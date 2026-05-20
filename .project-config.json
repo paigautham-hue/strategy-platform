@@ -1,0 +1,43 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://4PQbAAV1fA3eoWB.41bcdfe73c9e:T8efUQ80V84OWH4lqHiV@gateway02.us-east-1.prod.aws.tidbcloud.com:4000/UBLKZ3CiWHGh8bWcf5cVyg?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310419663026689444/UBLKZ3CiWHGh8bWcf5cVyg",
+    "access_key_id": "ASIAZV3A2ECZE5PIR254",
+    "secret_access_key": "LOReHVyjhjvG4RB05NcZbWuRzW4Qrrs69qn+ciI/",
+    "session_token": "IQoJb3JpZ2luX2VjECUaCXVzLWVhc3QtMSJHMEUCIQDHdF6HD56ywDNZ4qlxKtpF3AVPKh5+TjMKoKD0lK0gxgIgYSZUWfN4LyuwSdIxcK2ospl9er029DSHMf9wxON+g/kq/wMI7v//////////ARAEGgw2NjUzODYwOTg4NjYiDCKCcMtxUDOjnGOCrSrTA5+ALsWv4JBhXuAE9iWdrTTqZRSZ4Cnc3hGd/SeIGM4Wkjai1/3zgP3W0DL3cC7NRACvJThj0JQU9kBGwmMEXxDslxiy9Ion+ZCNaBhgdSA/HD7G77ERDJ4VFDU8s0ie0hGowwN4D3DylsE8/L9wOCO9sWwQb8Uc523pFyjqpG9xh+YxBwXRDJWx6hRj8fug1zLCrTA7SzEaf9FYLZmQNB7qSwtKEJ5LOxXTCrfkE+c8tYovlXDdY3jFism9HAmj57gElvushdSajT9I6xj9/EKMx47f/BM4PEjxa/n88+eDyVkr+PcdCna8Vs4EV3o5tQgy9OnJtVTJ2NkESi3FrBMEWQg1fGZpsHxHhqYmtSSETolSRpHplA1xkPfCiXhLptDhPJ+yAnUaUdQgEpW6hDu/k7f7p59GTaZ8sXUm0XKVtTBFjCYqoLQOf69ZUiaSIkwEDpWlMrx1Al03E/sDVqf6+X1yEFsORnpzAgrQrPEdwOkcpV7zOSEwR9pV7+QLe7iz7lYiJV1ctgw7knfn0HMnErEayrMXcnmeNOTNuY4L9Hnxxsa/rEKJtL7hEiLYwsChHqlkv7zHhs3Ucdh2YAS2bL0of70msfVC47KDv+tDA+EPMODcttAGOp0BGCPzYUstAQ/fqDZOdRiky3a+ZeW2PJty7aoWIb8uS0X4Gi45VkqkQei5jNsDuTdosaJc/8pG562jPpt5d8LjreuQmgHuiRjyKPXf1KlARKB89zF40ZJwh8MwFRLDVGoXbIlviDXEqXiPJgUeyZK802JFURmNeB85Hu7h7yvtz+L5HpbSRxCwlcSfHYfuKrkuYyXl2HyIewk2knlviw==",
+    "expiration": "2026-05-21T00:51:44.000Z"
+  },
+  "name": "strategy-platform",
+  "path": "/home/ubuntu/strategy-platform",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "Lyc67dyKKdVGKP8LdBbMMz",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "MwWGrLxEu6EKjNs9taaYzR",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Gautham Pai",
+    "OWNER_OPEN_ID": "6aEXQuUALzZqtWHhEdxiMA",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "0a35aba3-a022-4753-b9cf-c3a18af71822",
+    "VITE_APP_ID": "UBLKZ3CiWHGh8bWcf5cVyg",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "Strategy Platform",
+    "VITE_FRONTEND_FORGE_API_KEY": "HtznqVuCEymXgWQ9mEV4br",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}
