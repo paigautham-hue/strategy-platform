@@ -1,38 +1,111 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import { PlatformLayout } from "./components/PlatformLayout";
+import { useState } from "react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
-function Router() {
-  // make sure to consider if you need authentication for certain routes
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
+// Pages
+import Overview from "./pages/Overview";
+import Companies from "./pages/Companies";
+import Projects from "./pages/Projects";
+import Memory from "./pages/Memory";
+import Predictions from "./pages/Predictions";
+import CostDashboard from "./pages/CostDashboard";
+import AuditLog from "./pages/AuditLog";
+import UsageEvents from "./pages/UsageEvents";
+import ExportPage from "./pages/ExportPage";
+import McpTools from "./pages/McpTools";
+import NotFound from "./pages/NotFound";
+
+// ─── Login gate ───────────────────────────────────────────────────────────────
+
+function LoginGate({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center mx-auto animate-pulse">
+            <FileText className="h-6 w-6 text-background" />
+          </div>
+          <p className="text-muted-foreground font-sans text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-8 max-w-sm px-6">
+          <div className="space-y-3">
+            <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center mx-auto glow-gold">
+              <FileText className="h-8 w-8 text-background" />
+            </div>
+            <h1 className="font-heading text-3xl text-gradient-gold">MERIDIAN</h1>
+            <p className="text-muted-foreground font-body text-sm leading-relaxed">
+              Private equity intelligence platform. Strategy compounds with every session.
+            </p>
+          </div>
+          <a href={getLoginUrl()}>
+            <Button className="w-full gradient-gold text-background font-sans font-medium h-11">
+              Sign in to continue
+            </Button>
+          </a>
+          <p className="text-[11px] text-muted-foreground font-sans">
+            Access restricted to authorized personnel only.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+// ─── App shell ────────────────────────────────────────────────────────────────
+
+function AppShell() {
+  const [activeCompanyId, setActiveCompanyId] = useState<number | null>(null);
+
+  return (
+    <PlatformLayout
+      activeCompanyId={activeCompanyId}
+      onCompanySwitch={setActiveCompanyId}
+    >
+      <Switch>
+        <Route path="/" component={() => <Overview activeCompanyId={activeCompanyId} />} />
+        <Route path="/companies" component={() => <Companies onSelect={setActiveCompanyId} />} />
+        <Route path="/projects" component={() => <Projects activeCompanyId={activeCompanyId} />} />
+        <Route path="/memory" component={() => <Memory activeCompanyId={activeCompanyId} />} />
+        <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
+        <Route path="/cost" component={CostDashboard} />
+        <Route path="/audit" component={AuditLog} />
+        <Route path="/usage" component={UsageEvents} />
+        <Route path="/export" component={() => <ExportPage activeCompanyId={activeCompanyId} />} />
+        <Route path="/mcp" component={() => <McpTools activeCompanyId={activeCompanyId} />} />
+        <Route component={NotFound} />
+      </Switch>
+    </PlatformLayout>
+  );
+}
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <LoginGate>
+            <AppShell />
+          </LoginGate>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
