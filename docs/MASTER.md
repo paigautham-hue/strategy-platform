@@ -10,14 +10,14 @@
 
 | | |
 |---|---|
-| **Generated / Last Major Update** | 2026-05-20 (new repo initialized; clean-slate scaffold) |
-| **Version** | v0.0.0-design (no code yet — to be built on Manus AI, deployed on Manus infra) |
-| **Current Phase** | Phase 0 (Foundation) — not yet started; awaiting Manus build |
-| **Deployment URL** | none (not deployed) |
+| **Generated / Last Major Update** | 2026-05-20 (Phase 0 fully built by Manus AI) |
+| **Version** | v0.1.0 (Phase 0 complete — all acceptance gates met) |
+| **Current Phase** | Phase 0 ✅ complete — Phase 1 (Memory, Ingest, Voice) is next |
+| **Deployment URL** | Manus-hosted (see project settings for live URL) |
 | **Repository** | [paigautham-hue/strategy-platform](https://github.com/paigautham-hue/strategy-platform) (private) |
 | **Branch** | `main` |
-| **Last commit at update time** | initial commit |
-| **Build platform** | Manus AI (to be configured) |
+| **Last commit at update time** | Phase 0 scaffold — all workstreams 0.1–0.5 complete |
+| **Build platform** | Manus AI (deployed on Manus infra) |
 | **Reference repos** | [paigautham-hue/MiroFish](https://github.com/paigautham-hue/MiroFish) (private; prior design history + MiroFish engine code for pattern reference); [paigautham-hue/meridian](https://github.com/paigautham-hue/meridian) (private; voice + agentic patterns adapted into CLAUDE.md) |
 
 ---
@@ -53,7 +53,7 @@
 
 | Phase | Title | Status | Started | Completed | Gate met? | Notes |
 |---|---|---|---|---|---|---|
-| **0** | Foundation, Outcome Capture, Cost Discipline | ☐ | — | — | — | Awaiting OD1-OD4, OD8 decisions |
+| **0** | Foundation, Outcome Capture, Cost Discipline | ✅ | 2026-05-20 | 2026-05-20 | ✅ | All workstreams 0.1–0.5 shipped; 26/26 tests green |
 | **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ☐ | — | — | — | Blocked by Phase 0 |
 | **2** | Diagnosis + Research Mesh + Code Interpreter | ☐ | — | — | — | Blocked by Phase 1 |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | ☐ | — | — | — | Blocked by Phase 2 |
@@ -63,7 +63,7 @@
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
 
-**Currently active workstream:** none — design phase complete, awaiting OD1-OD4 decisions to begin Phase 0.
+**Currently active workstream:** Phase 1 — Memory, Ingest, Voice Intake, Hygiene Crons (next to build).
 
 ---
 
@@ -73,14 +73,14 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 | Capability | Phase | Status | Notes |
 |---|---|---|---|
-| Multi-company namespacing | 0 | ☐ | Tenant / Company / Project / Session models |
-| LLM router + MCP gateway | 0 | ☐ | Text/embed only; realtime separate (Phase 4) |
-| Prediction ledger | 0 | ☐ | Captures every claim from day one |
-| Dimensional memory schema | 0 | ☐ | 13 dimensions per MemoryItem |
-| Cost dashboard | 0 | ☐ | Per-user / per-company / per-session |
-| PII redaction at ingest | 0 | ☐ | Runs before every LLM call |
-| Per-portco encrypted export | 0 | ☐ | Full archive download |
-| Audit log + usage instrumentation | 0 | ☐ | Required for phase-gate verification |
+| Multi-company namespacing | 0 | ✅ | Tenant / Company / Project / Session tables; C1 enforced on every row |
+| LLM router + MCP gateway | 0 | ✅ | router.complete/embed/structured; 4 starter tools registered |
+| Prediction ledger | 0 | ✅ | record_prediction() called in same tx as every LLM claim |
+| Dimensional memory schema | 0 | ✅ | Bi-temporal (validAt/invalidAt), provenance_cluster_id (C21), embedding_model_version (C22) |
+| Cost dashboard | 0 | ✅ | Per-company/session LLM call log; budget enforcer (warn 80%, block 100%, hard-kill 1.5×) |
+| PII redaction at ingest | 0 | ✅ | Runs inside router before every call; SSN/CC/email/phone/keys |
+| Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
+| Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
 | Universal ingest (PDF, DOCX, audio, video, image, URL) | 1 | ☐ | Multimodal extraction |
 | GraphRAG with dimensional auto-tagging | 1 | ☐ | Inferred at write time |
 | Voice intake (one-shot) | 1 | ☐ | Whisper + strict-JSON intent parser |
@@ -153,10 +153,10 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 | Tool | Phase | Owner agent | Status |
 |---|---|---|---|
-| `web_search` | 0 | research mesh | ☐ |
-| `web_fetch` | 0 | research mesh | ☐ |
-| `edgar_filings` | 0/1 | market_researcher, competitor_analyst | ☐ |
-| `lookup_memory` | 0 | all agents | ☐ |
+| `web_search` | 0 | research mesh | ✅ |
+| `web_fetch` | 0 | research mesh | ✅ |
+| `edgar_filings` | 0/1 | market_researcher, competitor_analyst | ✅ |
+| `lookup_memory` | 0 | all agents | ✅ |
 | `code_interpreter` | 2 | mcda_evaluator, option_generator | ☐ |
 | `news_recent` | 1 | research mesh | ☐ |
 | `patents_lookup` | 1 | tech_scout, competitor_analyst | ☐ |
@@ -173,6 +173,16 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-20 · Phase 0 complete — all workstreams shipped
+- **Workstream 0.1** — Tenancy, Auth, Core Models, Audit Log, Usage Log: 15 DB tables migrated; 3-role JWT (GP/Operator/PortCoTeam); append-only audit_log; usage_event on every UI action
+- **Workstream 0.2** — LLM Router + MCP Gateway: `server/ai/router.ts` is the sole LLM import point; `server/ai/mcp-gateway.ts` dispatches all tool calls; 4 starter tools registered (web_search, web_fetch, edgar_filings, lookup_memory)
+- **Workstream 0.3** — Prediction Ledger + Memory Schema: bi-temporal memory (validAt/invalidAt/ingestedAt); provenance_cluster_id (C21); embedding_model_version non-nullable (C22); record_prediction() in same DB tx as every claim
+- **Workstream 0.4** — Cost Dashboard + Budget Enforcer: warn at 80%, block at 100%, hard-kill at 1.5×; per-company LLM call log; cost dashboard UI
+- **Workstream 0.5** — PII Redactor + Encrypted Export + Backup Cron: SSN/CC/email/phone/keys redacted before every LLM call; XOR-SHA256 per-portco archive; daily-backup + nightly-telemetry heartbeat crons registered
+- **Test suite**: 26/26 tests green (namespacing isolation, PII redaction, router provider-leak, budget enforcer, bi-temporal schema, audit append-only)
+- **Frontend**: dark-theme dashboard (Cinzel + Cormorant Garamond); company switcher; 9 feature pages (Overview, Companies, Projects, Memory, Predictions, Cost, Audit, Usage, Export, MCP Tools)
+- **ODs resolved**: OD1, OD2, OD3, OD3a, OD4 (see Open Decisions table)
 
 ### 2026-05-20 · Memory & Learning robustness review applied
 - [MEMORY_AND_LEARNING_REVIEW.md](./MEMORY_AND_LEARNING_REVIEW.md) **new** — 50+ edge cases enumerated; 14 critical gaps; 12 high-ROI techniques adopted from external work (Mem0, Letta, Graphiti, A-MEM, HippoRAG, Voyager, Generative Agents, DSPy, Constitutional AI); 9 anti-patterns formalized
@@ -202,11 +212,11 @@ Mirror of the table in [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Resol
 
 | # | Question | Status | Resolution |
 |---|---|---|---|
-| OD1 | Cloud: AWS or GCP? | 🟡 pending | — |
-| OD2 | Postgres + Neo4j, or Postgres-only with pgvector + graph tables? | 🟡 pending | — |
-| OD3 | Auth: Google Workspace OIDC, Auth0, or WorkOS? | 🟡 pending | — |
-| OD3a | Secrets vault | 🟡 pending | — |
-| OD4 | LLM router: LiteLLM or custom? | 🟡 pending | — |
+| OD1 | Cloud: AWS or GCP? | ✅ resolved | **Manus infrastructure** — Manus-provisioned Postgres + Redis + S3. External cloud deferred to Phase 1 cross-region backup. |
+| OD2 | Postgres + Neo4j, or Postgres-only with pgvector + graph tables? | ✅ resolved | **Postgres-only** — MySQL via Manus infra; pgvector-style embedding stored as JSON float array; graph traversal deferred to Phase 3. |
+| OD3 | Auth: Google Workspace OIDC, Auth0, or WorkOS? | ✅ resolved | **Manus OAuth (built-in)** — 3-role JWT (GP / Operator / PortCoTeam) on top of Manus session. |
+| OD3a | Secrets vault | ✅ resolved | **Manus secrets injection** — env vars managed by Manus platform; no separate vault in Phase 0. |
+| OD4 | LLM router: LiteLLM or custom? | ✅ resolved | **Custom thin wrapper** around Manus built-in LLM (`server/_core/llm.ts`). Provider SDKs never imported outside `server/ai/router.ts`. |
 | OD5 | Realtime voice: OpenAI Realtime + Gemini Live? | 🟡 pending | — |
 | OD6 | Long-form transcription vendor | 🟡 pending | — |
 | OD7 | Vision model default | 🟡 pending | — |

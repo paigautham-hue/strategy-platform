@@ -1,0 +1,90 @@
+# models.yaml — Phase 0 model routing configuration
+#
+# This file is the single source of truth for task→model assignments.
+# Phase 1: swap embedding_providers.active to bge-m3 for multilingual dedup.
+# All changes here are config flips — no schema migrations required.
+
+# ─── Completion Models ────────────────────────────────────────────────────────
+
+completion_providers:
+  default:
+    provider: manus_builtin
+    model: auto                    # Manus selects best available model
+    max_tokens: 4096
+    temperature: 0.3
+    description: "Default completion for strategic analysis"
+
+  extraction:
+    provider: manus_builtin
+    model: auto
+    max_tokens: 2048
+    temperature: 0.1               # Low temperature for deterministic extraction
+    description: "Claim extraction, canonical normalization, PII detection"
+
+  structured:
+    provider: manus_builtin
+    model: auto
+    max_tokens: 2048
+    temperature: 0.0               # Zero temperature for JSON schema output
+    description: "Structured JSON output (prediction ledger, memory normalization)"
+
+  creative:
+    provider: manus_builtin
+    model: auto
+    max_tokens: 8192
+    temperature: 0.7
+    description: "Brainstorm mode, option generation (Phase 4)"
+
+# ─── Embedding Models ─────────────────────────────────────────────────────────
+
+embedding_providers:
+  active: openai-3-small           # Hot path — Phase 0 default
+
+  openai-3-large:
+    provider: manus_builtin
+    model: text-embedding-3-large
+    dimensions: 3072
+    status: active
+    description: "High-quality embeddings for memory retrieval"
+
+  openai-3-small:
+    provider: manus_builtin
+    model: text-embedding-3-small
+    dimensions: 1536
+    status: active
+    description: "Fast embeddings for hot-path extraction"
+
+  bge-m3:
+    provider: deferred             # Phase 1: multilingual dedup
+    model: BAAI/bge-m3
+    dimensions: 1024
+    status: deferred
+    description: "Multilingual dense + sparse hybrid (Phase 1 cutover)"
+    promotion_criteria: "Enable when non-English portco content > 10% of corpus"
+
+# ─── Budget Defaults (per task type) ─────────────────────────────────────────
+
+budget_defaults:
+  extraction:
+    max_input_tokens: 4000
+    max_output_tokens: 1000
+    soft_cap_usd: 0.05
+    estimated_cost_usd: 0.02
+
+  completion:
+    max_input_tokens: 8000
+    max_output_tokens: 4000
+    soft_cap_usd: 0.10
+    estimated_cost_usd: 0.05
+
+  embedding:
+    max_input_tokens: 2000
+    max_output_tokens: 0
+    soft_cap_usd: 0.01
+    estimated_cost_usd: 0.002
+
+  structured:
+    max_input_tokens: 4000
+    max_output_tokens: 2000
+    soft_cap_usd: 0.08
+    estimated_cost_usd: 0.04
