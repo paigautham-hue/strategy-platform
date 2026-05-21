@@ -48,6 +48,7 @@ import { runPreMortem } from "./agents/pre-mortem";
 import { detectDrift, needsReplan, proposeReplan } from "./agents/drift";
 import { getCalibrationRecords, computeScorecard } from "./services/calibration";
 import { attributeInitiative } from "./agents/attribution";
+import { auditPredictions } from "./services/audit-constitution";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -964,6 +965,28 @@ const attributionRouter = router({
     }),
 });
 
+// ─── Compliance Router (Phase 6) ──────────────────────────────────────────────
+
+const complianceRouter = router({
+  // Anti-hallucination audit — constitutional compliance over the ledger.
+  auditPredictions: protectedProcedure
+    .input(z.object({ companyId: z.number(), limit: z.number().min(1).max(500).optional() }))
+    .query(async ({ ctx, input }) => {
+      const preds = await listPredictions({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        limit: input.limit ?? 200,
+      });
+      return auditPredictions(
+        preds.map((p) => ({
+          claim: p.claim,
+          confidence: p.confidence,
+          horizon: p.horizon,
+        })),
+      );
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -998,6 +1021,7 @@ export const appRouter = router({
   drift: driftRouter,
   calibration: calibrationRouter,
   attribution: attributionRouter,
+  compliance: complianceRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
