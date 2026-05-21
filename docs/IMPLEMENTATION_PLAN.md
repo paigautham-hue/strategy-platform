@@ -929,7 +929,7 @@ After 6+ months of Share-and-Apply use accumulated across portcos, the platform 
 | # | Question | Decision needed by |
 |---|---|---|
 | OD1 | Cloud: AWS or GCP? | Phase 0 start |
-| OD2 | Postgres + Neo4j, or Postgres-only with pgvector + graph tables? | Phase 0 |
+| OD2 | Database + vector search | **RESOLVED 2026-05-21: MySQL** (Manus platform default — MySQL 8.x, TiDB-compatible). Relational layer = MySQL. Vector search = `json` embedding column + app-side cosine for Phase 0; migrate to Zep Cloud for the vector + temporal-graph layer in Phase 1. Apache AGE graph → replaced by Zep. Real requirement was vector similarity search, not Postgres specifically. |
 | OD3 | Auth: Google Workspace OIDC, Auth0, or WorkOS? | Phase 0 |
 | OD3a | Secrets vault: AWS Secrets Manager / GCP Secret Manager / Bitwarden / HashiCorp Vault? | Phase 0 |
 | OD4 | LLM router: LiteLLM or custom thin layer? | Phase 0 |
