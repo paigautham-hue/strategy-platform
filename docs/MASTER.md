@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 1 — Strategy-Artifact recognition (Workstream 1.8)
+- **`server/services/strategy-artifact.ts`** — `recognizeStrategyArtifact()`: classifies whether text is an external strategy artifact and extracts its reusable structure — type (framework / playbook / thesis / case_study / maxim), core thesis, preconditions, key moves, expected outcomes, context of origin, attribution. Defensive parsing; best-effort (never throws).
+- **tRPC** `strategyArtifact.recognize` + **UI** `/strategy-artifacts` page (paste article/playbook/URL → see the extracted structure) + nav entry.
+- Foundation for Share-and-Apply (H13): Phase 1 recognises + structures; applying an artifact to a portco is Phase 2 (Workstream 2.8).
+- **Tests**: +9 unit tests (defensive parsing — type validation, list capping, confidence clamping). 197 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 1 — memory hygiene: decay + dedup cron (Workstream 1.4)
 - **`server/memory/decay.ts`** — read-time confidence decay (option A): `effectiveConfidence()` applies a half-life model (permanent / slow 2y / fast 3mo / ephemeral 2wk) toward a 0.1 floor. Stored confidence never mutates — no double-decay, no schema change.
 - **`server/cron/memory-hygiene.ts`** — `runMemoryHygiene()`: per-company exact-duplicate retirement — identical canonical forms collapse to the highest effective-confidence item, the rest get `invalidAt` + `supersededById` (zero-false-positive safety net). Wired into the nightly cron (`runNightlyTelemetry`).
