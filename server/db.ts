@@ -105,10 +105,13 @@ export async function ensureDefaultTenant(): Promise<void> {
 export async function listCompanies(tenantId: string): Promise<Company[]> {
   const db = await getDb();
   if (!db) return [];
-  return db
+  const rows = await db
     .select()
     .from(companies)
     .where(and(eq(companies.tenantId, tenantId), isNull(companies.deletedAt)));
+  // Hide reserved memory-layer containers (__global__, __user__) from the
+  // company switcher — they are memory scopes, not portfolio companies.
+  return rows.filter((c) => !(c.name.startsWith("__") && c.name.endsWith("__")));
 }
 
 export async function getCompany(tenantId: string, companyId: number): Promise<Company | undefined> {

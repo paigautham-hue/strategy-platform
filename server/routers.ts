@@ -20,6 +20,7 @@ import {
 } from "./db";
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
 import { hybridSearchMemory } from "./services/memory-search";
+import { writeLayerMemory, queryLayerMemory } from "./services/memory-layers";
 import { recordPrediction, closePrediction, listPredictions, extractClaims } from "./services/predictions";
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
@@ -248,6 +249,41 @@ const memoryRouter = router({
         sessionId: input.sessionId,
         rawContent: input.rawContent,
       });
+    }),
+
+  // Memory layers (1.7) — global framework canon + the GP's preference overlay.
+  writeLayer: protectedProcedure
+    .input(
+      z.object({
+        layer: z.enum(["global", "user"]),
+        rawContent: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return writeLayerMemory(
+        input.layer,
+        ctx.user.tenantId,
+        input.rawContent,
+        buildRouterCtx(ctx),
+      );
+    }),
+
+  queryLayer: protectedProcedure
+    .input(
+      z.object({
+        layer: z.enum(["global", "user"]),
+        query: z.string().min(1),
+        limit: z.number().max(50).optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return queryLayerMemory(
+        input.layer,
+        ctx.user.tenantId,
+        input.query,
+        buildRouterCtx(ctx),
+        input.limit,
+      );
     }),
 });
 

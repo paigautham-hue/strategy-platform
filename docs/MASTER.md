@@ -10,13 +10,13 @@
 
 | | |
 |---|---|
-| **Generated / Last Major Update** | 2026-05-20 (Phase 0 fully built by Manus AI) |
-| **Version** | v0.1.0 (Phase 0 complete — all acceptance gates met) |
-| **Current Phase** | Phase 0 ✅ complete — Phase 1 (Memory, Ingest, Voice) is next |
+| **Generated / Last Major Update** | 2026-05-21 (Phase 1 complete) |
+| **Version** | v0.2.0 (Phase 1 complete — memory engine end-to-end) |
+| **Current Phase** | Phase 1 ✅ complete — Phase 2 (Diagnosis + Research Mesh) is next |
 | **Deployment URL** | Manus-hosted (see project settings for live URL) |
 | **Repository** | [paigautham-hue/strategy-platform](https://github.com/paigautham-hue/strategy-platform) (private) |
 | **Branch** | `main` |
-| **Last commit at update time** | Phase 0 scaffold — all workstreams 0.1–0.5 complete |
+| **Last commit at update time** | Phase 1 — user/global memory layers (Workstream 1.7) |
 | **Build platform** | Manus AI (deployed on Manus infra) |
 | **Reference repos** | [paigautham-hue/MiroFish](https://github.com/paigautham-hue/MiroFish) (private; prior design history + MiroFish engine code for pattern reference); [paigautham-hue/meridian](https://github.com/paigautham-hue/meridian) (private; voice + agentic patterns adapted into CLAUDE.md) |
 
@@ -54,7 +54,7 @@
 | Phase | Title | Status | Started | Completed | Gate met? | Notes |
 |---|---|---|---|---|---|---|
 | **0** | Foundation, Outcome Capture, Cost Discipline | ✅ | 2026-05-20 | 2026-05-20 | ✅ | All workstreams 0.1–0.5 shipped; 26/26 tests green |
-| **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ☐ | — | — | — | Blocked by Phase 0 |
+| **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ✅ | 2026-05-21 | 2026-05-21 | ✅ | All 8 workstreams shipped — see Recent Changes |
 | **2** | Diagnosis + Research Mesh + Code Interpreter | ☐ | — | — | — | Blocked by Phase 1 |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | ☐ | — | — | — | Blocked by Phase 2 |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | ☐ | — | — | — | Blocked by Phase 3 |
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 1 COMPLETE — user / global memory layers (Workstream 1.7)
+- **`server/services/memory-layers.ts`** — the two non-company-scoped layers: GLOBAL (framework canon, durable industry knowledge, shared tenant-wide) and USER (the GP's preference / decision-style overlay). Implemented without a migration via reserved per-tenant Company containers (`__global__`, `__user__`), created lazily and hidden from the company switcher (`listCompanies` filters `__…__` names). `getLayeredContext()` does layer-routed retrieval — company + global + user merged.
+- **tRPC** `memory.writeLayer` / `memory.queryLayer`.
+- **Tests**: +4 unit tests. 216 pass / 16 skipped / 0 fail; typecheck + build clean.
+- **Phase 1 is functionally complete.** All eight workstreams shipped. (Audio/video/image ingest parsers reclassified to Phase 4 multimodal; near-duplicate semantic consolidation deliberately deferred — both noted in the backlog.)
 
 ### 2026-05-21 · Phase 1 — voice intake (Workstream 1.5)
 - **`client/src/lib/speech.ts`** — browser Web Speech API wrapper for one-shot dictation (client-side STT, no audio upload, no server transcription call); graceful text-input fallback where unsupported.
