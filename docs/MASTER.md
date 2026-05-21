@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 1 — memory reflection cron (Workstream 1.4 / T5)
+- **`server/cron/memory-reflection.ts`** — `runMemoryReflection()`: nightly, per company, synthesises recent ground-level (derivationDepth 0) memory into 3-5 higher-level strategic insights via the LLM, written back as `derivationDepth 1` memory items (`framework: reflection`, confidence capped at 0.55 — an insight is a hypothesis). Recursion is bounded by depth — reflections are never reflected upon (C4). Generative-Agents pattern (T5) — the compounding-intelligence mechanism.
+- Wired into the nightly cron alongside hygiene (`runNightlyTelemetry`).
+- **Tests**: +7 unit tests (reflection output normalisation). 204 pass / 16 skipped / 0 fail; typecheck + build clean.
+- Memory hygiene now covers decay + exact-dedup + reflection; near-duplicate *consolidation* (semantic merge) intentionally deferred — it needs a higher bar / human review.
+
 ### 2026-05-21 · Phase 1 — portco onboarding wizard (Workstream 1.6)
 - **`client/src/pages/Onboarding.tsx`** — 4-step guided flow: (1) create company → (2) describe it in prose, which is run through the ingest pipeline to seed strategic memory → (3) optionally ingest a first document → (4) done. Pure frontend orchestration over existing tested routes (`company.create`, `ingest.document`) — no new backend, no migration.
 - Route `/onboarding` + nav entry ("Onboard Company"); gated to GP / operator roles.
