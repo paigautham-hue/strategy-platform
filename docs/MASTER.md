@@ -40,7 +40,7 @@
 | Doc | Purpose | Length | Audience | Living? |
 |---|---|---|---|---|
 | [GUIDING_PRINCIPLES.md](./GUIDING_PRINCIPLES.md) | North star, 8 non-negotiables (P1-P8), 12 heuristics (H1-H12), explicit non-builds | ~9 KB | Anyone joining the project | Quarterly revision |
-| [CLAUDE.md](./CLAUDE.md) | Project conventions, 18 Critical Patterns (C1-C18), Known Bug Patterns catalog, ultra-review protocol | ~17 KB | Every coding agent | Append on every bug fix |
+| [CLAUDE.md](./CLAUDE.md) | Project conventions, 25 Critical Patterns (C1-C25), Known Bug Patterns catalog, ultra-review protocol | ~21 KB | Every coding agent | Append on every bug fix |
 | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | Phase-by-phase plan, deliverables, acceptance gates, open decisions | ~51 KB | Implementation lead | Updated per phase milestone |
 | [UX_DESIGN.md](./UX_DESIGN.md) | 12 design principles (DP1-DP12), 13 surfaces specified, design system, signature elements | ~43 KB | Designer + any frontend work | Quarterly revision |
 | [MEMORY_AND_LEARNING_REVIEW.md](./MEMORY_AND_LEARNING_REVIEW.md) | Robustness audit: 50+ edge cases + 12 external techniques + 9 anti-patterns | ~26 KB | Before any work on memory or learning subsystems | Re-run when memory/learning architecture changes |
@@ -201,7 +201,7 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 - [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md): Phase 0-8 detailed with acceptance gates, ran through 3 review passes, applied 24 fixes (v2)
 - [DEFERRED_BACKLOG.md](./DEFERRED_BACKLOG.md): 13 sections (A-M) of deferred items with promotion criteria + locked Won't-Build list
 - [UX_DESIGN.md](./UX_DESIGN.md): 12 design principles (DP1-DP12), 21-source reference set, 13 surfaces, design system, signature elements
-- [CLAUDE.md](./CLAUDE.md): 18 Critical Patterns (C1-C18), Known Bug Patterns catalog, ultra-review protocol, subsystem map — patterns imported from Meridian's CLAUDE.md
+- [CLAUDE.md](./CLAUDE.md): 25 Critical Patterns (C1-C25), Known Bug Patterns catalog, ultra-review protocol, subsystem map — patterns imported from Meridian's CLAUDE.md
 - This MASTER.md: source-of-truth index, status legend, feature matrix, change log
 
 ---
@@ -212,8 +212,8 @@ Mirror of the table in [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md). Resol
 
 | # | Question | Status | Resolution |
 |---|---|---|---|
-| OD1 | Cloud: AWS or GCP? | ✅ resolved | **Manus infrastructure** — Manus-provisioned Postgres + Redis + S3. External cloud deferred to Phase 1 cross-region backup. |
-| OD2 | Postgres + Neo4j, or Postgres-only with pgvector + graph tables? | ✅ resolved | **Postgres-only** — MySQL via Manus infra; pgvector-style embedding stored as JSON float array; graph traversal deferred to Phase 3. |
+| OD1 | Cloud: AWS or GCP? | ✅ resolved | **Manus infrastructure** — Manus-provisioned MySQL + storage. External cloud deferred to Phase 1 cross-region backup. |
+| OD2 | Database + vector search | ✅ resolved (2026-05-21) | **MySQL** (Manus platform — MySQL 8.x, TiDB-compatible). Relational layer = MySQL. Vector search = `json` embedding column + app-side cosine for Phase 0; migrate to Zep Cloud for vector + temporal graph in Phase 1. Real requirement was vector similarity, not Postgres. |
 | OD3 | Auth: Google Workspace OIDC, Auth0, or WorkOS? | ✅ resolved | **Manus OAuth (built-in)** — 3-role JWT (GP / Operator / PortCoTeam) on top of Manus session. |
 | OD3a | Secrets vault | ✅ resolved | **Manus secrets injection** — env vars managed by Manus platform; no separate vault in Phase 0. |
 | OD4 | LLM router: LiteLLM or custom? | ✅ resolved | **Custom thin wrapper** around Manus built-in LLM (`server/_core/llm.ts`). Provider SDKs never imported outside `server/ai/router.ts`. |
