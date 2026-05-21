@@ -31,6 +31,7 @@ import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
 import { runFrameworks } from "./agents/frameworks";
+import { runOptionAnalysis } from "./agents/options";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -616,6 +617,17 @@ const frameworksRouter = router({
     }),
 });
 
+// ─── Options Router (Phase 3) ─────────────────────────────────────────────────
+
+const optionsRouter = router({
+  analyze: protectedProcedure
+    .input(z.object({ companyId: z.number(), question: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return runOptionAnalysis(input.question, input.companyId, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -640,6 +652,7 @@ export const appRouter = router({
   diagnosis: diagnosisRouter,
   research: researchRouter,
   frameworks: frameworksRouter,
+  options: optionsRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

@@ -28,6 +28,7 @@ import {
   Radar,
   GitFork,
   Grid3x3,
+  ListChecks,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -114,6 +115,7 @@ const NAV_ITEMS = [
   { href: "/research", label: "Research", icon: Radar },
   { href: "/contradictions", label: "Contradictions", icon: GitFork },
   { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
+  { href: "/options", label: "Options", icon: ListChecks },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
