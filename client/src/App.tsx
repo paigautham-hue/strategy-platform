@@ -35,6 +35,7 @@ import WarGame from "./pages/WarGame";
 import CrossCoWarGame from "./pages/CrossCoWarGame";
 import Predictions from "./pages/Predictions";
 import Calibration from "./pages/Calibration";
+import Attribution from "./pages/Attribution";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
 import UsageEvents from "./pages/UsageEvents";
@@ -124,6 +125,7 @@ function AppShell() {
         <Route path="/drift" component={() => <Drift activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/calibration" component={() => <Calibration activeCompanyId={activeCompanyId} />} />
+        <Route path="/attribution" component={() => <Attribution activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
         <Route path="/usage" component={UsageEvents} />
