@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 2 — Chief Strategist + research mesh (Workstreams 2.1 + 2.3)
+- **`server/agents/research.ts`** — 8 specialist research agents (market, competitor, customer, tech, regulatory, macro, talent, internal-data). `runResearchMesh()` selects the specialists relevant to the diagnosed question type, grounds them in the company's memory (one hybrid-search pass shared across agents), runs them in parallel (H4), and the Chief Strategist synthesises their findings into a research brief with key takeaways.
+- **tRPC** `research.run` — diagnoses the question (P4) then dispatches the mesh — and **UI** `/research` (question → diagnosis + per-specialist findings + synthesis).
+- **Tests**: +6 unit tests (specialist selection by question type). 230 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 2 begins — Diagnosis Agent (Workstream 2.2)
 - **`server/agents/diagnosis.ts`** — `diagnoseQuestion()`: the entry point of the reasoning mesh (P4 — diagnosis precedes frameworks). Challenges the user's framing, re-states the real strategic question, classifies its type (10-type taxonomy: adjacency / white-space / geographic / M&A / pricing / capability / competitive-response / portfolio / scenario / custom), surfaces the genuine unknowns, and suggests frameworks. Defensive parse; best-effort fallback to the original question.
 - **tRPC** `diagnosis.diagnose` + **UI** `/diagnose` page (question → reframed question, type, key unknowns, suggested frameworks, rationale, confidence).

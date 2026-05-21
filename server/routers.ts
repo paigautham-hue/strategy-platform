@@ -28,6 +28,7 @@ import { recognizeStrategyArtifact } from "./services/strategy-artifact";
 import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
+import { runResearchMesh } from "./agents/research";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
@@ -514,6 +515,25 @@ const diagnosisRouter = router({
     }),
 });
 
+// ─── Research Router (Phase 2) ────────────────────────────────────────────────
+
+const researchRouter = router({
+  run: protectedProcedure
+    .input(z.object({ companyId: z.number(), question: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      // Diagnose first (P4), then dispatch the research mesh on the reframed question.
+      const diagnosis = await diagnoseQuestion(input.question, routerCtx);
+      const brief = await runResearchMesh(
+        diagnosis.reframedQuestion,
+        diagnosis.questionType,
+        input.companyId,
+        routerCtx,
+      );
+      return { diagnosis, brief };
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -536,6 +556,7 @@ export const appRouter = router({
   strategyArtifact: strategyArtifactRouter,
   voice: voiceRouter,
   diagnosis: diagnosisRouter,
+  research: researchRouter,
   prediction: predictionRouter,
   cost: costRouter,
   audit: auditRouter,
