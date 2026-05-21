@@ -20,6 +20,8 @@ import {
   XCircle,
   Target,
   ArrowRight,
+  Crosshair,
+  GitCompare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +34,7 @@ type SourceType = "text" | "markdown" | "html" | "url";
 export default function StrategyArtifact({ activeCompanyId }: StrategyArtifactProps) {
   const [sourceType, setSourceType] = useState<SourceType>("text");
   const [content, setContent] = useState("");
+  const [deepMode, setDeepMode] = useState(false);
 
   const recognizeMut = trpc.strategyArtifact.recognize.useMutation({
     onSuccess: (a) => {
@@ -67,11 +70,13 @@ export default function StrategyArtifact({ activeCompanyId }: StrategyArtifactPr
   const busy = recognizeMut.isPending || applyMut.isPending;
   const canSubmit = content.trim().length > 0 && !busy;
 
+  const deep = applyMut.data?.deepMode ?? null;
+
   function run(kind: "recognize" | "apply") {
     if (!activeCompanyId) return;
     const input = { companyId: activeCompanyId, sourceType, content: content.trim() };
     if (kind === "recognize") recognizeMut.mutate(input);
-    else applyMut.mutate(input);
+    else applyMut.mutate({ ...input, deepMode });
   }
 
   return (
@@ -125,6 +130,19 @@ export default function StrategyArtifact({ activeCompanyId }: StrategyArtifactPr
             />
           )}
 
+          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={deepMode}
+              onChange={(e) => setDeepMode(e.target.checked)}
+              className="h-4 w-4 rounded border-border/60 accent-gold"
+            />
+            <span className="text-sm font-sans text-foreground flex items-center gap-1.5">
+              <Crosshair className="h-3.5 w-3.5 text-gold" />
+              Deep mode — stress-test the adapted strategy with a micro war-game
+            </span>
+          </label>
+
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -141,7 +159,11 @@ export default function StrategyArtifact({ activeCompanyId }: StrategyArtifactPr
               onClick={() => run("apply")}
             >
               <Target className="h-4 w-4" />
-              {applyMut.isPending ? "Recognising + applying…" : "Recognise & apply to company"}
+              {applyMut.isPending
+                ? deepMode
+                  ? "Applying + war-gaming…"
+                  : "Recognising + applying…"
+                : "Recognise & apply to company"}
             </Button>
           </div>
         </CardContent>
@@ -245,6 +267,90 @@ export default function StrategyArtifact({ activeCompanyId }: StrategyArtifactPr
                 </p>
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Deep-mode micro war-game (3.5) */}
+      {deep && artifact?.isStrategyArtifact && (
+        <Card className="card-glass">
+          <CardHeader>
+            <CardTitle className="font-heading text-lg flex items-center gap-2">
+              <Crosshair className="h-4 w-4 text-gold" /> Deep mode — micro war-game
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Badge
+                className={`text-[10px] ${
+                  deep.warGame.survived
+                    ? "bg-gold/10 text-gold border-gold/20"
+                    : "bg-destructive/10 text-destructive border-destructive/20"
+                }`}
+              >
+                {deep.warGame.survived ? "strategy survived" : "did not survive"}
+              </Badge>
+              <Badge variant="outline" className="text-[10px]">
+                {deep.warGame.rounds.length} rounds
+              </Badge>
+              <Badge variant="secondary" className="text-[10px]">synthetic outcome</Badge>
+            </div>
+
+            <Field label="Simulated outcome" text={deep.warGame.outcome} />
+
+            <div
+              className={`rounded border p-3 ${
+                deep.comparison.alignment === "aligned"
+                  ? "border-gold/20 bg-gold/5"
+                  : deep.comparison.alignment === "diverges"
+                    ? "border-destructive/20 bg-destructive/5"
+                    : "border-border/50 bg-secondary/20"
+              }`}
+            >
+              <p className="text-xs font-sans uppercase tracking-wider text-gold flex items-center gap-1.5">
+                <GitCompare className="h-3 w-3" />
+                Simulated outcome vs expected — {deep.comparison.alignment}
+              </p>
+              <p className="text-sm text-foreground font-body mt-1 leading-relaxed">
+                {deep.comparison.comparison}
+              </p>
+            </div>
+
+            <div className="rounded border border-gold/20 bg-gold/5 p-3">
+              <p className="text-xs font-sans uppercase tracking-wider text-gold">
+                Adjusted recommendation
+              </p>
+              <p className="text-sm text-foreground font-body mt-0.5">
+                {deep.comparison.adjustedRecommendation}
+              </p>
+            </div>
+
+            <ListField label="Key learnings" items={deep.warGame.keyLearnings} />
+
+            <div className="space-y-2">
+              {deep.warGame.rounds.map((round) => (
+                <div
+                  key={round.round}
+                  className="rounded border border-border/50 bg-secondary/20 p-2.5 space-y-1.5"
+                >
+                  <p className="text-xs text-gold font-sans uppercase tracking-wider">
+                    Round {round.round}
+                  </p>
+                  {round.moves.length === 0 ? (
+                    <p className="text-xs text-muted-foreground font-sans">No moves this round.</p>
+                  ) : (
+                    round.moves.map((m, i) => (
+                      <div key={i} className="space-y-0.5">
+                        <p className="text-xs font-heading text-foreground">{m.stakeholderLabel}</p>
+                        <p className="text-sm text-muted-foreground font-body leading-relaxed">
+                          {m.move}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       )}
