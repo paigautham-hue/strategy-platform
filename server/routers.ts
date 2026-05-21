@@ -46,6 +46,7 @@ import { consultPersona, listPersonas } from "./agents/personas";
 import { decomposeStrategy } from "./agents/decomposer";
 import { runPreMortem } from "./agents/pre-mortem";
 import { detectDrift, needsReplan, proposeReplan } from "./agents/drift";
+import { getCalibrationRecords, computeScorecard } from "./services/calibration";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -922,6 +923,21 @@ const driftRouter = router({
     }),
 });
 
+// ─── Calibration Router (Phase 6) ─────────────────────────────────────────────
+
+const calibrationRouter = router({
+  // The calibration scorecard for a company's closed predictions.
+  scorecard: protectedProcedure
+    .input(z.object({ companyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const records = await getCalibrationRecords({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+      });
+      return computeScorecard(records);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -954,6 +970,7 @@ export const appRouter = router({
   persona: personaRouter,
   decomposer: decomposerRouter,
   drift: driftRouter,
+  calibration: calibrationRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

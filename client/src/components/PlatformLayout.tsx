@@ -37,6 +37,7 @@ import {
   Workflow,
   ShieldAlert,
   Gauge,
+  Scale,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -134,6 +135,7 @@ const NAV_ITEMS = [
   { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
   { href: "/drift", label: "Drift Detection", icon: Gauge },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
+  { href: "/calibration", label: "Calibration", icon: Scale },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
   { href: "/usage", label: "Usage Events", icon: Activity },
