@@ -58,7 +58,7 @@
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
-| **5** | Strategy → Execution + Operator UX Tier | ☐ | — | — | — | Blocked by Phase 4 |
+| **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Strategy Decomposer shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 5 — Strategy Decomposer (Workstream 5.1)
+- **`server/agents/decomposer.ts`** — the Strategy → Execution bridge. Decomposes a strategy thesis into 3-5 initiatives, each carrying a rationale, expected impact, cost estimate, confidence (0-1), dependencies, OKRs (objective + leading/lagging key results), and a task list. Grounded in company memory.
+- **Decomposer challenger** — `flagVagueObjectives` deterministically flags every objective whose key results are all unmeasurable; `isQuantitative` tests a KR for a number / percentage / currency amount. Vague OKRs never pass silently (Phase 5 risk mitigation) — the verdict is a pure function, not left to the model.
+- **tRPC** `decomposer.decompose` + **UI** `/decompose` page (initiatives with OKRs, leading/lagging + not-measurable badges, tasks, dependencies, a vague-objective warning banner).
+- **Tests**: +11 unit tests (quantitative detection, vague-objective challenger, decomposition normalization, confidence clamping). 328 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 4 — Advisory Personas (Workstream 4.4)
 - **`server/agents/personas.ts`** — a registry of five advisory stances (The Coach, The Challenger, The Devil's Advocate, The Consultant, The Chief of Staff), each with a stance prompt. `consultPersona` answers a question grounded in company memory, in that persona's voice. Pure helpers `getPersona` (defaults to Coach), `listPersonas` (picker view — stance prompt never leaves the server), `normalizeConsult` (caps key points at 6).

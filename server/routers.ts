@@ -43,6 +43,7 @@ import {
 } from "./agents/brainstorm";
 import { structureMemo } from "./agents/memo-dictation";
 import { consultPersona, listPersonas } from "./agents/personas";
+import { decomposeStrategy } from "./agents/decomposer";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -850,6 +851,18 @@ const personaRouter = router({
     }),
 });
 
+// ─── Decomposer Router (Phase 5) ──────────────────────────────────────────────
+
+const decomposerRouter = router({
+  // Decompose a strategy thesis into initiatives → OKRs → tasks.
+  decompose: protectedProcedure
+    .input(z.object({ companyId: z.number(), thesis: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return decomposeStrategy(input.thesis, input.companyId, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -880,6 +893,7 @@ export const appRouter = router({
   brainstorm: brainstormRouter,
   memo: memoRouter,
   persona: personaRouter,
+  decomposer: decomposerRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
