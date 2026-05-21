@@ -36,6 +36,7 @@ import {
   Users,
   Workflow,
   ShieldAlert,
+  Gauge,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -131,6 +132,7 @@ const NAV_ITEMS = [
   { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
   { href: "/decompose", label: "Decompose", icon: Workflow },
   { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
+  { href: "/drift", label: "Drift Detection", icon: Gauge },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },

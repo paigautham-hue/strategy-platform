@@ -24,6 +24,7 @@ import MemoDictation from "./pages/MemoDictation";
 import Personas from "./pages/Personas";
 import Decomposer from "./pages/Decomposer";
 import PreMortem from "./pages/PreMortem";
+import Drift from "./pages/Drift";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
 import Contradictions from "./pages/Contradictions";
@@ -119,6 +120,7 @@ function AppShell() {
         <Route path="/cross-war-game" component={CrossCoWarGame} />
         <Route path="/decompose" component={() => <Decomposer activeCompanyId={activeCompanyId} />} />
         <Route path="/pre-mortem" component={() => <PreMortem activeCompanyId={activeCompanyId} />} />
+        <Route path="/drift" component={() => <Drift activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
