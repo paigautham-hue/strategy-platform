@@ -26,6 +26,7 @@ import {
   Mic,
   Stethoscope,
   Radar,
+  GitFork,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -110,6 +111,7 @@ const NAV_ITEMS = [
   { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
   { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
   { href: "/research", label: "Research", icon: Radar },
+  { href: "/contradictions", label: "Contradictions", icon: GitFork },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },

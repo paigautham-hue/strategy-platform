@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 2 — Contradiction Review (Workstream 2.6)
+- **`server/services/contradictions.ts`** — `listContradictions()` (joined with both memory items for review) + `resolveContradiction()`: in-favor-of-A retires B, in-favor-of-B retires A (supersede, never delete — C19), both-valid-with-scope keeps both. Transactional; company-scoped (C1); audit-logged.
+- **tRPC** `contradiction.list` / `contradiction.resolve` + **UI** `/contradictions` — side-by-side claim comparison with confidence, three resolution actions, resolved-history view.
+- **Tests**: +7 unit tests (resolution → retired-item / winner mapping). 244 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 2 — Share-and-Apply engine (Workstream 2.8, H13)
 - **`server/agents/apply-strategy.ts`** — `applyStrategyToCompany()`: takes a recognised StrategyArtifact and applies it to a portfolio company — fit score (0-100) + rationale, gap list, each key move adapted to the company's context, risks, a recommendation (pursue / adapt-heavily / skip), and a one-page application memo. Grounded in company memory; honest about poor fit. Defensive parse.
 - **tRPC** `strategyArtifact.applyToCompany` (recognise → apply in one call) + **UI** — the Strategy Artifacts page gained a "Recognise & apply to company" action showing fit score, adapted moves, risks, and the memo.

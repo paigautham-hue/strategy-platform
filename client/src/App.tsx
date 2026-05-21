@@ -21,6 +21,7 @@ import StrategyArtifact from "./pages/StrategyArtifact";
 import VoiceIntake from "./pages/VoiceIntake";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
+import Contradictions from "./pages/Contradictions";
 import Predictions from "./pages/Predictions";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
@@ -97,6 +98,7 @@ function AppShell() {
         <Route path="/voice-intake" component={() => <VoiceIntake activeCompanyId={activeCompanyId} />} />
         <Route path="/diagnose" component={() => <Diagnosis activeCompanyId={activeCompanyId} />} />
         <Route path="/research" component={() => <Research activeCompanyId={activeCompanyId} />} />
+        <Route path="/contradictions" component={() => <Contradictions activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
