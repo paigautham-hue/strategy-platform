@@ -30,6 +30,7 @@ import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
+import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
@@ -552,6 +553,49 @@ const researchRouter = router({
     }),
 });
 
+// ─── Contradiction Router (Phase 2) ───────────────────────────────────────────
+
+const contradictionRouter = router({
+  list: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        status: z.string().optional(),
+        limit: z.number().max(100).optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return listContradictions(ctx.user.tenantId, input.companyId, {
+        status: input.status,
+        limit: input.limit,
+      });
+    }),
+
+  resolve: protectedProcedure
+    .input(
+      z.object({
+        contradictionId: z.number(),
+        companyId: z.number(),
+        resolution: z.enum([
+          "resolved_in_favor_of_a",
+          "resolved_in_favor_of_b",
+          "both_valid_with_scope",
+        ]),
+        notes: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return resolveContradiction({
+        contradictionId: input.contradictionId,
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        resolution: input.resolution,
+        resolvedBy: ctx.user.id,
+        notes: input.notes,
+      });
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -575,6 +619,7 @@ export const appRouter = router({
   voice: voiceRouter,
   diagnosis: diagnosisRouter,
   research: researchRouter,
+  contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
   audit: auditRouter,
