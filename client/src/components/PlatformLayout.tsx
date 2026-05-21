@@ -33,6 +33,7 @@ import {
   Crosshair,
   Network,
   Sparkles,
+  Users,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -116,6 +117,7 @@ const NAV_ITEMS = [
   { href: "/voice-intake", label: "Voice Intake", icon: Mic },
   { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
   { href: "/memo", label: "Memo Dictation", icon: FileText },
+  { href: "/personas", label: "Advisory Personas", icon: Users },
   { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
   { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
   { href: "/research", label: "Research", icon: Radar },
