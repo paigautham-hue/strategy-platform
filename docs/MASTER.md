@@ -59,7 +59,7 @@
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
-| **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
+| **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1 Calibration scoring library shipped; resolver cron / pattern mining / playbooks need closed-prediction data |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
 
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 6 — Calibration Scoring Library (Workstream 6.1)
+- **`server/services/calibration.ts`** — proper scoring rules so confident hedging cannot game the learning loop. `brierScore` / `meanBrier`; `brierDecomposition` (Murphy: Brier = reliability − resolution + uncertainty — resolution *rewards* forecasts that separate outcomes from the base rate, penalising uninformative hedging, the J3 Goodhart trap); `calibrationCurve` (predicted vs. observed frequency, binned); `meanSquaredError` / `mape` for point predictions; `hitRate`.
+- **`computeScorecard`** — a stratified scorecard that scores **real and synthetic outcomes separately (J4)** — war-game closes never contaminate the real-world record — and splits real calibration by framework and horizon. `deriveOutcome` recovers the binary outcome from a closed prediction's `errorDelta`; `getCalibrationRecords` joins the prediction ledger to its outcomes (returns [] with no DB).
+- **tRPC** `calibration.scorecard` + **UI** `/calibration` page (real vs. synthetic strata, per-framework / per-horizon breakdown, calibration curve; empty-state until predictions close).
+- **Tests**: +16 unit tests (Brier, Murphy decomposition + identity, calibration curve, MSE/MAPE, scorecard real/synthetic separation, outcome derivation). 360 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 5 — Drift Detection + Replan Engine (Workstream 5.4)
 - **`server/agents/drift.ts`** — three pure, deterministic detectors watch an active initiative: `scheduleDrift` (actual vs. planned progress → ahead/on-track/slipping/behind), `kpiDrift` (a leading indicator vs. expected, gated on a minimum sample size so noise never trips an alert; favourable divergence is not drift), `thesisDrift` (contradiction count vs. threshold → stable/questioned/invalidated). `detectDrift` + `overallSeverity` roll them up to none/watch/alert; `needsReplan` is the gate.
