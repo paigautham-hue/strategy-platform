@@ -21,6 +21,7 @@ import {
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
 import { recordPrediction, closePrediction, listPredictions, extractClaims } from "./services/predictions";
 import { createExport, getExportJob } from "./services/export";
+import { ingestDocument } from "./services/ingest-pipeline";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
@@ -389,6 +390,30 @@ const mcpRouter = router({
     }),
 });
 
+// ─── Ingest Router ────────────────────────────────────────────────────────────
+
+const ingestRouter = router({
+  document: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        projectId: z.number().optional(),
+        sessionId: z.number().optional(),
+        sourceType: z.enum(["text", "markdown", "html", "url"]),
+        content: z.string().min(1),
+        sourceUrl: z.string().optional(),
+        maxChunks: z.number().min(1).max(100).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return ingestDocument({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        ...input,
+      });
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -407,6 +432,7 @@ export const appRouter = router({
   project: projectRouter,
   session: sessionRouter,
   memory: memoryRouter,
+  ingest: ingestRouter,
   prediction: predictionRouter,
   cost: costRouter,
   audit: auditRouter,
