@@ -32,6 +32,7 @@ import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
 import { runFrameworks } from "./agents/frameworks";
 import { runOptionAnalysis } from "./agents/options";
+import { redTeamStrategy } from "./agents/red-team";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -628,6 +629,17 @@ const optionsRouter = router({
     }),
 });
 
+// ─── Red-Team Router (Phase 3) ────────────────────────────────────────────────
+
+const redTeamRouter = router({
+  review: protectedProcedure
+    .input(z.object({ companyId: z.number(), strategy: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return redTeamStrategy(input.strategy, input.companyId, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -653,6 +665,7 @@ export const appRouter = router({
   research: researchRouter,
   frameworks: frameworksRouter,
   options: optionsRouter,
+  redTeam: redTeamRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

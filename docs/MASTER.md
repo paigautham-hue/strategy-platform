@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 3 — Red-Team Critic (Workstream 3.3)
+- **`server/agents/red-team.ts`** — adversarial review of a strategy from 5 hostile personas (The Contrarian, The Regulator, The Incumbent Competitor, The Skeptical Investor, The Execution Skeptic). Each critique graded fatal / major / minor; `survivedReview` is derived deterministically — a strategy with any fatal flaw has NOT survived (the verdict is never left to the model).
+- **tRPC** `redTeam.review` + **UI** `/red-team` page (verdict banner, per-persona critiques with severity).
+- **Tests**: +8 unit tests (survived-review logic, severity/persona defaulting, fatal-flaw extraction). 275 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 3 — Option Generator + MCDA (Workstream 3.2)
 - **`server/agents/options.ts`** — generates 4-8 distinct strategic options for a question and scores each on 8 MCDA criteria (strategic fit, market, capability, financial, execution safety, speed, reversibility, synergy — weights sum to 1). The LLM produces options + raw 0-10 scores; **weighting, ranking, and ±20% sensitivity analysis are pure, fully-tested functions** — `computeWeightedScore`, `isRankingRobust`.
 - **tRPC** `options.analyze` + **UI** `/options` page (ranked options with MCDA score, per-criterion breakdown, robustness flag).
