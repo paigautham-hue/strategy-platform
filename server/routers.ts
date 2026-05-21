@@ -25,6 +25,7 @@ import { recordPrediction, closePrediction, listPredictions, extractClaims } fro
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
+import { applyStrategyToCompany } from "./agents/apply-strategy";
 import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
@@ -484,6 +485,23 @@ const strategyArtifactRouter = router({
       const extracted = await extractText(input.sourceType, input.content);
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
       return recognizeStrategyArtifact(extracted.text, routerCtx);
+    }),
+
+  // Share-and-Apply (H13, 2.8): recognise an external strategy, then apply it.
+  applyToCompany: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        sourceType: z.enum(["text", "markdown", "html", "url"]),
+        content: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const extracted = await extractText(input.sourceType, input.content);
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      const artifact = await recognizeStrategyArtifact(extracted.text, routerCtx);
+      const application = await applyStrategyToCompany(artifact, input.companyId, routerCtx);
+      return { artifact, application };
     }),
 });
 
