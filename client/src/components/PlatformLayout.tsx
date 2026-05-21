@@ -41,6 +41,7 @@ import {
   Microscope,
   ShieldCheck,
   BookOpen,
+  Boxes,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -142,6 +143,7 @@ const NAV_ITEMS = [
   { href: "/attribution", label: "Attribution", icon: Microscope },
   { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
   { href: "/playbooks", label: "Playbooks", icon: BookOpen },
+  { href: "/patterns", label: "Pattern Mining", icon: Boxes },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
   { href: "/usage", label: "Usage Events", icon: Activity },

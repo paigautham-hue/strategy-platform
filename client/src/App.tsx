@@ -38,6 +38,7 @@ import Calibration from "./pages/Calibration";
 import Attribution from "./pages/Attribution";
 import Compliance from "./pages/Compliance";
 import Playbooks from "./pages/Playbooks";
+import PatternMining from "./pages/PatternMining";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
 import UsageEvents from "./pages/UsageEvents";
@@ -130,6 +131,7 @@ function AppShell() {
         <Route path="/attribution" component={() => <Attribution activeCompanyId={activeCompanyId} />} />
         <Route path="/compliance" component={() => <Compliance activeCompanyId={activeCompanyId} />} />
         <Route path="/playbooks" component={() => <Playbooks activeCompanyId={activeCompanyId} />} />
+        <Route path="/patterns" component={() => <PatternMining activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
         <Route path="/usage" component={UsageEvents} />
