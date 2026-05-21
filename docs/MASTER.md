@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 1 — hybrid memory retrieval (Workstream 1.3 complete)
+- **`server/services/memory-search.ts`** — `hybridSearchMemory()`: query → embed → dense (cosine) + keyword rankings → Reciprocal Rank Fusion → MMR diversity → top-K. Company-scoped, bi-temporal-clamped; degrades to keyword-only if embedding fails.
+- **`memory.query` tRPC route** upgraded — a query string now runs hybrid search; no query still returns a plain bi-temporal listing.
+- **Ingest pipeline** candidate lookup switched from keyword to `hybridSearchMemory` — a semantically-equivalent prior claim is now found even with no shared keywords, which is essential for correct dedup (C23).
+- **Tests**: +9 unit tests (query tokenisation, keyword scoring). 177 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 1 — universal ingest pipeline + UI (first visible feature)
 The foundation modules are now wired into a working, end-to-end feature:
 - **Ingest sources** (`server/ingest/`): `html-to-text.ts` (HTML→clean text), `extract-text.ts` (dispatch: text / markdown / html / url with bounded fetch).
