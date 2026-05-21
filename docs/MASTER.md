@@ -56,7 +56,7 @@
 | **0** | Foundation, Outcome Capture, Cost Discipline | ✅ | 2026-05-20 | 2026-05-20 | ✅ | All workstreams 0.1–0.5 shipped; 26/26 tests green |
 | **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ✅ | 2026-05-21 | 2026-05-21 | ✅ | All 8 workstreams shipped — see Recent Changes |
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
-| **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | 3.1 Frameworks, 3.2 Options, 3.3 Red-Team, 3.4 War-Game shipped; 3.5 cross-company war-game next |
+| **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | 3.1–3.5 shipped (Frameworks, Options, Red-Team, War-Game, Apply Micro War-Game); 3.6 cross-company war-game next |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | ☐ | — | — | — | Blocked by Phase 3 |
 | **5** | Strategy → Execution + Operator UX Tier | ☐ | — | — | — | Blocked by Phase 4 |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 3 — Share-and-Apply Micro War-Game (Workstream 3.5)
+- **`server/agents/apply-war-game.ts`** — "deep mode" for the Share-and-Apply pipeline (H13). After an external strategy artifact is adapted to a company, deep mode plays the **adapted moves** out as a quick 2-round micro war-game, then runs a comparison call that judges the simulated outcome against the artifact's stated expected outcomes (`aligned` / `partial` / `diverges`) and revises the recommendation. Pure helpers `buildAppliedStrategyText` (prefers adapted moves, falls back to artifact key moves) and `normalizeComparison` are fully tested.
+- **tRPC** `strategyArtifact.applyToCompany` gains an optional `deepMode` flag — when set (and the input is a real artifact) it returns a `deepMode` block and records the micro war-game outcome to the ledger as **synthetic** (`framework: "apply_war_game"`, `outcomeClass: "synthetic"`). **UI** `/strategy-artifacts` page adds a deep-mode toggle and a "Simulated outcome vs expected" result card.
+- **Tests**: +7 unit tests (applied-strategy text construction, fallback, comparison normalization/alignment defaulting). 291 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 3 — War-Game Simulation (Workstream 3.4)
 - **`server/agents/war-game.ts`** — plays a strategy out over several rounds (default 3, max 5) against 4 reacting stakeholders across 4 arenas: Customer Archetype (customer), Competitor CEO (competitor), Regulator (regulatory), Activist Investor (capital). Round 1 reacts to the strategy; later rounds react to and escalate the prior round's moves. A separate adjudication call judges whether the strategy `survived` and extracts key learnings. Best-effort per round (a failed round yields no moves but the game continues); grounded in company memory via hybrid search.

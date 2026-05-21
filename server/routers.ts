@@ -26,6 +26,7 @@ import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
 import { applyStrategyToCompany } from "./agents/apply-strategy";
+import { runApplyDeepMode } from "./agents/apply-war-game";
 import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
@@ -493,12 +494,15 @@ const strategyArtifactRouter = router({
     }),
 
   // Share-and-Apply (H13, 2.8): recognise an external strategy, then apply it.
+  // deepMode (3.5) additionally stress-tests the adapted strategy with a quick
+  // micro war-game and compares the simulated outcome against expectations.
   applyToCompany: protectedProcedure
     .input(
       z.object({
         companyId: z.number(),
         sourceType: z.enum(["text", "markdown", "html", "url"]),
         content: z.string().min(1),
+        deepMode: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -506,7 +510,32 @@ const strategyArtifactRouter = router({
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
       const artifact = await recognizeStrategyArtifact(extracted.text, routerCtx);
       const application = await applyStrategyToCompany(artifact, input.companyId, routerCtx);
-      return { artifact, application };
+
+      // Deep mode (3.5) — only meaningful for a real strategy artifact.
+      let deepMode: Awaited<ReturnType<typeof runApplyDeepMode>> | null = null;
+      if (input.deepMode && artifact.isStrategyArtifact) {
+        deepMode = await runApplyDeepMode(artifact, application, input.companyId, routerCtx);
+        // The micro war-game outcome is SYNTHETIC (C2, J4) — best-effort ledger write.
+        try {
+          await recordPrediction({
+            tenantId: ctx.user.tenantId,
+            companyId: input.companyId,
+            userId: ctx.user.id,
+            claim:
+              `Applied-strategy war-game — ${deepMode.warGame.survived ? "survived" : "did not survive"} ` +
+              `(${deepMode.comparison.alignment} vs expected): ${deepMode.warGame.outcome}`,
+            confidence: 0.5,
+            model: "war-game-simulation",
+            framework: "apply_war_game",
+            horizon: "simulated",
+            outcomeClass: "synthetic",
+          });
+        } catch {
+          /* ledger write is best-effort — never block the apply result */
+        }
+      }
+
+      return { artifact, application, deepMode };
     }),
 });
 
