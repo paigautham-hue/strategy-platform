@@ -52,6 +52,7 @@ import { auditPredictions } from "./services/audit-constitution";
 import { draftPlaybook, checkPromotion, type PlaybookLayer } from "./agents/playbook";
 import { minePatterns } from "./agents/pattern-mining";
 import { runSynergyScout } from "./agents/synergy-scout";
+import { distillPattern } from "./services/distillation";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1086,6 +1087,28 @@ const synergyRouter = router({
     }),
 });
 
+// ─── Distillation Router (Phase 7) ────────────────────────────────────────────
+
+const distillationRouter = router({
+  // Anonymize a pattern for cross-company publication + enforce the min-N gate.
+  // GP-only: anonymization is checked against every company name in the tenant.
+  preview: gpProcedure
+    .input(
+      z.object({
+        patternText: z.string().min(1),
+        sourcePortcoCount: z.number().min(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const companies = await listCompanies(ctx.user.tenantId);
+      return distillPattern({
+        patternText: input.patternText,
+        companyNames: companies.map((c) => c.name),
+        sourcePortcoCount: input.sourcePortcoCount,
+      });
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1124,6 +1147,7 @@ export const appRouter = router({
   playbook: playbookRouter,
   pattern: patternRouter,
   synergy: synergyRouter,
+  distillation: distillationRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
