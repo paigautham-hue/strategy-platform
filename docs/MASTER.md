@@ -174,6 +174,16 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Build status — Phases 3–7 buildable surface complete
+- Every workstream across Phases 3–7 that can be built **without deployment infrastructure** is shipped: Phase 3 (3.1–3.6 all six), Phase 4 (4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation), Phase 5 (5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection), Phase 6 (6.1–6.5), Phase 7 (7.1 Synergy, 7.2 Distillation, 7.6 Briefing). 412 tests passing; typecheck + build clean throughout.
+- **Infra-gated remainder** — items that genuinely require external credentials, deployment infrastructure, GPU hosting, or accumulated production data, and are correctly deferred until the platform is live on Manus:
+  - **Phase 2**: 2.4 live-steering UI (streaming), 2.5 code interpreter (sandbox), 2.7 multi-hop HippoRAG (entity graph).
+  - **Phase 4**: 4.1 realtime WebRTC voice, 4.3 voice triggers, 4.5 diagram generation (Imagen/Flux, OD9), 4.6 hot-path distillation (vLLM + ≥ 5K real examples, OD10).
+  - **Phase 5**: 5.2 execution-tool connectors (Linear/Notion/Jira), 5.3 KPI sync (Stripe/GA4), 5.5 Slack bot.
+  - **Phase 6**: outcome-resolver cron + scorecard population (needs ≥ 20 closed real predictions); 6.6 per-industry confounder DAGs (inline confounder-naming already shipped in 6.4).
+  - **Phase 7**: 7.3 portfolio dashboard, 7.4 cross-company playbook surfacing, 7.5 applied-strategy library (all need accumulated portfolio data); TTS audio digest.
+  - **Phase 8**: performance/cost tuning, on-prem vLLM lane, monitoring, runbooks — all deployment-environment work.
+
 ### 2026-05-21 · Phase 7 — Voice Briefing Builder (Workstream 7.6)
 - **`server/agents/briefing.ts`** — synthesises a daily or weekly board-style briefing from the platform's recent signals: a one-line headline, a few labelled sections, a prioritised "what needs your attention" list, and suggested actions. Briefing-default (H6) — synthesis leads, raw signals underneath. `normalizeBriefing` defends the output (drops empty sections, caps lists at 8).
 - **tRPC** `briefing.generate` — pulls the company's recent prediction-ledger entries as signals, appends optional GP notes, and builds the briefing. **UI** `/briefing` page (daily/weekly toggle, headline, attention list, sections, actions).
