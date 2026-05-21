@@ -50,6 +50,7 @@ import { getCalibrationRecords, computeScorecard } from "./services/calibration"
 import { attributeInitiative } from "./agents/attribution";
 import { auditPredictions } from "./services/audit-constitution";
 import { draftPlaybook, checkPromotion, type PlaybookLayer } from "./agents/playbook";
+import { minePatterns } from "./agents/pattern-mining";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1025,6 +1026,23 @@ const playbookRouter = router({
     }),
 });
 
+// ─── Pattern Mining Router (Phase 6) ──────────────────────────────────────────
+
+const patternRouter = router({
+  // Mine a set of past projects for recurring patterns and anti-patterns.
+  mine: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        projects: z.array(z.string().min(1)).min(2).max(20),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return minePatterns(input.projects, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1061,6 +1079,7 @@ export const appRouter = router({
   attribution: attributionRouter,
   compliance: complianceRouter,
   playbook: playbookRouter,
+  pattern: patternRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
