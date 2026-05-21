@@ -35,8 +35,9 @@ import { runFrameworks } from "./agents/frameworks";
 import { runOptionAnalysis } from "./agents/options";
 import { redTeamStrategy } from "./agents/red-team";
 import { runWarGame } from "./agents/war-game";
+import { runCrossCoWarGame } from "./agents/cross-co-war-game";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
-import { emitUsage } from "./middleware/audit";
+import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
 
@@ -699,6 +700,74 @@ const warGameRouter = router({
         });
       } catch {
         /* ledger write is best-effort — never block the war-game result */
+      }
+      return result;
+    }),
+
+  // Cross-Company War-Game (3.6) — GP-only, three-layer enforcement:
+  //   layer 1 (API): gpProcedure; layer 2 (query): every companyId is
+  //   validated against the tenant; layer 3 (UI): page is GP-only in nav.
+  // Every cross-company memory read is audit-logged (restricted tier).
+  crossCompany: gpProcedure
+    .input(
+      z.object({
+        companyIds: z.array(z.number()).min(2).max(6),
+        scenario: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Layer 2 — resolve & validate each company belongs to this tenant.
+      const uniqueIds = Array.from(new Set(input.companyIds));
+      if (uniqueIds.length < 2) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A cross-company war-game needs at least 2 distinct companies.",
+        });
+      }
+      const companies: { id: number; name: string }[] = [];
+      for (const id of uniqueIds) {
+        const company = await getCompany(ctx.user.tenantId, id);
+        if (!company) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: `Company ${id} not found in this tenant.`,
+          });
+        }
+        companies.push({ id: company.id, name: company.name });
+      }
+
+      // Audit every deliberate cross-company read (one restricted entry each).
+      for (const company of companies) {
+        void auditCrossCompanyRead({
+          tenantId: ctx.user.tenantId,
+          companyId: company.id,
+          userId: ctx.user.id,
+          metadata: { scenario: input.scenario, scope: uniqueIds },
+        });
+      }
+
+      const routerCtx = buildRouterCtx(ctx);
+      const result = await runCrossCoWarGame(input.scenario, companies, routerCtx);
+
+      // Record the SYNTHETIC outcome to the ledger, namespaced per company (C2, J4).
+      for (const outcome of result.companyOutcomes) {
+        try {
+          await recordPrediction({
+            tenantId: ctx.user.tenantId,
+            companyId: outcome.companyId,
+            userId: ctx.user.id,
+            claim:
+              `Cross-company war-game — ${outcome.companyName} exposure ${outcome.exposure}: ` +
+              outcome.outcome,
+            confidence: 0.5,
+            model: "war-game-simulation",
+            framework: "cross_co_war_game",
+            horizon: "simulated",
+            outcomeClass: "synthetic",
+          });
+        } catch {
+          /* ledger write is best-effort */
+        }
       }
       return result;
     }),

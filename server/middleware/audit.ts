@@ -148,6 +148,27 @@ export function auditPredictionWrite(params: {
   });
 }
 
+/**
+ * Audit a deliberate cross-company read (Workstream 3.6). The platform is
+ * company-namespaced by default (C1); a cross-company war-game is the rare
+ * exception, so every company touched gets its own restricted-tier entry.
+ */
+export function auditCrossCompanyRead(params: {
+  tenantId: string;
+  companyId: number;
+  userId?: number;
+  resourceId?: string;
+  traceId?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  return appendAudit({
+    ...params,
+    action: "cross-company-read",
+    resourceType: "cross_co_war_game",
+    confidentialityTier: "restricted",
+  });
+}
+
 /** Audit an export request. */
 export function auditExport(params: {
   tenantId: string;
