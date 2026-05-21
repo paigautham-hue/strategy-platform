@@ -27,6 +27,7 @@ import {
   Stethoscope,
   Radar,
   GitFork,
+  Grid3x3,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -112,6 +113,7 @@ const NAV_ITEMS = [
   { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
   { href: "/research", label: "Research", icon: Radar },
   { href: "/contradictions", label: "Contradictions", icon: GitFork },
+  { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },

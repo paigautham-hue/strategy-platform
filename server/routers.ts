@@ -30,6 +30,7 @@ import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
+import { runFrameworks } from "./agents/frameworks";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -596,6 +597,25 @@ const contradictionRouter = router({
     }),
 });
 
+// ─── Frameworks Router (Phase 3) ──────────────────────────────────────────────
+
+const frameworksRouter = router({
+  analyze: protectedProcedure
+    .input(z.object({ companyId: z.number(), question: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      // Diagnose first (P4) — the question type selects the frameworks.
+      const diagnosis = await diagnoseQuestion(input.question, routerCtx);
+      const result = await runFrameworks(
+        diagnosis.reframedQuestion,
+        diagnosis.questionType,
+        input.companyId,
+        routerCtx,
+      );
+      return { diagnosis, ...result };
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -619,6 +639,7 @@ export const appRouter = router({
   voice: voiceRouter,
   diagnosis: diagnosisRouter,
   research: researchRouter,
+  frameworks: frameworksRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
