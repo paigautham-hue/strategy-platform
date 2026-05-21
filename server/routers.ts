@@ -47,6 +47,7 @@ import { decomposeStrategy } from "./agents/decomposer";
 import { runPreMortem } from "./agents/pre-mortem";
 import { detectDrift, needsReplan, proposeReplan } from "./agents/drift";
 import { getCalibrationRecords, computeScorecard } from "./services/calibration";
+import { attributeInitiative } from "./agents/attribution";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -938,6 +939,31 @@ const calibrationRouter = router({
     }),
 });
 
+// ─── Attribution Router (Phase 6) ─────────────────────────────────────────────
+
+const attributionRouter = router({
+  // Causal-lite attribution + auto-drafted post-mortem for a completed initiative.
+  analyze: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        initiative: z.string().min(1),
+        outcome: z.string().min(1),
+        context: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return attributeInitiative(
+        input.initiative,
+        input.outcome,
+        input.context ?? "",
+        input.companyId,
+        routerCtx,
+      );
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -971,6 +997,7 @@ export const appRouter = router({
   decomposer: decomposerRouter,
   drift: driftRouter,
   calibration: calibrationRouter,
+  attribution: attributionRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

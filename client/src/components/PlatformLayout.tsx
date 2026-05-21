@@ -38,6 +38,7 @@ import {
   ShieldAlert,
   Gauge,
   Scale,
+  Microscope,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -136,6 +137,7 @@ const NAV_ITEMS = [
   { href: "/drift", label: "Drift Detection", icon: Gauge },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/calibration", label: "Calibration", icon: Scale },
+  { href: "/attribution", label: "Attribution", icon: Microscope },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
   { href: "/usage", label: "Usage Events", icon: Activity },
