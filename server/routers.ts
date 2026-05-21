@@ -23,6 +23,8 @@ import { hybridSearchMemory } from "./services/memory-search";
 import { recordPrediction, closePrediction, listPredictions, extractClaims } from "./services/predictions";
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
+import { recognizeStrategyArtifact } from "./services/strategy-artifact";
+import { extractText } from "./ingest/extract-text";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
@@ -428,6 +430,24 @@ const ingestRouter = router({
     }),
 });
 
+// ─── Strategy-Artifact Router ─────────────────────────────────────────────────
+
+const strategyArtifactRouter = router({
+  recognize: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        sourceType: z.enum(["text", "markdown", "html", "url"]),
+        content: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const extracted = await extractText(input.sourceType, input.content);
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return recognizeStrategyArtifact(extracted.text, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -447,6 +467,7 @@ export const appRouter = router({
   session: sessionRouter,
   memory: memoryRouter,
   ingest: ingestRouter,
+  strategyArtifact: strategyArtifactRouter,
   prediction: predictionRouter,
   cost: costRouter,
   audit: auditRouter,

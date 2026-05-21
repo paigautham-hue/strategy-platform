@@ -21,6 +21,7 @@ import {
   BarChart3,
   FileText,
   FileInput,
+  Telescope,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -100,6 +101,7 @@ const NAV_ITEMS = [
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/ingest", label: "Ingest", icon: FileInput },
+  { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
