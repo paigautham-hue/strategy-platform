@@ -15,5 +15,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["server/**/*.test.ts", "server/**/*.spec.ts"],
+    // Integration tests call real DB + OpenAI embeddings; allow up to 30s per test
+    testTimeout: 30000,
   },
 });

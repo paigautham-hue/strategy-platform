@@ -91,3 +91,13 @@
 ## Docs
 - [x] Update MASTER.md with Phase 0 status and resolved ODs
 - [x] .env.example with ZEP_API_KEY slot and all required vars
+
+## Phase 0 Review Fixes (2026-05-21)
+- [x] B2 — Real embeddings: call OpenAI text-embedding-3-small via direct HTTPS (Manus forge has no /v1/embeddings)
+- [x] B3 — embeddingModelVersion: stamp with actual model string returned from OpenAI, not hardcoded
+- [x] B4 — 8 real integration tests against live DB: cross-company isolation with seeded data in two companies
+- [x] M1 — Router reads models.yaml for model selection; no hardcoded DEFAULT_MODEL
+- [x] M2 — supersedeMemory runs in a single DB transaction; no -1 placeholder
+- [x] M3 — CI workflow present and green (already on GitHub; verify it passes)
+- [x] M4 — structured() validates output against JSON schema, not just JSON.parse
+- [x] OPENAI_API_KEY secret added to Manus secrets for embeddings
