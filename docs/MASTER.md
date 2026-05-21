@@ -57,7 +57,7 @@
 | **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ✅ | 2026-05-21 | 2026-05-21 | ✅ | All 8 workstreams shipped — see Recent Changes |
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
-| **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | ☐ | — | — | — | Blocked by Phase 3 |
+| **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm Mode shipped; 4.1 realtime voice / 4.5 diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | ☐ | — | — | — | Blocked by Phase 4 |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 4 — Brainstorm Mode (Workstream 4.2)
+- **`server/agents/brainstorm.ts`** — a structured brainstorm runs four phases (Diverge → Probe → Sharpen → Lock), each with its own facilitation stance. Five **silent extractors** capture the raw material in one structured call — hypotheses, options, assumptions, risks, open questions — and a recap call names recurring themes, unresolved threads, and suggested next moves. Pure, tested: `nextPhase`, `getPhase`, `normalizeCaptures` (dedup + per-category cap of 15), `captureCount`, `normalizeRecap`.
+- **tRPC** `brainstorm.extract` + `brainstorm.recap`. **UI** `/brainstorm` page — phase stepper, transcript box with browser voice **dictation** (reuses the Workstream 1.5 one-shot speech path), a five-category draft tray, and a recap card with suggested moves.
+- **Scope note**: this is the brainstorm *intelligence* — it runs on typed or dictated text. The realtime WebRTC voice *channel* (4.1), diagram generation (4.5, OD9), and hot-path distillation (4.6, OD10) remain infra-gated.
+- **Tests**: +10 unit tests (phase machine, capture/recap normalization, dedup, caps). 308 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 3 — Cross-Company War-Game (Workstream 3.6)
 - **`server/agents/cross-co-war-game.ts`** — applies one shared shock (FX swing, supplier acquisition, new regulation) across 2-6 portfolio companies at once and surfaces the non-obvious cross-company synergies and correlated risks. Each company's context is gathered with a memory search **namespaced to that single company** — the agent never issues a cross-company query (C1). Pure `normalizeCrossCoResult` resolves model-returned company names back to IDs (case-insensitive / partial), dedupes outcomes, defaults exposure/kind.

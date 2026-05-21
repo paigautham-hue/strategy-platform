@@ -32,6 +32,7 @@ import {
   Swords,
   Crosshair,
   Network,
+  Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -113,6 +114,7 @@ const NAV_ITEMS = [
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/ingest", label: "Ingest", icon: FileInput },
   { href: "/voice-intake", label: "Voice Intake", icon: Mic },
+  { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
   { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
   { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
   { href: "/research", label: "Research", icon: Radar },
