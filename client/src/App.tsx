@@ -39,6 +39,7 @@ import Attribution from "./pages/Attribution";
 import Compliance from "./pages/Compliance";
 import Playbooks from "./pages/Playbooks";
 import PatternMining from "./pages/PatternMining";
+import SynergyScout from "./pages/SynergyScout";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
 import UsageEvents from "./pages/UsageEvents";
@@ -132,6 +133,7 @@ function AppShell() {
         <Route path="/compliance" component={() => <Compliance activeCompanyId={activeCompanyId} />} />
         <Route path="/playbooks" component={() => <Playbooks activeCompanyId={activeCompanyId} />} />
         <Route path="/patterns" component={() => <PatternMining activeCompanyId={activeCompanyId} />} />
+        <Route path="/synergy" component={SynergyScout} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
         <Route path="/usage" component={UsageEvents} />

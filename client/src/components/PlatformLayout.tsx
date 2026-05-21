@@ -42,6 +42,7 @@ import {
   ShieldCheck,
   BookOpen,
   Boxes,
+  Combine,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -144,6 +145,7 @@ const NAV_ITEMS = [
   { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
   { href: "/playbooks", label: "Playbooks", icon: BookOpen },
   { href: "/patterns", label: "Pattern Mining", icon: Boxes },
+  { href: "/synergy", label: "Synergy Scout", icon: Combine },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
   { href: "/usage", label: "Usage Events", icon: Activity },
@@ -151,7 +153,7 @@ const NAV_ITEMS = [
   { href: "/mcp", label: "MCP Tools", icon: Cpu },
 ];
 
-const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game"];
+const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy"];
 const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding"];
 
 // ─── PlatformLayout ───────────────────────────────────────────────────────────
