@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 3 begins — framework library (Workstream 3.1)
+- **`server/agents/frameworks.ts`** — 8 strategy frameworks as structured agents: Porter Five Forces, Ansoff Matrix, JTBD, Wardley Map, Three Horizons, BCG Matrix, Blue Ocean (Four Actions), Christensen Disruption Lens. Frameworks are NOT a user menu (P4) — `frameworksForQuestionType` selects them from the diagnosed question type. `runFrameworks` applies the selected set in parallel, grounded in company memory; uniform section/summary/implications output.
+- **tRPC** `frameworks.analyze` (diagnose → select → apply) + **UI** `/frameworks` page.
+- **Tests**: +10 unit tests (registry, question-type selection, analysis normalisation). 254 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 2 — Contradiction Review (Workstream 2.6)
 - **`server/services/contradictions.ts`** — `listContradictions()` (joined with both memory items for review) + `resolveContradiction()`: in-favor-of-A retires B, in-favor-of-B retires A (supersede, never delete — C19), both-valid-with-scope keeps both. Transactional; company-scoped (C1); audit-logged.
 - **tRPC** `contradiction.list` / `contradiction.resolve` + **UI** `/contradictions` — side-by-side claim comparison with confidence, three resolution actions, resolved-history view.
