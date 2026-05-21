@@ -57,7 +57,7 @@
 | **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ✅ | 2026-05-21 | 2026-05-21 | ✅ | All 8 workstreams shipped — see Recent Changes |
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
-| **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm Mode shipped; 4.1 realtime voice / 4.5 diagram gen / 4.6 distillation infra-gated |
+| **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm Mode + 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.5 diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | ☐ | — | — | — | Blocked by Phase 4 |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 4 — Memo Dictation (Workstream 4.5)
+- **`server/agents/memo-dictation.ts`** — turns a raw dictated monologue into a clean one-page strategy memo: title, executive summary, a few labelled sections, decisions, and next actions. Briefing-default (H6) — structure first, transcript second; faithful to what was said (no invented facts). On failure it preserves the raw transcript so nothing is lost. Pure `normalizeMemo` (drops empty sections, caps sections at 8 / lists at 10) and `renderMemoMarkdown` are tested.
+- **tRPC** `memo.structure` + **UI** `/memo` page — dictate or type, structure into a memo, copy as markdown.
+- **Tests**: +6 unit tests (memo normalization, section/list caps, markdown rendering). 314 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 4 — Brainstorm Mode (Workstream 4.2)
 - **`server/agents/brainstorm.ts`** — a structured brainstorm runs four phases (Diverge → Probe → Sharpen → Lock), each with its own facilitation stance. Five **silent extractors** capture the raw material in one structured call — hypotheses, options, assumptions, risks, open questions — and a recap call names recurring themes, unresolved threads, and suggested next moves. Pure, tested: `nextPhase`, `getPhase`, `normalizeCaptures` (dedup + per-category cap of 15), `captureCount`, `normalizeRecap`.

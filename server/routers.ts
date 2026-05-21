@@ -41,6 +41,7 @@ import {
   generateRecap,
   type BrainstormCaptures,
 } from "./agents/brainstorm";
+import { structureMemo } from "./agents/memo-dictation";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -815,6 +816,18 @@ const brainstormRouter = router({
     }),
 });
 
+// ─── Memo Dictation Router (Phase 4) ──────────────────────────────────────────
+
+const memoRouter = router({
+  // Structure a dictated monologue into a one-page strategy memo.
+  structure: protectedProcedure
+    .input(z.object({ companyId: z.number(), transcript: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return structureMemo(input.transcript, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -843,6 +856,7 @@ export const appRouter = router({
   redTeam: redTeamRouter,
   warGame: warGameRouter,
   brainstorm: brainstormRouter,
+  memo: memoRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
