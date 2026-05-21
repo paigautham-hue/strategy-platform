@@ -59,7 +59,7 @@
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
-| **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1 Calibration scoring, 6.4 Causal Attribution shipped; resolver cron / pattern mining / playbooks need closed-prediction data |
+| **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1 Calibration, 6.4 Attribution, 6.5 Constitutional Audit shipped; resolver cron / pattern mining / playbooks need closed-prediction data |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
 
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 6 — Anti-Hallucination Audit (Workstream 6.5)
+- **`server/services/audit-constitution.ts`** — a constitution-based audit that measures principle-*compliance*, not vibes. Four explicit, checkable principles (numeric claims cite a source; predictions specify horizon + confidence; causal claims name confounders; cross-portfolio analogies name both sides) applied to ledger claims via **pure, deterministic heuristics**: `hasNumericClaim` (ignores bare years), `citesSource`, `hasCausalLanguage`, `namesConfounder`. `checkPrediction` returns compliant / violation / not-applicable per principle; `auditPredictions` aggregates a `ComplianceReport` with per-principle compliance rates and flagged claims.
+- **tRPC** `compliance.auditPredictions` + **UI** `/compliance` page (overall compliance %, per-principle bars, flagged claims with the principles they breach).
+- **Tests**: +14 unit tests (each detector, per-principle checks, applicability, report aggregation, empty/clean samples). 376 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 6 — Causal-Lite Attribution (Workstream 6.4 / 6.6)
 - **`server/agents/attribution.ts`** — when an initiative completes, attributes the outcome: did the initiative cause it, or would it have happened anyway? Names the variables the team changed, sketches a plausible counterfactual, splits credit between internal and external factors, and **names the confounders any causal claim must be conditioned on** (L1/L3 — never asserts causation without them). Auto-drafts a post-mortem framed as **hypotheses** (operator confirms before it lands in memory). `hasFailureTrace` is derived — a post-mortem with no "what didn't" is itself flagged (anti-pattern AP6 / L4).

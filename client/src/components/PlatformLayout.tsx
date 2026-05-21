@@ -39,6 +39,7 @@ import {
   Gauge,
   Scale,
   Microscope,
+  ShieldCheck,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -138,6 +139,7 @@ const NAV_ITEMS = [
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/calibration", label: "Calibration", icon: Scale },
   { href: "/attribution", label: "Attribution", icon: Microscope },
+  { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
   { href: "/usage", label: "Usage Events", icon: Activity },
