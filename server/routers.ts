@@ -53,6 +53,7 @@ import { draftPlaybook, checkPromotion, type PlaybookLayer } from "./agents/play
 import { minePatterns } from "./agents/pattern-mining";
 import { runSynergyScout } from "./agents/synergy-scout";
 import { distillPattern } from "./services/distillation";
+import { buildBriefing } from "./agents/briefing";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1109,6 +1110,42 @@ const distillationRouter = router({
     }),
 });
 
+// ─── Briefing Router (Phase 7) ────────────────────────────────────────────────
+
+const briefingRouter = router({
+  // Build a daily / weekly briefing from the company's recent ledger signals.
+  generate: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        cadence: z.enum(["daily", "weekly"]),
+        notes: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const company = await getCompany(ctx.user.tenantId, input.companyId);
+      if (!company) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const preds = await listPredictions({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        limit: input.cadence === "daily" ? 12 : 30,
+      });
+
+      const signalLines = preds.map(
+        (p) =>
+          `- [${p.outcomeClass}${p.framework ? `/${p.framework}` : ""}] ` +
+          `${p.claim} (confidence ${p.confidence})`,
+      );
+      if (input.notes && input.notes.trim()) {
+        signalLines.push(`- GP note: ${input.notes.trim()}`);
+      }
+
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return buildBriefing(input.cadence, company.name, signalLines.join("\n"), routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1148,6 +1185,7 @@ export const appRouter = router({
   pattern: patternRouter,
   synergy: synergyRouter,
   distillation: distillationRouter,
+  briefing: briefingRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

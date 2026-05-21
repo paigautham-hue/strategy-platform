@@ -60,7 +60,7 @@
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1–6.5 shipped (Calibration, Pattern Mining, Playbooks, Attribution, Constitutional Audit); resolver cron + 6.6 DAGs need closed-prediction data |
-| **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy Scout + 7.2 Pattern Distillation shipped; 7.3 dashboard / 7.5 applied library / 7.6 TTS briefing need portfolio data |
+| **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy, 7.2 Distillation, 7.6 Briefing builder shipped; 7.3 dashboard / 7.5 applied library / TTS audio need portfolio data + infra |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
 
 **Currently active workstream:** Phase 1 — Memory, Ingest, Voice Intake, Hygiene Crons (next to build).
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 7 — Voice Briefing Builder (Workstream 7.6)
+- **`server/agents/briefing.ts`** — synthesises a daily or weekly board-style briefing from the platform's recent signals: a one-line headline, a few labelled sections, a prioritised "what needs your attention" list, and suggested actions. Briefing-default (H6) — synthesis leads, raw signals underneath. `normalizeBriefing` defends the output (drops empty sections, caps lists at 8).
+- **tRPC** `briefing.generate` — pulls the company's recent prediction-ledger entries as signals, appends optional GP notes, and builds the briefing. **UI** `/briefing` page (daily/weekly toggle, headline, attention list, sections, actions).
+- **Scope note**: this is the briefing *text* builder. The TTS audio digest and the realtime "pause and ask a follow-up" interaction remain infra-gated.
+- **Tests**: +4 unit tests (briefing normalization, section filtering, cadence stamping, list caps). 412 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 7 — Pattern Distillation (Workstream 7.2)
 - **`server/services/distillation.ts`** — before a pattern learned inside one company can be surfaced to another (P12), two pure gates apply: `canPublishPattern` (drawn from ≥ 3 portcos, so no single portco is re-identifiable) and `anonymizeText` (strips company names — longest-match-first, case-insensitive — currency amounts, and specific dates, counting every redaction). `distillPattern` combines them; `aggregateStat` rolls per-portco numbers into a publishable "N=4, median 14" statistic, returning null below the min sample.
