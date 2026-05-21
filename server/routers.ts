@@ -36,6 +36,11 @@ import { runOptionAnalysis } from "./agents/options";
 import { redTeamStrategy } from "./agents/red-team";
 import { runWarGame } from "./agents/war-game";
 import { runCrossCoWarGame } from "./agents/cross-co-war-game";
+import {
+  extractBrainstormCaptures,
+  generateRecap,
+  type BrainstormCaptures,
+} from "./agents/brainstorm";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -773,6 +778,43 @@ const warGameRouter = router({
     }),
 });
 
+// ─── Brainstorm Router (Phase 4) ──────────────────────────────────────────────
+
+const brainstormRouter = router({
+  // Run the five silent extractors over a brainstorm transcript.
+  extract: protectedProcedure
+    .input(z.object({ companyId: z.number(), transcript: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return extractBrainstormCaptures(input.transcript, routerCtx);
+    }),
+
+  // Close the session with a recap card + suggested next moves.
+  recap: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        transcript: z.string().min(1),
+        captures: z
+          .object({
+            hypotheses: z.array(z.string()),
+            options: z.array(z.string()),
+            assumptions: z.array(z.string()),
+            risks: z.array(z.string()),
+            openQuestions: z.array(z.string()),
+          })
+          .optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      const captures: BrainstormCaptures =
+        input.captures ??
+        (await extractBrainstormCaptures(input.transcript, routerCtx));
+      return generateRecap(input.transcript, captures, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -800,6 +842,7 @@ export const appRouter = router({
   options: optionsRouter,
   redTeam: redTeamRouter,
   warGame: warGameRouter,
+  brainstorm: brainstormRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
