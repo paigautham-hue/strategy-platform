@@ -44,6 +44,7 @@ import {
 import { structureMemo } from "./agents/memo-dictation";
 import { consultPersona, listPersonas } from "./agents/personas";
 import { decomposeStrategy } from "./agents/decomposer";
+import { runPreMortem } from "./agents/pre-mortem";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -860,6 +861,20 @@ const decomposerRouter = router({
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
       return decomposeStrategy(input.thesis, input.companyId, routerCtx);
+    }),
+
+  // Pre-mortem launch ritual — run before an initiative goes "active".
+  preMortem: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        initiative: z.string().min(1),
+        context: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return runPreMortem(input.initiative, input.context ?? "", input.companyId, routerCtx);
     }),
 });
 
