@@ -45,6 +45,7 @@ import { structureMemo } from "./agents/memo-dictation";
 import { consultPersona, listPersonas } from "./agents/personas";
 import { decomposeStrategy } from "./agents/decomposer";
 import { runPreMortem } from "./agents/pre-mortem";
+import { detectDrift, needsReplan, proposeReplan } from "./agents/drift";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -878,6 +879,49 @@ const decomposerRouter = router({
     }),
 });
 
+// ─── Drift Router (Phase 5) ───────────────────────────────────────────────────
+
+const driftRouter = router({
+  // Run the three drift detectors; when drift is found, propose a replan.
+  detect: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        initiative: z.string().min(1),
+        context: z.string().optional(),
+        plannedProgress: z.number().min(0).max(1),
+        actualProgress: z.number().min(0).max(1),
+        kpiExpected: z.number(),
+        kpiActual: z.number(),
+        kpiSampleSize: z.number().min(0),
+        kpiHigherIsBetter: z.boolean().optional(),
+        contradictionCount: z.number().min(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const report = detectDrift({
+        schedule: {
+          plannedProgress: input.plannedProgress,
+          actualProgress: input.actualProgress,
+        },
+        kpi: {
+          expected: input.kpiExpected,
+          actual: input.kpiActual,
+          sampleSize: input.kpiSampleSize,
+          higherIsBetter: input.kpiHigherIsBetter,
+        },
+        contradictionCount: input.contradictionCount,
+      });
+
+      let replan: Awaited<ReturnType<typeof proposeReplan>> | null = null;
+      if (needsReplan(report)) {
+        const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+        replan = await proposeReplan(input.initiative, report, input.context ?? "", routerCtx);
+      }
+      return { report, replan };
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -909,6 +953,7 @@ export const appRouter = router({
   memo: memoRouter,
   persona: personaRouter,
   decomposer: decomposerRouter,
+  drift: driftRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

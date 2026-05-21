@@ -58,7 +58,7 @@
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
-| **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
+| **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 5 — Drift Detection + Replan Engine (Workstream 5.4)
+- **`server/agents/drift.ts`** — three pure, deterministic detectors watch an active initiative: `scheduleDrift` (actual vs. planned progress → ahead/on-track/slipping/behind), `kpiDrift` (a leading indicator vs. expected, gated on a minimum sample size so noise never trips an alert; favourable divergence is not drift), `thesisDrift` (contradiction count vs. threshold → stable/questioned/invalidated). `detectDrift` + `overallSeverity` roll them up to none/watch/alert; `needsReplan` is the gate.
+- **Replan engine** — when drift is found, `proposeReplan` recommends exactly one of Continue / Adjust-pace / Pivot / Kill with a rationale and concrete adjustments. The three detectors are the place a synthetic drift fixture is exercised end to end (Phase 5 deliverable).
+- **tRPC** `drift.detect` (runs detectors, proposes a replan only when warranted) + **UI** `/drift` page (per-detector status, severity roll-up, replan proposal).
+- **Tests**: +14 unit tests (each detector's bands, sample gating, favourable-direction logic, severity roll-up, replan normalization). 348 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 5 — Pre-Mortem Launch Ritual (Workstream 5.1)
 - **`server/agents/pre-mortem.ts`** — before an initiative goes "active", run a pre-mortem: assume it is twelve months later and the initiative failed outright, then work backwards. Produces a risk register, each risk graded for likelihood × impact with an early-warning sign and a mitigation. Pure `riskSeverity` (likelihood × impact → low/medium/high/critical) and `normalizePreMortem` (sorts most-severe first; `readyToLaunch` is true only when risks were surfaced and every one carries a mitigation — the launch gate is deterministic).
