@@ -81,7 +81,7 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 | PII redaction at ingest | 0 | ✅ | Runs inside router before every call; SSN/CC/email/phone/keys |
 | Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
 | Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
-| Universal ingest (PDF, DOCX, audio, video, image, URL) | 1 | ☐ | Multimodal extraction |
+| Universal ingest | 1 | 🟡 | text / markdown / html / URL live (pipeline + tRPC + UI); PDF / DOCX / audio / video / image pending |
 | GraphRAG with dimensional auto-tagging | 1 | ☐ | Inferred at write time |
 | Voice intake (one-shot) | 1 | ☐ | Whisper + strict-JSON intent parser |
 | Portco onboarding wizard | 1 | ☐ | ≤ 30 min end-to-end |
@@ -173,6 +173,16 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 1 — universal ingest pipeline + UI (first visible feature)
+The foundation modules are now wired into a working, end-to-end feature:
+- **Ingest sources** (`server/ingest/`): `html-to-text.ts` (HTML→clean text), `extract-text.ts` (dispatch: text / markdown / html / url with bounded fetch).
+- **Memory-claim extractor** (`server/services/memory-extractor.ts`): LLM → atomic memory claims (canonical form, modality, dimensional tags, structured numeric); defensive output parsing.
+- **Ingest pipeline** (`server/services/ingest-pipeline.ts`): `ingestDocument()` — source → chunk → extract → `decideExtraction` → write/supersede/contradiction, with source-trust confidence + quarantine; partial-failure tolerant; full summary returned.
+- **memory.ts**: added `WriteMemoryInput.quarantined` (C24) + `linkContradiction()` (idempotent edge, C19/I1).
+- **tRPC**: `ingest.document` mutation (`server/routers.ts`).
+- **UI**: `/ingest` page (`client/src/pages/Ingest.tsx`) + nav entry — paste text/markdown/HTML or a URL, see the ingest summary (added / noop / superseded / contradictions / quarantined).
+- **Tests**: +28 unit tests (html-to-text, extraction parser); **168 pass / 16 skipped / 0 fail** local; typecheck + production build clean.
 
 ### 2026-05-21 · Phase 1 (partial) — extraction & retrieval foundations
 DB-free, fully-unit-tested building blocks of the memory subsystem:

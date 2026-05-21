@@ -20,6 +20,7 @@ import {
   Cpu,
   BarChart3,
   FileText,
+  FileInput,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -98,6 +99,7 @@ const NAV_ITEMS = [
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/memory", label: "Memory", icon: Brain },
+  { href: "/ingest", label: "Ingest", icon: FileInput },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },

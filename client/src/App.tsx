@@ -15,6 +15,7 @@ import Overview from "./pages/Overview";
 import Companies from "./pages/Companies";
 import Projects from "./pages/Projects";
 import Memory from "./pages/Memory";
+import Ingest from "./pages/Ingest";
 import Predictions from "./pages/Predictions";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
@@ -85,6 +86,7 @@ function AppShell() {
         <Route path="/companies" component={() => <Companies onSelect={setActiveCompanyId} />} />
         <Route path="/projects" component={() => <Projects activeCompanyId={activeCompanyId} />} />
         <Route path="/memory" component={() => <Memory activeCompanyId={activeCompanyId} />} />
+        <Route path="/ingest" component={() => <Ingest activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
