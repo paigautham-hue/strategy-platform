@@ -60,7 +60,7 @@
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1–6.5 shipped (Calibration, Pattern Mining, Playbooks, Attribution, Constitutional Audit); resolver cron + 6.6 DAGs need closed-prediction data |
-| **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
+| **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy Scout shipped; 7.3 dashboard / 7.5 applied library / 7.6 TTS briefing need portfolio data |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
 
 **Currently active workstream:** Phase 1 — Memory, Ingest, Voice Intake, Hygiene Crons (next to build).
@@ -173,6 +173,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 7 — Synergy Scout (Workstream 7.1)
+- **`server/agents/synergy-scout.ts`** — nine detectors (capability, customer, supplier, channel, geographic, talent, tech/IP, capital-structure, macro-exposure overlap) scan 2-6 portfolio companies for concrete, capturable synergy candidates. Each candidate carries the detector, the companies it spans, a value (low/medium/high), a confidence, and a recommended action. `normalizeSynergyResult` resolves company names to IDs and sorts candidates by value then confidence.
+- **Three-layer enforcement** (like the cross-company war-game): `gpProcedure`, per-company tenant validation, GP-only `/synergy` route. Every cross-company memory read is audit-logged at restricted tier. Each company's memory search is namespaced to that single company (C1).
+- **tRPC** `synergy.scout` + **UI** `/synergy` page (multi-company picker, value-sorted candidates with detector, companies, confidence, action).
+- **Tests**: +6 unit tests (detector registry, name→id resolution, unknown-detector filtering, value sort, value/confidence defaulting). 398 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 6 — Pattern Mining (Workstream 6.2)
 - **`server/agents/pattern-mining.ts`** — across a set of past projects, `minePatterns` finds the recurring **decision structures** (name, when it applies, typical outcome, support count) and an anti-pattern detector flags the repeated **failure shapes** (failure mode, support). Only genuinely recurring shapes are reported — a one-off is not a pattern. A mined pattern that recurs is a candidate for the playbook engine (6.3).

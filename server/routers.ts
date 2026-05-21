@@ -51,6 +51,7 @@ import { attributeInitiative } from "./agents/attribution";
 import { auditPredictions } from "./services/audit-constitution";
 import { draftPlaybook, checkPromotion, type PlaybookLayer } from "./agents/playbook";
 import { minePatterns } from "./agents/pattern-mining";
+import { runSynergyScout } from "./agents/synergy-scout";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1043,6 +1044,48 @@ const patternRouter = router({
     }),
 });
 
+// ─── Synergy Router (Phase 7) ─────────────────────────────────────────────────
+
+const synergyRouter = router({
+  // Synergy Scout — GP-only cross-portfolio synergy detection. Three-layer
+  // enforcement (gpProcedure, per-company tenant validation, GP-only UI);
+  // every cross-company memory read is audit-logged at restricted tier.
+  scout: gpProcedure
+    .input(z.object({ companyIds: z.array(z.number()).min(2).max(6) }))
+    .mutation(async ({ ctx, input }) => {
+      const uniqueIds = Array.from(new Set(input.companyIds));
+      if (uniqueIds.length < 2) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "The Synergy Scout needs at least 2 distinct companies.",
+        });
+      }
+      const companies: { id: number; name: string }[] = [];
+      for (const id of uniqueIds) {
+        const company = await getCompany(ctx.user.tenantId, id);
+        if (!company) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: `Company ${id} not found in this tenant.`,
+          });
+        }
+        companies.push({ id: company.id, name: company.name });
+      }
+
+      for (const company of companies) {
+        void auditCrossCompanyRead({
+          tenantId: ctx.user.tenantId,
+          companyId: company.id,
+          userId: ctx.user.id,
+          metadata: { surface: "synergy-scout", scope: uniqueIds },
+        });
+      }
+
+      const routerCtx = buildRouterCtx(ctx);
+      return runSynergyScout(companies, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1080,6 +1123,7 @@ export const appRouter = router({
   compliance: complianceRouter,
   playbook: playbookRouter,
   pattern: patternRouter,
+  synergy: synergyRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
