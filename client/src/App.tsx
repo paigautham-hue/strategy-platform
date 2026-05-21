@@ -22,6 +22,7 @@ import VoiceIntake from "./pages/VoiceIntake";
 import Brainstorm from "./pages/Brainstorm";
 import MemoDictation from "./pages/MemoDictation";
 import Personas from "./pages/Personas";
+import Decomposer from "./pages/Decomposer";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
 import Contradictions from "./pages/Contradictions";
@@ -115,6 +116,7 @@ function AppShell() {
         <Route path="/red-team" component={() => <RedTeam activeCompanyId={activeCompanyId} />} />
         <Route path="/war-game" component={() => <WarGame activeCompanyId={activeCompanyId} />} />
         <Route path="/cross-war-game" component={CrossCoWarGame} />
+        <Route path="/decompose" component={() => <Decomposer activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
