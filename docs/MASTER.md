@@ -55,7 +55,7 @@
 |---|---|---|---|---|---|---|
 | **0** | Foundation, Outcome Capture, Cost Discipline | ✅ | 2026-05-20 | 2026-05-20 | ✅ | All workstreams 0.1–0.5 shipped; 26/26 tests green |
 | **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ✅ | 2026-05-21 | 2026-05-21 | ✅ | All 8 workstreams shipped — see Recent Changes |
-| **2** | Diagnosis + Research Mesh + Code Interpreter | ☐ | — | — | — | Blocked by Phase 1 |
+| **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | ☐ | — | — | — | Blocked by Phase 2 |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | ☐ | — | — | — | Blocked by Phase 3 |
 | **5** | Strategy → Execution + Operator UX Tier | ☐ | — | — | — | Blocked by Phase 4 |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 2 begins — Diagnosis Agent (Workstream 2.2)
+- **`server/agents/diagnosis.ts`** — `diagnoseQuestion()`: the entry point of the reasoning mesh (P4 — diagnosis precedes frameworks). Challenges the user's framing, re-states the real strategic question, classifies its type (10-type taxonomy: adjacency / white-space / geographic / M&A / pricing / capability / competitive-response / portfolio / scenario / custom), surfaces the genuine unknowns, and suggests frameworks. Defensive parse; best-effort fallback to the original question.
+- **tRPC** `diagnosis.diagnose` + **UI** `/diagnose` page (question → reframed question, type, key unknowns, suggested frameworks, rationale, confidence).
+- **Tests**: +8 unit tests. 224 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 1 COMPLETE — user / global memory layers (Workstream 1.7)
 - **`server/services/memory-layers.ts`** — the two non-company-scoped layers: GLOBAL (framework canon, durable industry knowledge, shared tenant-wide) and USER (the GP's preference / decision-style overlay). Implemented without a migration via reserved per-tenant Company containers (`__global__`, `__user__`), created lazily and hidden from the company switcher (`listCompanies` filters `__…__` names). `getLayeredContext()` does layer-routed retrieval — company + global + user merged.

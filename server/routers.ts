@@ -27,6 +27,7 @@ import { ingestDocument } from "./services/ingest-pipeline";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
 import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
+import { diagnoseQuestion } from "./agents/diagnosis";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
@@ -496,6 +497,23 @@ const voiceRouter = router({
     }),
 });
 
+// ─── Diagnosis Router (Phase 2) ───────────────────────────────────────────────
+
+const diagnosisRouter = router({
+  diagnose: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        question: z.string().min(1),
+        companyContext: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return diagnoseQuestion(input.question, routerCtx, input.companyContext);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -517,6 +535,7 @@ export const appRouter = router({
   ingest: ingestRouter,
   strategyArtifact: strategyArtifactRouter,
   voice: voiceRouter,
+  diagnosis: diagnosisRouter,
   prediction: predictionRouter,
   cost: costRouter,
   audit: auditRouter,
