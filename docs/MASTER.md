@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 2 — Share-and-Apply engine (Workstream 2.8, H13)
+- **`server/agents/apply-strategy.ts`** — `applyStrategyToCompany()`: takes a recognised StrategyArtifact and applies it to a portfolio company — fit score (0-100) + rationale, gap list, each key move adapted to the company's context, risks, a recommendation (pursue / adapt-heavily / skip), and a one-page application memo. Grounded in company memory; honest about poor fit. Defensive parse.
+- **tRPC** `strategyArtifact.applyToCompany` (recognise → apply in one call) + **UI** — the Strategy Artifacts page gained a "Recognise & apply to company" action showing fit score, adapted moves, risks, and the memo.
+- **Tests**: +7 unit tests (application normalisation — score clamping, adapted-move resolution, list caps). 237 pass / 16 skipped / 0 fail; typecheck + build clean.
+- Note: tRPC reserves `apply` as a procedure name — the procedure is `applyToCompany`.
+
 ### 2026-05-21 · Phase 2 — Chief Strategist + research mesh (Workstreams 2.1 + 2.3)
 - **`server/agents/research.ts`** — 8 specialist research agents (market, competitor, customer, tech, regulatory, macro, talent, internal-data). `runResearchMesh()` selects the specialists relevant to the diagnosed question type, grounds them in the company's memory (one hybrid-search pass shared across agents), runs them in parallel (H4), and the Chief Strategist synthesises their findings into a research brief with key takeaways.
 - **tRPC** `research.run` — diagnoses the question (P4) then dispatches the mesh — and **UI** `/research` (question → diagnosis + per-specialist findings + synthesis).
