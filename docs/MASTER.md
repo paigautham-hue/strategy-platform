@@ -58,7 +58,7 @@
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
 | **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | All 6 workstreams shipped (3.1 Frameworks → 3.6 Cross-Co War-Game); gate pending TTS playback (infra-gated) + 4-week usage telemetry |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
-| **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Strategy Decomposer shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
+| **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
 | **7** | Portfolio + Synergy + Voice Briefing | ☐ | — | — | — | Needs ≥ 3 portcos onboarded |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 5 — Pre-Mortem Launch Ritual (Workstream 5.1)
+- **`server/agents/pre-mortem.ts`** — before an initiative goes "active", run a pre-mortem: assume it is twelve months later and the initiative failed outright, then work backwards. Produces a risk register, each risk graded for likelihood × impact with an early-warning sign and a mitigation. Pure `riskSeverity` (likelihood × impact → low/medium/high/critical) and `normalizePreMortem` (sorts most-severe first; `readyToLaunch` is true only when risks were surfaced and every one carries a mitigation — the launch gate is deterministic).
+- **tRPC** `decomposer.preMortem` + **UI** `/pre-mortem` page (cleared-for-launch banner, top risk, severity-sorted risk register).
+- **Tests**: +10 unit tests (severity bands, normalization, severity sort, launch-gate logic, grade defaulting). 334 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 5 — Strategy Decomposer (Workstream 5.1)
 - **`server/agents/decomposer.ts`** — the Strategy → Execution bridge. Decomposes a strategy thesis into 3-5 initiatives, each carrying a rationale, expected impact, cost estimate, confidence (0-1), dependencies, OKRs (objective + leading/lagging key results), and a task list. Grounded in company memory.

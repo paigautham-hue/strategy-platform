@@ -35,6 +35,7 @@ import {
   Sparkles,
   Users,
   Workflow,
+  ShieldAlert,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -129,6 +130,7 @@ const NAV_ITEMS = [
   { href: "/war-game", label: "War-Game", icon: Crosshair },
   { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
   { href: "/decompose", label: "Decompose", icon: Workflow },
+  { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
