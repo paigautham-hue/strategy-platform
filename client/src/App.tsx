@@ -13,6 +13,7 @@ import { FileText } from "lucide-react";
 // Pages
 import Overview from "./pages/Overview";
 import Companies from "./pages/Companies";
+import Onboarding from "./pages/Onboarding";
 import Projects from "./pages/Projects";
 import Memory from "./pages/Memory";
 import Ingest from "./pages/Ingest";
@@ -85,6 +86,7 @@ function AppShell() {
       <Switch>
         <Route path="/" component={() => <Overview activeCompanyId={activeCompanyId} />} />
         <Route path="/companies" component={() => <Companies onSelect={setActiveCompanyId} />} />
+        <Route path="/onboarding" component={() => <Onboarding onSelect={setActiveCompanyId} />} />
         <Route path="/projects" component={() => <Projects activeCompanyId={activeCompanyId} />} />
         <Route path="/memory" component={() => <Memory activeCompanyId={activeCompanyId} />} />
         <Route path="/ingest" component={() => <Ingest activeCompanyId={activeCompanyId} />} />

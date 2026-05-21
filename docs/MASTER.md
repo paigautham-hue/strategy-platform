@@ -84,7 +84,7 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 | Universal ingest | 1 | 🟡 | text / markdown / html / URL live (pipeline + tRPC + UI); PDF / DOCX / audio / video / image pending |
 | GraphRAG with dimensional auto-tagging | 1 | ☐ | Inferred at write time |
 | Voice intake (one-shot) | 1 | ☐ | Whisper + strict-JSON intent parser |
-| Portco onboarding wizard | 1 | ☐ | ≤ 30 min end-to-end |
+| Portco onboarding wizard | 1 | ✅ | 4-step wizard: create → seed memory → ingest doc → done |
 | Decay / consolidation / dedup crons | 1 | ☐ | Memory hygiene from this phase |
 | User + global memory layers | 1 | ☐ | GP preferences + framework canon |
 | Diagnosis agent | 2 | ☐ | Reframes question before frameworks |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 1 — portco onboarding wizard (Workstream 1.6)
+- **`client/src/pages/Onboarding.tsx`** — 4-step guided flow: (1) create company → (2) describe it in prose, which is run through the ingest pipeline to seed strategic memory → (3) optionally ingest a first document → (4) done. Pure frontend orchestration over existing tested routes (`company.create`, `ingest.document`) — no new backend, no migration.
+- Route `/onboarding` + nav entry ("Onboard Company"); gated to GP / operator roles.
+- Tests: no new unit tests (composes already-tested routes); 197 pass / 16 skipped; typecheck + build clean.
 
 ### 2026-05-21 · Phase 1 — Strategy-Artifact recognition (Workstream 1.8)
 - **`server/services/strategy-artifact.ts`** — `recognizeStrategyArtifact()`: classifies whether text is an external strategy artifact and extracts its reusable structure — type (framework / playbook / thesis / case_study / maxim), core thesis, preconditions, key moves, expected outcomes, context of origin, attribution. Defensive parsing; best-effort (never throws).
