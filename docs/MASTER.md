@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 3 — Option Generator + MCDA (Workstream 3.2)
+- **`server/agents/options.ts`** — generates 4-8 distinct strategic options for a question and scores each on 8 MCDA criteria (strategic fit, market, capability, financial, execution safety, speed, reversibility, synergy — weights sum to 1). The LLM produces options + raw 0-10 scores; **weighting, ranking, and ±20% sensitivity analysis are pure, fully-tested functions** — `computeWeightedScore`, `isRankingRobust`.
+- **tRPC** `options.analyze` + **UI** `/options` page (ranked options with MCDA score, per-criterion breakdown, robustness flag).
+- **Tests**: +13 unit tests (criteria weights, score clamping, weighted-score math, ranking robustness, normalisation). 267 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 3 begins — framework library (Workstream 3.1)
 - **`server/agents/frameworks.ts`** — 8 strategy frameworks as structured agents: Porter Five Forces, Ansoff Matrix, JTBD, Wardley Map, Three Horizons, BCG Matrix, Blue Ocean (Four Actions), Christensen Disruption Lens. Frameworks are NOT a user menu (P4) — `frameworksForQuestionType` selects them from the diagnosed question type. `runFrameworks` applies the selected set in parallel, grounded in company memory; uniform section/summary/implications output.
 - **tRPC** `frameworks.analyze` (diagnose → select → apply) + **UI** `/frameworks` page.
