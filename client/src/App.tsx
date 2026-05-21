@@ -41,6 +41,7 @@ import Playbooks from "./pages/Playbooks";
 import PatternMining from "./pages/PatternMining";
 import SynergyScout from "./pages/SynergyScout";
 import Distillation from "./pages/Distillation";
+import Briefing from "./pages/Briefing";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
 import UsageEvents from "./pages/UsageEvents";
@@ -136,6 +137,7 @@ function AppShell() {
         <Route path="/patterns" component={() => <PatternMining activeCompanyId={activeCompanyId} />} />
         <Route path="/synergy" component={SynergyScout} />
         <Route path="/distillation" component={Distillation} />
+        <Route path="/briefing" component={() => <Briefing activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />
         <Route path="/usage" component={UsageEvents} />

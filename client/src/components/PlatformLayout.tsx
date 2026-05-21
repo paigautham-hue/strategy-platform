@@ -44,6 +44,7 @@ import {
   Boxes,
   Combine,
   FlaskConical,
+  Newspaper,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -148,6 +149,7 @@ const NAV_ITEMS = [
   { href: "/patterns", label: "Pattern Mining", icon: Boxes },
   { href: "/synergy", label: "Synergy Scout", icon: Combine },
   { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
+  { href: "/briefing", label: "Briefing", icon: Newspaper },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
   { href: "/usage", label: "Usage Events", icon: Activity },
