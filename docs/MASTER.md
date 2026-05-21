@@ -81,7 +81,7 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 | PII redaction at ingest | 0 | ✅ | Runs inside router before every call; SSN/CC/email/phone/keys |
 | Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
 | Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
-| Universal ingest | 1 | 🟡 | text / markdown / html / URL live (pipeline + tRPC + UI); PDF / DOCX / audio / video / image pending |
+| Universal ingest | 1 | 🟡 | text / markdown / html / URL / **PDF / DOCX** live; audio / video / image pending |
 | GraphRAG with dimensional auto-tagging | 1 | ☐ | Inferred at write time |
 | Voice intake (one-shot) | 1 | ☐ | Whisper + strict-JSON intent parser |
 | Portco onboarding wizard | 1 | ✅ | 4-step wizard: create → seed memory → ingest doc → done |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 1 — PDF / DOCX ingest (Workstream 1.2)
+- **`client/src/lib/file-extract.ts`** — `extractTextFromFile()`: in-browser PDF (pdfjs-dist) and DOCX (mammoth) text extraction, plus plain text/markdown. Heavy parsers dynamically imported — code-split, not in the main bundle.
+- **Ingest page** — "Upload PDF / DOCX / text" button; the extracted text flows through the existing ingest pipeline (no server binary handling, no storage upload, no migration).
+- 204 tests / 16 skipped; typecheck + build clean (parsers confirmed code-split).
 
 ### 2026-05-21 · Phase 1 — memory reflection cron (Workstream 1.4 / T5)
 - **`server/cron/memory-reflection.ts`** — `runMemoryReflection()`: nightly, per company, synthesises recent ground-level (derivationDepth 0) memory into 3-5 higher-level strategic insights via the LLM, written back as `derivationDepth 1` memory items (`framework: reflection`, confidence capped at 0.55 — an insight is a hypothesis). Recursion is bounded by depth — reflections are never reflected upon (C4). Generative-Agents pattern (T5) — the compounding-intelligence mechanism.

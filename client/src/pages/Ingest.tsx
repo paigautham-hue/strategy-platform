@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, FileInput, Sparkles, Layers } from "lucide-react";
+import { AlertCircle, FileInput, Sparkles, Layers, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { extractTextFromFile, ACCEPTED_FILE_TYPES } from "@/lib/file-extract";
 
 interface IngestProps {
   activeCompanyId: number | null;
@@ -32,6 +33,27 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
   const [sourceType, setSourceType] = useState<SourceType>("text");
   const [content, setContent] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileLoading, setFileLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function onFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+    setFileLoading(true);
+    try {
+      const result = await extractTextFromFile(file);
+      setSourceType("text");
+      setContent(result.text);
+      setFileName(file.name);
+      toast.success(`Loaded ${file.name} — ${result.text.length.toLocaleString()} characters`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not read the file");
+    } finally {
+      setFileLoading(false);
+    }
+  }
 
   const ingestMut = trpc.ingest.document.useMutation({
     onSuccess: (r) => {
@@ -112,6 +134,30 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
                   className="bg-secondary/50 border-border/60"
                 />
               </div>
+            )}
+          </div>
+
+          {/* File upload — extracts PDF / DOCX / text in-browser into the content box */}
+          <div className="flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_FILE_TYPES}
+              onChange={onFilePicked}
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-sans gap-2"
+              disabled={fileLoading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="h-4 w-4" />
+              {fileLoading ? "Reading file…" : "Upload PDF / DOCX / text"}
+            </Button>
+            {fileName && (
+              <Badge variant="secondary" className="text-[10px]">loaded: {fileName}</Badge>
             )}
           </div>
 
