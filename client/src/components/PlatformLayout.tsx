@@ -22,6 +22,7 @@ import {
   FileText,
   FileInput,
   Telescope,
+  Rocket,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -98,6 +99,7 @@ function CompanySwitcher({ activeCompanyId, onSwitch }: CompanySwitcherProps) {
 const NAV_ITEMS = [
   { href: "/", label: "Overview", icon: BarChart3 },
   { href: "/companies", label: "Companies", icon: Building2 },
+  { href: "/onboarding", label: "Onboard Company", icon: Rocket },
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/memory", label: "Memory", icon: Brain },
   { href: "/ingest", label: "Ingest", icon: FileInput },
@@ -111,7 +113,7 @@ const NAV_ITEMS = [
 ];
 
 const GP_ONLY_ITEMS = ["/export", "/cost"];
-const OPERATOR_ITEMS = ["/audit", "/usage"];
+const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding"];
 
 // ─── PlatformLayout ───────────────────────────────────────────────────────────
 
