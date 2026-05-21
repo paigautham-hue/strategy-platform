@@ -42,6 +42,7 @@ import {
   type BrainstormCaptures,
 } from "./agents/brainstorm";
 import { structureMemo } from "./agents/memo-dictation";
+import { consultPersona, listPersonas } from "./agents/personas";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -828,6 +829,27 @@ const memoRouter = router({
     }),
 });
 
+// ─── Persona Router (Phase 4) ─────────────────────────────────────────────────
+
+const personaRouter = router({
+  // The picker-facing registry — no stance prompts leak to the client.
+  list: protectedProcedure.query(() => listPersonas()),
+
+  // Consult a persona on a question, grounded in company memory.
+  consult: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        personaId: z.string().min(1),
+        question: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return consultPersona(input.personaId, input.question, input.companyId, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -857,6 +879,7 @@ export const appRouter = router({
   warGame: warGameRouter,
   brainstorm: brainstormRouter,
   memo: memoRouter,
+  persona: personaRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
