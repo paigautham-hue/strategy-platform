@@ -174,6 +174,13 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 1 — voice intake (Workstream 1.5)
+- **`client/src/lib/speech.ts`** — browser Web Speech API wrapper for one-shot dictation (client-side STT, no audio upload, no server transcription call); graceful text-input fallback where unsupported.
+- **`server/services/voice-intent.ts`** — `parseVoiceIntent()`: a spoken request → structured strategy-project intent (name, description, summary, confidence). Defensive parse; falls back to the transcript so a project is always creatable.
+- **tRPC** `voice.parseIntent` + **UI** `/voice-intake` — dictate → parse → editable project draft → create.
+- **Tests**: +8 unit tests (voice-intent normalisation). 212 pass / 16 skipped / 0 fail; typecheck + build clean.
+- (Realtime WebRTC always-on voice copilot is Phase 4; this is the Phase 1 one-shot path.)
+
 ### 2026-05-21 · Phase 1 — PDF / DOCX ingest (Workstream 1.2)
 - **`client/src/lib/file-extract.ts`** — `extractTextFromFile()`: in-browser PDF (pdfjs-dist) and DOCX (mammoth) text extraction, plus plain text/markdown. Heavy parsers dynamically imported — code-split, not in the main bundle.
 - **Ingest page** — "Upload PDF / DOCX / text" button; the extracted text flows through the existing ingest pipeline (no server binary handling, no storage upload, no migration).

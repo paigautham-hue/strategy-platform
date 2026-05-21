@@ -25,6 +25,7 @@ import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
 import { extractText } from "./ingest/extract-text";
+import { parseVoiceIntent } from "./services/voice-intent";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
@@ -448,6 +449,17 @@ const strategyArtifactRouter = router({
     }),
 });
 
+// ─── Voice Router ─────────────────────────────────────────────────────────────
+
+const voiceRouter = router({
+  parseIntent: protectedProcedure
+    .input(z.object({ companyId: z.number(), transcript: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return parseVoiceIntent(input.transcript, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -468,6 +480,7 @@ export const appRouter = router({
   memory: memoryRouter,
   ingest: ingestRouter,
   strategyArtifact: strategyArtifactRouter,
+  voice: voiceRouter,
   prediction: predictionRouter,
   cost: costRouter,
   audit: auditRouter,
