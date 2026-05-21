@@ -19,6 +19,7 @@ import Memory from "./pages/Memory";
 import Ingest from "./pages/Ingest";
 import StrategyArtifact from "./pages/StrategyArtifact";
 import VoiceIntake from "./pages/VoiceIntake";
+import Diagnosis from "./pages/Diagnosis";
 import Predictions from "./pages/Predictions";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
@@ -93,6 +94,7 @@ function AppShell() {
         <Route path="/ingest" component={() => <Ingest activeCompanyId={activeCompanyId} />} />
         <Route path="/strategy-artifacts" component={() => <StrategyArtifact activeCompanyId={activeCompanyId} />} />
         <Route path="/voice-intake" component={() => <VoiceIntake activeCompanyId={activeCompanyId} />} />
+        <Route path="/diagnose" component={() => <Diagnosis activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />

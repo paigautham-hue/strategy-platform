@@ -24,6 +24,7 @@ import {
   Telescope,
   Rocket,
   Mic,
+  Stethoscope,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -106,6 +107,7 @@ const NAV_ITEMS = [
   { href: "/ingest", label: "Ingest", icon: FileInput },
   { href: "/voice-intake", label: "Voice Intake", icon: Mic },
   { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
+  { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
