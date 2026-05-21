@@ -10,7 +10,7 @@
 import { nanoid } from "nanoid";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { getDb } from "../db";
-import { memoryItems, type MemoryItem } from "../../drizzle/schema";
+import { memoryItems, contradictions, type MemoryItem } from "../../drizzle/schema";
 import * as router from "../ai/router";
 import { appendAudit, emitUsage } from "../middleware/audit";
 import type { RouterContext } from "../ai/router";
@@ -46,6 +46,8 @@ export interface WriteMemoryInput {
   decayClass?: "permanent" | "slow" | "fast" | "ephemeral";
   visibility?: "company" | "portfolio" | "global";
   idempotencyKey?: string;
+  /** C24 — withhold from Portfolio/Global retrieval until corroborated. */
+  quarantined?: boolean;
   traceId?: string;
 }
 
@@ -161,7 +163,7 @@ export async function writeMemory(input: WriteMemoryInput): Promise<MemoryItem> 
     confidence: input.confidence ?? 0.5,
     claimModality: input.claimModality ?? "actual",
     derivationDepth: input.derivationDepth ?? 0,
-    quarantined: false,
+    quarantined: input.quarantined ?? false,
     dimMarket: input.dims?.market,
     dimSegment: input.dims?.segment,
     dimProduct: input.dims?.product,
@@ -286,7 +288,7 @@ export async function supersedeMemory(
       confidence: newContent.confidence ?? 0.5,
       claimModality: newContent.claimModality ?? "actual",
       derivationDepth: newContent.derivationDepth ?? 0,
-      quarantined: false,
+      quarantined: newContent.quarantined ?? false,
       dimMarket: newContent.dims?.market,
       dimSegment: newContent.dims?.segment,
       dimProduct: newContent.dims?.product,
@@ -439,4 +441,48 @@ export async function aggregateConfidence(
   // Phase 1: replace with Bayesian update using source_trust_register priors
   const mean = rows.reduce((sum, r) => sum + (r.confidence ?? 0.5), 0) / rows.length;
   return Math.min(1, Math.max(0, mean));
+}
+
+// ─── link_contradiction (C19, I1) ─────────────────────────────────────────────
+
+export interface LinkContradictionInput {
+  tenantId: string;
+  companyId: number;
+  /** The existing memory item. */
+  aId: number;
+  /** The newly-ingested conflicting memory item. */
+  bId: number;
+  notes?: string;
+}
+
+/**
+ * Open a contradiction edge between two memory items. Idempotent: the
+ * unique constraint on (aId, bId) means a repeated call updates rather than
+ * duplicates (I1). Both items remain valid — a contradiction is recorded,
+ * not resolved (C19); resolution is a deliberate later act.
+ */
+export async function linkContradiction(input: LinkContradictionInput): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .insert(contradictions)
+    .values({
+      tenantId: input.tenantId,
+      companyId: input.companyId,
+      aId: input.aId,
+      bId: input.bId,
+      status: "open",
+      notes: input.notes,
+    })
+    .onDuplicateKeyUpdate({ set: { updatedAt: new Date() } });
+
+  void appendAudit({
+    tenantId: input.tenantId,
+    companyId: input.companyId,
+    action: "write",
+    resourceType: "contradiction",
+    resourceId: `${input.aId}-${input.bId}`,
+    confidentialityTier: "confidential",
+  });
 }
