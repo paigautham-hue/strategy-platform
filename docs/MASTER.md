@@ -60,7 +60,7 @@
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | 🟡 | 2026-05-21 | — | — | 4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation shipped; 4.1 realtime voice / 4.3 voice triggers / diagram gen / 4.6 distillation infra-gated |
 | **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1–6.5 shipped (Calibration, Pattern Mining, Playbooks, Attribution, Constitutional Audit); resolver cron + 6.6 DAGs need closed-prediction data |
-| **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy Scout shipped; 7.3 dashboard / 7.5 applied library / 7.6 TTS briefing need portfolio data |
+| **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy Scout + 7.2 Pattern Distillation shipped; 7.3 dashboard / 7.5 applied library / 7.6 TTS briefing need portfolio data |
 | **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
 
 **Currently active workstream:** Phase 1 — Memory, Ingest, Voice Intake, Hygiene Crons (next to build).
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 7 — Pattern Distillation (Workstream 7.2)
+- **`server/services/distillation.ts`** — before a pattern learned inside one company can be surfaced to another (P12), two pure gates apply: `canPublishPattern` (drawn from ≥ 3 portcos, so no single portco is re-identifiable) and `anonymizeText` (strips company names — longest-match-first, case-insensitive — currency amounts, and specific dates, counting every redaction). `distillPattern` combines them; `aggregateStat` rolls per-portco numbers into a publishable "N=4, median 14" statistic, returning null below the min sample.
+- **tRPC** `distillation.preview` (GP-only — anonymization is checked against every company name in the tenant) + **UI** `/distillation` page (publishable verdict, anonymized text, redaction count).
+- **Tests**: +12 unit tests (publication gate, name/amount/date redaction, longest-match-first, distill flow, aggregate stat). 408 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 7 — Synergy Scout (Workstream 7.1)
 - **`server/agents/synergy-scout.ts`** — nine detectors (capability, customer, supplier, channel, geographic, talent, tech/IP, capital-structure, macro-exposure overlap) scan 2-6 portfolio companies for concrete, capturable synergy candidates. Each candidate carries the detector, the companies it spans, a value (low/medium/high), a confidence, and a recommended action. `normalizeSynergyResult` resolves company names to IDs and sorts candidates by value then confidence.
