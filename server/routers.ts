@@ -49,6 +49,7 @@ import { detectDrift, needsReplan, proposeReplan } from "./agents/drift";
 import { getCalibrationRecords, computeScorecard } from "./services/calibration";
 import { attributeInitiative } from "./agents/attribution";
 import { auditPredictions } from "./services/audit-constitution";
+import { draftPlaybook, checkPromotion, type PlaybookLayer } from "./agents/playbook";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -987,6 +988,43 @@ const complianceRouter = router({
     }),
 });
 
+// ─── Playbook Router (Phase 6) ────────────────────────────────────────────────
+
+const playbookRouter = router({
+  // Auto-draft a playbook from a recurring pattern.
+  draft: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        pattern: z.string().min(1),
+        evidenceSummary: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return draftPlaybook(input.pattern, input.evidenceSummary ?? "", routerCtx);
+    }),
+
+  // Pure promotion-gate check — does the evidence clear the next layer?
+  checkPromotion: protectedProcedure
+    .input(
+      z.object({
+        currentLayer: z.enum(["project", "company", "portfolio"]),
+        evidence: z.array(
+          z.object({
+            industry: z.string(),
+            geo: z.string(),
+            stage: z.string(),
+            succeeded: z.boolean(),
+          })
+        ),
+      })
+    )
+    .query(({ input }) => {
+      return checkPromotion(input.currentLayer as PlaybookLayer, input.evidence);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1022,6 +1060,7 @@ export const appRouter = router({
   calibration: calibrationRouter,
   attribution: attributionRouter,
   compliance: complianceRouter,
+  playbook: playbookRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
