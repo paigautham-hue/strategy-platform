@@ -66,6 +66,10 @@ export type InvokeParams = {
   output_schema?: OutputSchema;
   responseFormat?: ResponseFormat;
   response_format?: ResponseFormat;
+  /** Optional model override. When provided by the router (from models.yaml), this
+   *  replaces the default. The Manus forge endpoint accepts model="auto" to let the
+   *  platform choose; task-specific overrides flow from models.yaml via the router. */
+  model?: string;
 };
 
 export type ToolCall = {
@@ -277,10 +281,15 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
     responseFormat,
     response_format,
+    model,
   } = params;
 
+  // M1: Use the model provided by the router (from models.yaml).
+  // Fall back to "gemini-2.5-flash" which is the Manus forge default.
+  const resolvedModel = model ?? "gemini-2.5-flash";
+
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: resolvedModel,
     messages: messages.map(normalizeMessage),
   };
 

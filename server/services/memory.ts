@@ -125,14 +125,19 @@ export async function writeMemory(input: WriteMemoryInput): Promise<MemoryItem> 
   const canonicalForm = input.canonicalForm ?? await normalizeToCanonicalForm(input.rawContent, ctx);
 
   // C22: Embed canonical form (not raw content)
+  // B3: embeddingModelVersion must be truthful — only set from the provider response.
+  // If embedding fails, store a sentinel "none" (no model was called) rather than a
+  // hardcoded label that would falsely imply an OpenAI response was received.
   let embedding: number[] | undefined;
-  let embeddingModelVersion = "openai-text-embedding-3-small-v1";
+  let embeddingModelVersion = "none"; // sentinel: no embedding produced
   try {
     const embedResult = await router.embed({ text: canonicalForm, ctx });
     embedding = embedResult.embedding;
+    // B3: stamp with the exact model string returned by OpenAI (e.g. "openai:text-embedding-3-small:dims=1536")
     embeddingModelVersion = embedResult.modelVersion;
   } catch (err) {
     console.warn("[memory] Embedding failed, storing without vector:", err);
+    // embeddingModelVersion stays "none" — truthful: no embedding was produced
   }
 
   const sourceDomain = input.sourceUrl
@@ -210,7 +215,12 @@ export async function writeMemory(input: WriteMemoryInput): Promise<MemoryItem> 
 
 /**
  * Bi-temporal update: mark old item as invalid, create new one.
+ * Runs in a single DB transaction — no -1 placeholder (M2).
  * Never calls DELETE. C19 compliant.
+ *
+ * Transaction flow:
+ *   1. Insert the new memory item (with all embeddings).
+ *   2. In the same transaction: set invalidAt=now() and supersededById=newItem.id on the old row.
  */
 export async function supersedeMemory(
   oldItemId: number,
@@ -219,20 +229,119 @@ export async function supersedeMemory(
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  // Mark old item as invalid (C19)
-  await db
-    .update(memoryItems)
-    .set({ invalidAt: new Date(), supersededById: -1 /* placeholder */ })
-    .where(eq(memoryItems.id, oldItemId));
+  // Step 1: Prepare all data for the new item BEFORE opening the transaction
+  // (embedding call can be slow; we don't want to hold a transaction open during it)
+  const traceId = newContent.traceId ?? nanoid(16);
+  const idempotencyKey = newContent.idempotencyKey ?? nanoid(32);
+  const provenanceClusterId = newContent.provenanceClusterId ?? nanoid(16);
 
-  // Create new item
-  const newItem = await writeMemory(newContent);
+  const ctx: RouterContext = {
+    tenantId: newContent.tenantId,
+    companyId: newContent.companyId,
+    projectId: newContent.projectId,
+    sessionId: newContent.sessionId,
+    userId: newContent.userId,
+    traceId,
+  };
 
-  // Link old item to new item
-  await db
-    .update(memoryItems)
-    .set({ supersededById: newItem.id })
-    .where(eq(memoryItems.id, oldItemId));
+  // C20: Normalize to canonical form outside the transaction
+  const canonicalForm = newContent.canonicalForm ?? await normalizeToCanonicalForm(newContent.rawContent, ctx);
+
+  // C22: Embed canonical form outside the transaction
+  let embedding: number[] | undefined;
+  let embeddingModelVersion = "unknown";
+  try {
+    const embedResult = await router.embed({ text: canonicalForm, ctx });
+    embedding = embedResult.embedding;
+    // B3: stamp with the model string returned by the embedding provider
+    embeddingModelVersion = embedResult.modelVersion;
+  } catch (err) {
+    console.warn("[memory] Embedding failed in supersede, storing without vector:", err);
+  }
+
+  const sourceDomain = newContent.sourceUrl
+    ? (() => { try { return new URL(newContent.sourceUrl).hostname; } catch { return undefined; } })()
+    : undefined;
+
+  const now = new Date();
+
+  // Step 2: Single transaction — insert new row + invalidate old row atomically (M2)
+  let newItemId: number;
+  await db.transaction(async (tx) => {
+    // Insert new memory item
+    const [inserted] = await tx.insert(memoryItems).values({
+      tenantId: newContent.tenantId,
+      companyId: newContent.companyId,
+      projectId: newContent.projectId,
+      sessionId: newContent.sessionId,
+      rawContent: newContent.rawContent,
+      canonicalForm,
+      embeddingModelVersion,
+      embedding: embedding ?? null,
+      validAt: now,
+      ingestedAt: now,
+      provenanceClusterId,
+      sourceUrl: newContent.sourceUrl,
+      sourceDomain,
+      confidence: newContent.confidence ?? 0.5,
+      claimModality: newContent.claimModality ?? "actual",
+      derivationDepth: newContent.derivationDepth ?? 0,
+      quarantined: false,
+      dimMarket: newContent.dims?.market,
+      dimSegment: newContent.dims?.segment,
+      dimProduct: newContent.dims?.product,
+      dimGeo: newContent.dims?.geo,
+      dimChannel: newContent.dims?.channel,
+      dimTech: newContent.dims?.tech,
+      dimCapability: newContent.dims?.capability,
+      dimFramework: newContent.dims?.framework,
+      dimHorizon: newContent.dims?.horizon,
+      decayClass: newContent.decayClass ?? "slow",
+      visibility: newContent.visibility ?? "company",
+      idempotencyKey,
+    }).$returningId();
+
+    newItemId = inserted.id;
+
+    // Atomically invalidate the old item and link it to the new one — no -1 placeholder
+    await tx
+      .update(memoryItems)
+      .set({ invalidAt: now, supersededById: newItemId })
+      .where(eq(memoryItems.id, oldItemId));
+  });
+
+  // Fetch the newly inserted row
+  const [newItem] = await db
+    .select()
+    .from(memoryItems)
+    .where(eq(memoryItems.id, newItemId!))
+    .limit(1);
+
+  // Audit + usage events (non-blocking)
+  void appendAudit({
+    tenantId: newContent.tenantId,
+    companyId: newContent.companyId,
+    projectId: newContent.projectId,
+    sessionId: newContent.sessionId,
+    userId: newContent.userId,
+    action: "write",
+    resourceType: "memory_item",
+    resourceId: String(newItemId!),
+    confidentialityTier: "confidential",
+    traceId,
+    metadata: { supersededId: oldItemId },
+  });
+
+  void emitUsage({
+    tenantId: newContent.tenantId,
+    companyId: newContent.companyId,
+    projectId: newContent.projectId,
+    sessionId: newContent.sessionId,
+    userId: newContent.userId,
+    surface: "api",
+    action: "write-memory",
+    metadata: { memoryItemId: newItemId!, supersededId: oldItemId },
+  });
 
   return newItem;
 }

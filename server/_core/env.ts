@@ -7,4 +7,7 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  /** OpenAI API key — used ONLY for text-embedding-3-small in router.embed().
+   *  Never exposed to the client. Manus forge has no /v1/embeddings endpoint. */
+  openAiApiKey: process.env.OPENAI_API_KEY ?? "",
 };
