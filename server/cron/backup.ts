@@ -13,6 +13,7 @@ import { and, gte, lt, sql } from "drizzle-orm";
 import { appendAudit } from "../middleware/audit";
 import { createExport } from "../services/export";
 import { runMemoryHygiene, type MemoryHygieneResult } from "./memory-hygiene";
+import { runMemoryReflection, type ReflectionResult } from "./memory-reflection";
 
 // ─── Daily Backup ─────────────────────────────────────────────────────────────
 
@@ -56,6 +57,7 @@ export async function runDailyBackup(): Promise<{ companiesProcessed: number; er
 export async function runNightlyTelemetry(): Promise<{
   aggregated: number;
   memoryHygiene: MemoryHygieneResult;
+  memoryReflection: ReflectionResult;
 }> {
   const db = await getDb();
   if (!db) {
@@ -63,6 +65,7 @@ export async function runNightlyTelemetry(): Promise<{
     return {
       aggregated: 0,
       memoryHygiene: { companiesProcessed: 0, duplicatesRetired: 0, errors: ["DB unavailable"] },
+      memoryReflection: { companiesProcessed: 0, insightsWritten: 0, errors: ["DB unavailable"] },
     };
   }
 
@@ -121,5 +124,12 @@ export async function runNightlyTelemetry(): Promise<{
       `${memoryHygiene.companiesProcessed} companies`,
   );
 
-  return { aggregated: summary.length, memoryHygiene };
+  // Memory reflection — synthesise recent memory into higher-level insights.
+  const memoryReflection = await runMemoryReflection();
+  console.log(
+    `[reflection] wrote ${memoryReflection.insightsWritten} insight(s) across ` +
+      `${memoryReflection.companiesProcessed} companies`,
+  );
+
+  return { aggregated: summary.length, memoryHygiene, memoryReflection };
 }
