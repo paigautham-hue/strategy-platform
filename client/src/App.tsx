@@ -25,6 +25,7 @@ import Contradictions from "./pages/Contradictions";
 import Frameworks from "./pages/Frameworks";
 import Options from "./pages/Options";
 import RedTeam from "./pages/RedTeam";
+import WarGame from "./pages/WarGame";
 import Predictions from "./pages/Predictions";
 import CostDashboard from "./pages/CostDashboard";
 import AuditLog from "./pages/AuditLog";
@@ -105,6 +106,7 @@ function AppShell() {
         <Route path="/frameworks" component={() => <Frameworks activeCompanyId={activeCompanyId} />} />
         <Route path="/options" component={() => <Options activeCompanyId={activeCompanyId} />} />
         <Route path="/red-team" component={() => <RedTeam activeCompanyId={activeCompanyId} />} />
+        <Route path="/war-game" component={() => <WarGame activeCompanyId={activeCompanyId} />} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
         <Route path="/audit" component={AuditLog} />

@@ -30,6 +30,7 @@ import {
   Grid3x3,
   ListChecks,
   Swords,
+  Crosshair,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -118,6 +119,7 @@ const NAV_ITEMS = [
   { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
   { href: "/options", label: "Options", icon: ListChecks },
   { href: "/red-team", label: "Red Team", icon: Swords },
+  { href: "/war-game", label: "War-Game", icon: Crosshair },
   { href: "/predictions", label: "Predictions", icon: TrendingUp },
   { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
   { href: "/audit", label: "Audit Log", icon: Shield },
