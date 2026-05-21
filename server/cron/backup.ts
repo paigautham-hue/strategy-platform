@@ -12,6 +12,7 @@ import { companies, llmCallLogs, usageEvents } from "../../drizzle/schema";
 import { and, gte, lt, sql } from "drizzle-orm";
 import { appendAudit } from "../middleware/audit";
 import { createExport } from "../services/export";
+import { runMemoryHygiene, type MemoryHygieneResult } from "./memory-hygiene";
 
 // ─── Daily Backup ─────────────────────────────────────────────────────────────
 
@@ -52,11 +53,17 @@ export async function runDailyBackup(): Promise<{ companiesProcessed: number; er
 
 // ─── Nightly Telemetry Aggregation ────────────────────────────────────────────
 
-export async function runNightlyTelemetry(): Promise<{ aggregated: number }> {
+export async function runNightlyTelemetry(): Promise<{
+  aggregated: number;
+  memoryHygiene: MemoryHygieneResult;
+}> {
   const db = await getDb();
   if (!db) {
     console.warn("[telemetry] DB unavailable, skipping aggregation");
-    return { aggregated: 0 };
+    return {
+      aggregated: 0,
+      memoryHygiene: { companiesProcessed: 0, duplicatesRetired: 0, errors: ["DB unavailable"] },
+    };
   }
 
   const now = new Date();
@@ -107,5 +114,12 @@ export async function runNightlyTelemetry(): Promise<{ aggregated: number }> {
     },
   });
 
-  return { aggregated: summary.length };
+  // Memory hygiene — exact-duplicate retirement across all companies.
+  const memoryHygiene = await runMemoryHygiene();
+  console.log(
+    `[hygiene] retired ${memoryHygiene.duplicatesRetired} duplicate(s) across ` +
+      `${memoryHygiene.companiesProcessed} companies`,
+  );
+
+  return { aggregated: summary.length, memoryHygiene };
 }

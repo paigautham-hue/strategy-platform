@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-21 · Phase 1 — memory hygiene: decay + dedup cron (Workstream 1.4)
+- **`server/memory/decay.ts`** — read-time confidence decay (option A): `effectiveConfidence()` applies a half-life model (permanent / slow 2y / fast 3mo / ephemeral 2wk) toward a 0.1 floor. Stored confidence never mutates — no double-decay, no schema change.
+- **`server/cron/memory-hygiene.ts`** — `runMemoryHygiene()`: per-company exact-duplicate retirement — identical canonical forms collapse to the highest effective-confidence item, the rest get `invalidAt` + `supersededById` (zero-false-positive safety net). Wired into the nightly cron (`runNightlyTelemetry`).
+- **Tests**: +11 decay unit tests (half-life curve, floor, ordering by class, clamping). 188 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-21 · Phase 1 — hybrid memory retrieval (Workstream 1.3 complete)
 - **`server/services/memory-search.ts`** — `hybridSearchMemory()`: query → embed → dense (cosine) + keyword rankings → Reciprocal Rank Fusion → MMR diversity → top-K. Company-scoped, bi-temporal-clamped; degrades to keyword-only if embedding fails.
 - **`memory.query` tRPC route** upgraded — a query string now runs hybrid search; no query still returns a plain bi-temporal listing.
