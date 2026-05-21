@@ -115,6 +115,7 @@ const NAV_ITEMS = [
   { href: "/ingest", label: "Ingest", icon: FileInput },
   { href: "/voice-intake", label: "Voice Intake", icon: Mic },
   { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
+  { href: "/memo", label: "Memo Dictation", icon: FileText },
   { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
   { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
   { href: "/research", label: "Research", icon: Radar },

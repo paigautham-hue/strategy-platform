@@ -20,6 +20,7 @@ import Ingest from "./pages/Ingest";
 import StrategyArtifact from "./pages/StrategyArtifact";
 import VoiceIntake from "./pages/VoiceIntake";
 import Brainstorm from "./pages/Brainstorm";
+import MemoDictation from "./pages/MemoDictation";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
 import Contradictions from "./pages/Contradictions";
@@ -103,6 +104,7 @@ function AppShell() {
         <Route path="/strategy-artifacts" component={() => <StrategyArtifact activeCompanyId={activeCompanyId} />} />
         <Route path="/voice-intake" component={() => <VoiceIntake activeCompanyId={activeCompanyId} />} />
         <Route path="/brainstorm" component={() => <Brainstorm activeCompanyId={activeCompanyId} />} />
+        <Route path="/memo" component={() => <MemoDictation activeCompanyId={activeCompanyId} />} />
         <Route path="/diagnose" component={() => <Diagnosis activeCompanyId={activeCompanyId} />} />
         <Route path="/research" component={() => <Research activeCompanyId={activeCompanyId} />} />
         <Route path="/contradictions" component={() => <Contradictions activeCompanyId={activeCompanyId} />} />
