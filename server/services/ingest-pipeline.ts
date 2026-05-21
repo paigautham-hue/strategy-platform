@@ -30,10 +30,10 @@ import {
 import {
   writeMemory,
   supersedeMemory,
-  queryMemory,
   linkContradiction,
   type WriteMemoryInput,
 } from "./memory";
+import { hybridSearchMemory } from "./memory-search";
 import { emitUsage } from "../middleware/audit";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -211,15 +211,16 @@ async function applyClaim(
   prov: Provenance,
   result: IngestDocumentResult,
 ): Promise<void> {
-  // Retrieve near-neighbour candidates for the decision.
-  const candidateRows = await queryMemory({
+  // Retrieve near-neighbour candidates for the decision — hybrid (dense +
+  // keyword) so a semantically-equivalent prior claim is found even when it
+  // shares no keywords (essential for correct dedup, C23).
+  const candidateRows = await hybridSearchMemory({
     tenantId: input.tenantId,
     companyId: input.companyId,
     projectId: input.projectId,
     query: claim.canonicalForm,
     limit: CANDIDATE_LIMIT,
-    userId: input.userId,
-    traceId: input.traceId,
+    ctx,
   });
   const candidates: ExistingCandidate[] = candidateRows.map((r) => ({
     memoryItemId: r.id,

@@ -19,6 +19,7 @@ import {
   ensureDefaultTenant,
 } from "./db";
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
+import { hybridSearchMemory } from "./services/memory-search";
 import { recordPrediction, closePrediction, listPredictions, extractClaims } from "./services/predictions";
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
@@ -205,6 +206,19 @@ const memoryRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      // With a query string → hybrid search (dense + keyword, RRF + MMR).
+      // Without one → plain bi-temporal listing.
+      if (input.query && input.query.trim()) {
+        return hybridSearchMemory({
+          tenantId: ctx.user.tenantId,
+          companyId: input.companyId,
+          projectId: input.projectId,
+          query: input.query.trim(),
+          limit: input.limit,
+          includeQuarantined: input.includeQuarantined,
+          ctx: buildRouterCtx(ctx, { companyId: input.companyId, projectId: input.projectId }),
+        });
+      }
       return queryMemory({
         tenantId: ctx.user.tenantId,
         userId: ctx.user.id,
