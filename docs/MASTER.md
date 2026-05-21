@@ -181,7 +181,8 @@ DB-free, fully-unit-tested building blocks of the memory subsystem:
 - **Workstream 1.4 (A5) — Numeric claims** (`server/extraction/numeric-claim.ts`): `NumericClaim` normalization (magnitude/unit/period), `annualize`, `numericClaimsEquivalent`, `classifyNumericPair` — the dedup primitive for numeric facts.
 - **Workstream 1.4 (C23/T2) — Unified extraction decision** (`server/extraction/extraction-decision.ts`): one ADD/NOOP/UPDATE/SUPERSEDE/CONTRADICTION decision per incoming claim; deterministic shortcuts (exact-match, numeric) before the LLM; strict LLM-output validation.
 - **Workstream 1.4 (C21/C24/T12) — Source trust & confidence** (`server/extraction/source-trust.ts`): seed trust register (regulators → press → social), `extractDomain`, `trustScoreForDomain`, `bayesianConfidence` (1−Π(1−r) over distinct sources), `shouldQuarantine` (low-trust claims withheld from Portfolio/Global until corroborated).
-- **Tests**: +102 unit tests this session — total **128 pass / 16 skipped / 0 fail**; typecheck clean.
+- **Workstream 1.2 (core) — Text chunking** (`server/ingest/chunking.ts`): `chunkText` — boundary-respecting (paragraph → sentence → hard slice), size-budgeted, overlapping; cores form a gap-free partition of the source. Front of the universal-ingest pipeline.
+- **Tests**: +114 unit tests this session — total **140 pass / 16 skipped / 0 fail** locally (144/144 on Manus, where the 16 integration tests run against the real DB); typecheck clean.
 - **Build model**: Claude Code builds in the local repo and pushes; Manus pulls + publishes; bugs found on the deployed app are reported back to Claude Code to fix. Manus must `git pull` latest `main` before each build so it does not clobber these commits.
 - **Remaining Phase 1** (universal ingest, GraphRAG extraction wiring, hygiene crons, voice intake, onboarding, Strategy-Artifact recognition) — DB/LLM-dependent; built next, verified on Manus deploy.
 
