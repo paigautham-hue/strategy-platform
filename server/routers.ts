@@ -33,6 +33,7 @@ import { runResearchMesh } from "./agents/research";
 import { runFrameworks } from "./agents/frameworks";
 import { runOptionAnalysis } from "./agents/options";
 import { redTeamStrategy } from "./agents/red-team";
+import { runWarGame } from "./agents/war-game";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -640,6 +641,40 @@ const redTeamRouter = router({
     }),
 });
 
+// ─── War-Game Router (Phase 3) ────────────────────────────────────────────────
+
+const warGameRouter = router({
+  run: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        strategy: z.string().min(1),
+        rounds: z.number().min(1).max(5).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      const result = await runWarGame(input.strategy, input.companyId, routerCtx, input.rounds);
+      // Record the SYNTHETIC war-game outcome to the prediction ledger (C2, J4).
+      try {
+        await recordPrediction({
+          tenantId: ctx.user.tenantId,
+          companyId: input.companyId,
+          userId: ctx.user.id,
+          claim: `War-game outcome — ${result.survived ? "survived" : "did not survive"}: ${result.outcome}`,
+          confidence: 0.5,
+          model: "war-game-simulation",
+          framework: "war_game",
+          horizon: "simulated",
+          outcomeClass: "synthetic",
+        });
+      } catch {
+        /* ledger write is best-effort — never block the war-game result */
+      }
+      return result;
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -666,6 +701,7 @@ export const appRouter = router({
   frameworks: frameworksRouter,
   options: optionsRouter,
   redTeam: redTeamRouter,
+  warGame: warGameRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,

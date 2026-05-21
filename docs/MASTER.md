@@ -56,7 +56,7 @@
 | **0** | Foundation, Outcome Capture, Cost Discipline | ✅ | 2026-05-20 | 2026-05-20 | ✅ | All workstreams 0.1–0.5 shipped; 26/26 tests green |
 | **1** | Memory, Ingest, Voice Intake, Hygiene Crons | ✅ | 2026-05-21 | 2026-05-21 | ✅ | All 8 workstreams shipped — see Recent Changes |
 | **2** | Diagnosis + Research Mesh + Code Interpreter | 🟡 | 2026-05-21 | — | — | Diagnosis Agent (2.2) shipped; orchestrator + research agents next |
-| **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | ☐ | — | — | — | Blocked by Phase 2 |
+| **3** | Reasoning Mesh + Simulation + Cross-Co War-Game | 🟡 | 2026-05-21 | — | — | 3.1 Frameworks, 3.2 Options, 3.3 Red-Team, 3.4 War-Game shipped; 3.5 cross-company war-game next |
 | **4** | Brainstorm Mode + Multimodal + Realtime Voice + Distill | ☐ | — | — | — | Blocked by Phase 3 |
 | **5** | Strategy → Execution + Operator UX Tier | ☐ | — | — | — | Blocked by Phase 4 |
 | **6** | Learning Loop Activates | ☐ | — | — | — | Needs ≥ 20 closed predictions |
@@ -173,6 +173,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-21 · Phase 3 — War-Game Simulation (Workstream 3.4)
+- **`server/agents/war-game.ts`** — plays a strategy out over several rounds (default 3, max 5) against 4 reacting stakeholders across 4 arenas: Customer Archetype (customer), Competitor CEO (competitor), Regulator (regulatory), Activist Investor (capital). Round 1 reacts to the strategy; later rounds react to and escalate the prior round's moves. A separate adjudication call judges whether the strategy `survived` and extracts key learnings. Best-effort per round (a failed round yields no moves but the game continues); grounded in company memory via hybrid search.
+- **tRPC** `warGame.run` — runs the simulation then records the outcome to the prediction ledger as a **synthetic** outcome (`outcomeClass: "synthetic"`, `framework: "war_game"`) so the calibration loop never mixes war-game results with real outcomes (J4). **UI** `/war-game` page (survived/outcome banner, key learnings, per-round stakeholder moves).
+- **Tests**: +9 unit tests (round normalization, stakeholder defaulting, outcome normalization, learnings cap). 284 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Phase 3 — Red-Team Critic (Workstream 3.3)
 - **`server/agents/red-team.ts`** — adversarial review of a strategy from 5 hostile personas (The Contrarian, The Regulator, The Incumbent Competitor, The Skeptical Investor, The Execution Skeptic). Each critique graded fatal / major / minor; `survivedReview` is derived deterministically — a strategy with any fatal flaw has NOT survived (the verdict is never left to the model).
