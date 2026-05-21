@@ -174,12 +174,15 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
-### 2026-05-21 · Phase 1 (partial) — strategic ontology + retrieval primitives
-- **Workstream 1.1 — Strategic Ontology** (`shared/ontology.ts`): 15 entity types + 9 relation types as typed registries with metadata; `isValidRelation()` validates edges against endpoint constraints (symmetric-aware); `explainInvalidRelation()` for extraction feedback. Pure, DB-free.
-- **Workstream 1.3 (core) — Retrieval primitives** (`server/retrieval/`): `cosineSimilarity`/`cosineDistance` (zero-vector safe); `reciprocalRankFusion` (RRF, k=60 fixed per AP7); `maximalMarginalRelevance` (MMR, λ=0.5 default per T7/E3). Pure functions — the building blocks of hybrid retrieval.
-- **Tests**: +44 unit tests (18 ontology, 26 retrieval) — total **70 pass / 16 skipped / 0 fail**; typecheck clean.
-- Build model change: all implementation now done in the local repo by Claude Code and pushed; Manus is pull-only (deploy) — its force-pushing sync script made dual-write untenable.
-- **Remaining Phase 1** (ingest, extraction, hygiene crons, voice intake, onboarding, Strategy-Artifact recognition) is DB-dependent — blocked pending a dev database connection string.
+### 2026-05-21 · Phase 1 (partial) — extraction & retrieval foundations
+DB-free, fully-unit-tested building blocks of the memory subsystem:
+- **Workstream 1.1 — Strategic Ontology** (`shared/ontology.ts`): 15 entity types + 9 relation types as typed registries with metadata; `isValidRelation()` validates edges against endpoint constraints (symmetric-aware); `explainInvalidRelation()` for extraction feedback.
+- **Workstream 1.3 (core) — Retrieval primitives** (`server/retrieval/`): `cosineSimilarity`/`cosineDistance` (zero-vector safe); `reciprocalRankFusion` (RRF, k=60 fixed per AP7); `maximalMarginalRelevance` (MMR, λ=0.5 per T7/E3).
+- **Workstream 1.4 (A5) — Numeric claims** (`server/extraction/numeric-claim.ts`): `NumericClaim` normalization (magnitude/unit/period), `annualize`, `numericClaimsEquivalent`, `classifyNumericPair` — the dedup primitive for numeric facts.
+- **Workstream 1.4 (C23/T2) — Unified extraction decision** (`server/extraction/extraction-decision.ts`): one ADD/NOOP/UPDATE/SUPERSEDE/CONTRADICTION decision per incoming claim; deterministic shortcuts (exact-match, numeric) before the LLM; strict LLM-output validation.
+- **Tests**: +83 unit tests this session — total **109 pass / 16 skipped / 0 fail**; typecheck clean.
+- **Build model**: Claude Code builds in the local repo and pushes; Manus pulls + publishes; bugs found on the deployed app are reported back to Claude Code to fix. Manus must `git pull` latest `main` before each build so it does not clobber these commits.
+- **Remaining Phase 1** (universal ingest, GraphRAG extraction wiring, hygiene crons, voice intake, onboarding, Strategy-Artifact recognition) — DB/LLM-dependent; built next, verified on Manus deploy.
 
 ### 2026-05-20 · Phase 0 complete — all workstreams shipped
 - **Workstream 0.1** — Tenancy, Auth, Core Models, Audit Log, Usage Log: 15 DB tables migrated; 3-role JWT (GP/Operator/PortCoTeam); append-only audit_log; usage_event on every UI action
