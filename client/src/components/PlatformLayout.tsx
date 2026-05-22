@@ -50,6 +50,7 @@ import {
   Layers,
   Calculator,
   Plug,
+  PieChart,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -168,6 +169,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { href: "/research", label: "Research", icon: Radar },
       { href: "/contradictions", label: "Contradictions", icon: GitFork },
       { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
+      { href: "/diagrams", label: "Diagrams", icon: PieChart },
       { href: "/options", label: "Options", icon: ListChecks },
       { href: "/red-team", label: "Red Team", icon: Swords },
     ],
