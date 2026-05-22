@@ -11,8 +11,25 @@ import {
   Activity,
   Shield,
   AlertCircle,
+  Rocket,
+  ArrowRight,
+  Sparkles,
+  Stethoscope,
+  Radar,
+  ListChecks,
+  Crosshair,
+  Workflow,
 } from "lucide-react";
 import { Link } from "wouter";
+
+const QUICK_ACTIONS = [
+  { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
+  { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
+  { href: "/research", label: "Research", icon: Radar },
+  { href: "/options", label: "Options", icon: ListChecks },
+  { href: "/war-game", label: "War-Game", icon: Crosshair },
+  { href: "/decompose", label: "Decompose", icon: Workflow },
+];
 
 interface OverviewProps {
   activeCompanyId: number | null;
@@ -94,6 +111,54 @@ export default function Overview({ activeCompanyId }: OverviewProps) {
         </p>
       </div>
 
+      {/* Getting started — shown until the first company is onboarded */}
+      {!loadingCo && (companies?.length ?? 0) === 0 && (
+        <Card className="card-glass border-gold/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-heading text-base flex items-center gap-2">
+              <Rocket className="h-4 w-4 text-gold" /> Get started
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {[
+              {
+                n: 1,
+                label: "Onboard your first company",
+                desc: "Create a portfolio company and seed its context.",
+                href: "/onboarding",
+              },
+              {
+                n: 2,
+                label: "Ingest a document",
+                desc: "Feed in a deck, report, or notes — the platform extracts what matters.",
+                href: "/ingest",
+              },
+              {
+                n: 3,
+                label: "Run your first diagnosis",
+                desc: "Put a real strategic question to the engine.",
+                href: "/diagnose",
+              },
+            ].map((step) => (
+              <Link key={step.n} href={step.href}>
+                <a className="flex items-center gap-3 p-3 rounded-md bg-secondary/40 border border-border/40 hover:border-gold/30 transition-colors group">
+                  <div className="w-7 h-7 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-heading text-gold">{step.n}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-sans text-foreground group-hover:text-gold transition-colors">
+                      {step.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-body">{step.desc}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
+                </a>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -128,6 +193,32 @@ export default function Overview({ activeCompanyId }: OverviewProps) {
           loading={loadingCost}
         />
       </div>
+
+      {/* Quick actions */}
+      <Card className="card-glass">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-heading text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-gold" /> Quick actions
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {QUICK_ACTIONS.map((action) => {
+              const Icon = action.icon;
+              return (
+                <Link key={action.href} href={action.href}>
+                  <a className="flex items-center gap-2.5 p-3 rounded-md bg-secondary/40 border border-border/40 hover:border-gold/30 hover:bg-secondary/60 transition-colors group">
+                    <Icon className="h-4 w-4 text-gold shrink-0" />
+                    <span className="text-sm font-sans text-foreground group-hover:text-gold transition-colors">
+                      {action.label}
+                    </span>
+                  </a>
+                </Link>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

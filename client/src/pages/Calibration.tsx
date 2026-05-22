@@ -1,6 +1,8 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/EmptyState";
 import { AlertCircle, Scale, FlaskConical, Globe } from "lucide-react";
 
 interface CalibrationProps {
@@ -85,23 +87,25 @@ export default function Calibration({ activeCompanyId }: CalibrationProps) {
       </div>
 
       {isLoading && (
-        <p className="text-sm text-muted-foreground font-sans">Loading scorecard…</p>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="card-glass">
+              <CardContent className="p-4">
+                <Skeleton className="h-24 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       {data && (
         <>
           {data.real.count === 0 && data.synthetic.count === 0 ? (
-            <Card className="card-glass">
-              <CardContent className="p-6 text-center space-y-1">
-                <p className="font-heading text-sm text-foreground">
-                  No closed predictions yet
-                </p>
-                <p className="text-xs text-muted-foreground font-body">
-                  The scorecard populates as predictions reach their horizon and
-                  outcomes are logged to the ledger.
-                </p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Scale}
+              title="No closed predictions yet"
+              description="The scorecard populates as predictions reach their horizon and outcomes are logged to the ledger."
+            />
           ) : (
             <>
               <Card className="card-glass">

@@ -174,6 +174,13 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Visual polish — first-run, empty states, login, rhythm
+- **Dashboard first-run** — the Overview page now shows a "Get started" card (a 3-step checklist: onboard a company → ingest a document → run a diagnosis) until the first company exists, and a always-on **Quick actions** grid linking the six most-used surfaces. The empty dashboard is no longer a void.
+- **Empty & loading states** — new reusable `EmptyState` component (icon + title + guidance + optional CTA). Plain "Loading…" lines replaced with skeleton placeholder cards; `Calibration` and `Compliance` now use `EmptyState` for their no-data cases.
+- **Login screen depth** — a soft radial gold glow and a faint masked grid behind the mark; same layout, more presence.
+- **Result-page rhythm** — new `SectionLabel` component (uppercase label + trailing hairline rule) applied to the longest stacked-result pages (War-Game, Cross-Co War-Game, Decompose) for clearer visual rhythm.
+- Typecheck + build clean; 437 tests pass.
+
 ### 2026-05-22 · Visual — sidebar navigation grouped into sections
 - The sidebar had grown to ~38 destinations in a single flat list — impossible to scan. It is now grouped into eleven labelled sections (Companies, Knowledge, Strategy Intake, Reasoning, Simulation, Execution, Learning Loop, Portfolio, Operations, Help & Admin) that mirror the app's own conceptual structure and the in-app manual.
 - Each group has a small uppercase header; empty groups (all items hidden by role) collapse away. The active item now uses a left gold accent bar instead of a full border — no layout shift on selection — and item rows are slightly tighter to keep the longer, grouped list compact.

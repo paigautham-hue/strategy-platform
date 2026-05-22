@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Swords, Flag, Users, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { SectionLabel } from "@/components/SectionLabel";
 
 interface WarGameProps {
   activeCompanyId: number | null;
@@ -109,9 +110,9 @@ export default function WarGame({ activeCompanyId }: WarGameProps) {
           )}
 
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider flex items-center gap-1.5">
+            <SectionLabel>
               <Users className="h-3 w-3" /> {r.rounds.length} rounds
-            </p>
+            </SectionLabel>
             {r.rounds.map((round) => (
               <Card key={round.round} className="card-glass">
                 <CardContent className="p-4 space-y-2">
