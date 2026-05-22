@@ -25,6 +25,7 @@ import Personas from "./pages/Personas";
 import Decomposer from "./pages/Decomposer";
 import PreMortem from "./pages/PreMortem";
 import Drift from "./pages/Drift";
+import KpiLibrary from "./pages/KpiLibrary";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
 import Contradictions from "./pages/Contradictions";
@@ -148,6 +149,7 @@ function AppShell() {
         <Route path="/decompose" component={() => <Decomposer activeCompanyId={activeCompanyId} />} />
         <Route path="/pre-mortem" component={() => <PreMortem activeCompanyId={activeCompanyId} />} />
         <Route path="/drift" component={() => <Drift activeCompanyId={activeCompanyId} />} />
+        <Route path="/kpi-library" component={KpiLibrary} />
         <Route path="/predictions" component={() => <Predictions activeCompanyId={activeCompanyId} />} />
         <Route path="/calibration" component={() => <Calibration activeCompanyId={activeCompanyId} />} />
         <Route path="/attribution" component={() => <Attribution activeCompanyId={activeCompanyId} />} />

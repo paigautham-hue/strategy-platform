@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Phase 5 — KPI Definition Library (Workstream 5.3)
+- **`server/services/kpi-library.ts`** — a reusable catalog of 15 standard operating KPIs across five categories (unit-economics, retention, growth, efficiency, liquidity): CAC, LTV, LTV:CAC, CAC payback, NRR, GRR, logo retention, ARR, growth rate, Rule of 40, magic number, gross margin, burn multiple, runway. Each definition carries its inputs, a human-readable formula, a unit, a direction, and a **pure `compute` function** (safe division → null on a zero denominator).
+- `listKpis` returns a serialisable catalog (compute fns stripped); `computeKpi` runs one; `formatKpiValue` renders by unit. This is what KPI sync maps live metrics onto and what the OKR auto-mapper matches against (when connectors land).
+- **tRPC** `kpi.list` + `kpi.compute` + **UI** `/kpi-library` page (pick a metric, enter inputs, compute; browse the full catalog grouped by category).
+- **Tests**: +14 unit tests (catalog integrity, every formula, zero-denominator handling, formatting). 458 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-22 · Phase 6 — Confounder DAGs (Workstream 6.6)
 - **`server/causal/confounder-dags.ts`** — hand-curated, per-industry directed acyclic graphs of the confounders a causal claim must be conditioned on (B2B SaaS, fintech, consumer, marketplace, healthcare, + a generic fallback). `getConfounderDag` resolves a free-text industry to the best-matching DAG; `renderConfounders` produces the prompt block; `isAcyclic` is a pure DFS check that the curated data really is a DAG.
 - **Wired into Causal Attribution (6.4)** — `attributeInitiative` now takes the company's industry, looks up the curated DAG, and instructs the agent its causal claims MUST account for those named confounders. The tRPC `attribution.analyze` fetches the company's industry automatically.

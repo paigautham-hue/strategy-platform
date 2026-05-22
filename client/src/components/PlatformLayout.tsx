@@ -48,6 +48,7 @@ import {
   UserCog,
   BookText,
   Layers,
+  Calculator,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -183,6 +184,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { href: "/decompose", label: "Decompose", icon: Workflow },
       { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
       { href: "/drift", label: "Drift Detection", icon: Gauge },
+      { href: "/kpi-library", label: "KPI Library", icon: Calculator },
     ],
   },
   {
