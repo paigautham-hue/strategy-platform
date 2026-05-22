@@ -48,6 +48,7 @@ import AuditLog from "./pages/AuditLog";
 import UsageEvents from "./pages/UsageEvents";
 import ExportPage from "./pages/ExportPage";
 import McpTools from "./pages/McpTools";
+import Connectors from "./pages/Connectors";
 import Users from "./pages/Users";
 import Manual from "./pages/Manual";
 import NotFound from "./pages/NotFound";
@@ -164,6 +165,7 @@ function AppShell() {
         <Route path="/usage" component={UsageEvents} />
         <Route path="/export" component={() => <ExportPage activeCompanyId={activeCompanyId} />} />
         <Route path="/mcp" component={() => <McpTools activeCompanyId={activeCompanyId} />} />
+        <Route path="/connectors" component={() => <Connectors activeCompanyId={activeCompanyId} />} />
         <Route path="/users" component={Users} />
         <Route path="/manual" component={Manual} />
         <Route component={NotFound} />

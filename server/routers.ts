@@ -20,8 +20,19 @@ import {
   listUsers,
   updateUserRole,
   setAssignedCompanies,
+  getConnectorCredential,
+  listConnectorCredentials,
+  upsertConnectorCredential,
+  updateConnectorStatus,
+  updateConnectorConfig,
+  deleteConnectorCredential,
+  recordConnectorLink,
+  listConnectorLinks,
 } from "./db";
 import { filterAccessibleCompanies } from "./services/access";
+import { encryptSecret, decryptSecret } from "./connectors/crypto";
+import { testLinearConnection, listLinearTeams, createLinearIssue } from "./connectors/linear";
+import { CONNECTOR_REGISTRY, isConnectorAvailable } from "./connectors";
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
 import { hybridSearchMemory } from "./services/memory-search";
 import { writeLayerMemory, queryLayerMemory } from "./services/memory-layers";
@@ -1238,6 +1249,187 @@ const kpiRouter = router({
     .mutation(({ input }) => computeKpi(input.id, input.inputs)),
 });
 
+// ─── Connector Router (Phase 5, Workstream 5.2) ───────────────────────────────
+
+const connectorTypeSchema = z.enum(["linear", "notion", "jira"]);
+
+const connectorRouter = router({
+  // Per-company connector status across the registry. Never returns credentials.
+  list: operatorProcedure
+    .input(z.object({ companyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const creds = await listConnectorCredentials(ctx.user.tenantId, input.companyId);
+      return CONNECTOR_REGISTRY.map((meta) => {
+        const row = creds.find((c) => c.connectorType === meta.type);
+        return {
+          type: meta.type,
+          label: meta.label,
+          available: meta.available,
+          description: meta.description,
+          credentialLabel: meta.credentialLabel,
+          configured: !!row,
+          status: row?.status ?? ("not-configured" as const),
+          teamName: (row?.config as Record<string, string> | null)?.teamName,
+          lastTestedAt: row?.lastTestedAt ?? null,
+          lastError: row?.lastError ?? null,
+        };
+      });
+    }),
+
+  // Store a connector credential (encrypted at rest).
+  connect: operatorProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        connectorType: connectorTypeSchema,
+        credential: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!isConnectorAvailable(input.connectorType)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `The ${input.connectorType} connector is not yet available.`,
+        });
+      }
+      await upsertConnectorCredential({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        connectorType: input.connectorType,
+        credential: encryptSecret(input.credential.trim()),
+      });
+      void emitUsage({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        userId: ctx.user.id,
+        role: ctx.user.role,
+        surface: "api",
+        action: "connector-connect",
+        metadata: { connectorType: input.connectorType },
+      });
+      return { success: true } as const;
+    }),
+
+  // Test a stored credential against the live API; updates the status.
+  test: operatorProcedure
+    .input(z.object({ companyId: z.number(), connectorType: connectorTypeSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const row = await getConnectorCredential(
+        ctx.user.tenantId,
+        input.companyId,
+        input.connectorType,
+      );
+      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Connector not configured." });
+
+      if (input.connectorType !== "linear") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Connector not yet available." });
+      }
+      const result = await testLinearConnection(decryptSecret(row.credential));
+      await updateConnectorStatus(
+        ctx.user.tenantId,
+        input.companyId,
+        input.connectorType,
+        result.ok ? "connected" : "error",
+        result.ok ? null : result.error,
+      );
+      return result;
+    }),
+
+  // List the Linear teams the stored token can see (to pick a target team).
+  teams: operatorProcedure
+    .input(z.object({ companyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const row = await getConnectorCredential(ctx.user.tenantId, input.companyId, "linear");
+      if (!row) return { ok: false as const, teams: [], error: "Linear not configured." };
+      const result = await listLinearTeams(decryptSecret(row.credential));
+      return { ok: result.ok, teams: result.teams ?? [], error: result.error };
+    }),
+
+  // Choose the Linear team initiatives are pushed into.
+  setTeam: operatorProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        teamId: z.string().min(1),
+        teamName: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await updateConnectorConfig(ctx.user.tenantId, input.companyId, "linear", {
+        teamId: input.teamId,
+        teamName: input.teamName,
+      });
+      return { success: true } as const;
+    }),
+
+  // Remove a connector credential.
+  disconnect: operatorProcedure
+    .input(z.object({ companyId: z.number(), connectorType: connectorTypeSchema }))
+    .mutation(async ({ ctx, input }) => {
+      await deleteConnectorCredential(ctx.user.tenantId, input.companyId, input.connectorType);
+      return { success: true } as const;
+    }),
+
+  // Push an initiative to the connected tool as an issue.
+  pushInitiative: operatorProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        title: z.string().min(1),
+        description: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const row = await getConnectorCredential(ctx.user.tenantId, input.companyId, "linear");
+      if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Linear is not configured." });
+      const teamId = (row.config as Record<string, string> | null)?.teamId;
+      if (!teamId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Pick a Linear team before pushing initiatives.",
+        });
+      }
+      const result = await createLinearIssue(
+        decryptSecret(row.credential),
+        teamId,
+        input.title,
+        input.description ?? "",
+      );
+      if (!result.ok || !result.issue) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: result.error ?? "Could not create the Linear issue.",
+        });
+      }
+      await recordConnectorLink({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        connectorType: "linear",
+        localKey: input.title,
+        externalId: result.issue.id,
+        externalUrl: result.issue.url,
+        externalState: result.issue.state,
+      });
+      void emitUsage({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        userId: ctx.user.id,
+        role: ctx.user.role,
+        surface: "api",
+        action: "connector-push-initiative",
+        metadata: { connectorType: "linear", identifier: result.issue.identifier },
+      });
+      return result.issue;
+    }),
+
+  // The external links recorded for a company.
+  links: operatorProcedure
+    .input(z.object({ companyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return listConnectorLinks(ctx.user.tenantId, input.companyId);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1280,6 +1472,7 @@ export const appRouter = router({
   distillation: distillationRouter,
   briefing: briefingRouter,
   kpi: kpiRouter,
+  connector: connectorRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
