@@ -45,6 +45,7 @@ import {
   Combine,
   FlaskConical,
   Newspaper,
+  UserCog,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -155,10 +156,12 @@ const NAV_ITEMS = [
   { href: "/usage", label: "Usage Events", icon: Activity },
   { href: "/export", label: "Export", icon: Download },
   { href: "/mcp", label: "MCP Tools", icon: Cpu },
+  { href: "/users", label: "User Management", icon: UserCog },
 ];
 
 const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation"];
 const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding"];
+const ADMIN_ONLY_ITEMS = ["/users"];
 
 // ─── PlatformLayout ───────────────────────────────────────────────────────────
 
@@ -179,6 +182,7 @@ export function PlatformLayout({
 
   const canAccess = (href: string) => {
     if (!user) return false;
+    if (ADMIN_ONLY_ITEMS.includes(href) && user.role !== "admin") return false;
     if (GP_ONLY_ITEMS.includes(href) && user.role !== "gp" && user.role !== "admin") return false;
     if (OPERATOR_ITEMS.includes(href) && user.role === "portco_team") return false;
     return true;

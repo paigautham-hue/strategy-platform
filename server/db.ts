@@ -13,6 +13,8 @@ import {
   type Company,
   type StrategyProject,
   type Session,
+  type User,
+  type UserRole,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -87,6 +89,48 @@ export async function getUserByOpenId(openId: string) {
   if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+/** List every user in a tenant, newest sign-in first. */
+export async function listUsers(tenantId: string): Promise<User[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(users)
+    .where(eq(users.tenantId, tenantId))
+    .orderBy(users.lastSignedIn);
+}
+
+/** Update a user's role. Tenant-scoped (C1). */
+export async function updateUserRole(
+  tenantId: string,
+  userId: number,
+  role: UserRole,
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(users)
+    .set({ role })
+    .where(and(eq(users.tenantId, tenantId), eq(users.id, userId)));
+}
+
+/**
+ * Set the companies a user may access. Pass null to clear scoping (the user
+ * then sees every company, subject to their role). Tenant-scoped (C1).
+ */
+export async function setAssignedCompanies(
+  tenantId: string,
+  userId: number,
+  companyIds: number[] | null,
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(users)
+    .set({ assignedCompanyIds: companyIds })
+    .where(and(eq(users.tenantId, tenantId), eq(users.id, userId)));
 }
 
 // ─── Tenants ──────────────────────────────────────────────────────────────────

@@ -17,7 +17,11 @@ import {
   queryCostByCompany,
   queryCostByUser,
   ensureDefaultTenant,
+  listUsers,
+  updateUserRole,
+  setAssignedCompanies,
 } from "./db";
+import { filterAccessibleCompanies } from "./services/access";
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
 import { hybridSearchMemory } from "./services/memory-search";
 import { writeLayerMemory, queryLayerMemory } from "./services/memory-layers";
@@ -91,12 +95,22 @@ const operatorProcedure = protectedProcedure.use(({ ctx, next }) => {
   return next({ ctx });
 });
 
+/** Require admin — platform / user management. */
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "admin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Admin role required" });
+  }
+  return next({ ctx });
+});
+
 // ─── Company Router ───────────────────────────────────────────────────────────
 
 const companyRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
     await ensureDefaultTenant();
-    return listCompanies(ctx.user.tenantId);
+    const all = await listCompanies(ctx.user.tenantId);
+    // C1: operator / portco_team users see only their assigned companies.
+    return filterAccessibleCompanies(all, ctx.user.role, ctx.user.assignedCompanyIds);
   }),
 
   get: protectedProcedure
@@ -1146,6 +1160,63 @@ const briefingRouter = router({
     }),
 });
 
+// ─── User Management Router (admin only) ──────────────────────────────────────
+
+const userRouter = router({
+  // List every user in the tenant.
+  list: adminProcedure.query(async ({ ctx }) => {
+    return listUsers(ctx.user.tenantId);
+  }),
+
+  // Change a user's role.
+  updateRole: adminProcedure
+    .input(
+      z.object({
+        userId: z.number(),
+        role: z.enum(["gp", "operator", "portco_team", "admin"]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // An admin cannot strip their own admin role — prevents self-lockout.
+      if (input.userId === ctx.user.id && input.role !== "admin") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You cannot remove your own admin role.",
+        });
+      }
+      await updateUserRole(ctx.user.tenantId, input.userId, input.role);
+      void emitUsage({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        role: ctx.user.role,
+        surface: "api",
+        action: "update-user-role",
+        metadata: { targetUserId: input.userId, role: input.role },
+      });
+      return { success: true } as const;
+    }),
+
+  // Set the companies a user may access. An empty list clears scoping.
+  assignCompanies: adminProcedure
+    .input(z.object({ userId: z.number(), companyIds: z.array(z.number()) }))
+    .mutation(async ({ ctx, input }) => {
+      await setAssignedCompanies(
+        ctx.user.tenantId,
+        input.userId,
+        input.companyIds.length > 0 ? input.companyIds : null,
+      );
+      void emitUsage({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        role: ctx.user.role,
+        surface: "api",
+        action: "assign-user-companies",
+        metadata: { targetUserId: input.userId, companyIds: input.companyIds },
+      });
+      return { success: true } as const;
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1161,6 +1232,7 @@ export const appRouter = router({
   }),
 
   company: companyRouter,
+  user: userRouter,
   project: projectRouter,
   session: sessionRouter,
   memory: memoryRouter,
