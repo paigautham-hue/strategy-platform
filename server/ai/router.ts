@@ -31,6 +31,7 @@ import {
 import { getCompletionConfig, getActiveEmbeddingConfig } from "./models-config";
 import { getDb } from "../db";
 import { llmCallLogs } from "../../drizzle/schema";
+import { embeddingCache, embeddingCacheKey } from "../services/cache";
 
 // ─── AJV instance for M4 ──────────────────────────────────────────────────────
 
@@ -89,6 +90,8 @@ export interface EmbedResponse {
   costUsd: number;
   latencyMs: number;
   traceId: string;
+  /** True when the embedding was served from the cache (Phase 8.1). */
+  cached?: boolean;
   /** Exact model identifier returned by the embedding provider (B3). */
   model: string;
   /** Canonical version string for embeddingModelVersion column (B3). */
@@ -272,6 +275,24 @@ export async function embed(opts: EmbedOptions): Promise<EmbedResponse> {
   // C5: Redact PII
   const { redacted } = redact(opts.text);
 
+  // 8.1: Embedding cache — a text embeds to the same vector for a given model,
+  // so a cache hit costs nothing and is never budget-checked or logged.
+  const embedCacheKey = embeddingCacheKey(embeddingCfg.model, embeddingCfg.dimensions, redacted);
+  const cachedEmbedding = embeddingCache.get(embedCacheKey);
+  if (cachedEmbedding) {
+    return {
+      embedding: cachedEmbedding,
+      dimensions: cachedEmbedding.length,
+      tokensIn: 0,
+      costUsd: 0,
+      latencyMs: Date.now() - start,
+      traceId,
+      model: embeddingCfg.model,
+      modelVersion: `openai:${embeddingCfg.model}:dims=${cachedEmbedding.length}`,
+      cached: true,
+    };
+  }
+
   const inputTokens = estimateTokens(redacted);
   const estimatedCost = estimateCost(inputTokens, 0);
 
@@ -334,6 +355,8 @@ export async function embed(opts: EmbedOptions): Promise<EmbedResponse> {
     tokensIn = data.usage?.prompt_tokens ?? inputTokens;
     // OpenAI embedding pricing: $0.02 / 1M tokens
     costUsd = (tokensIn / 1_000_000) * 0.02;
+    // 8.1: Cache the vector so the same text is never embedded twice.
+    if (embedding.length > 0) embeddingCache.set(embedCacheKey, embedding);
   } catch (err) {
     success = false;
     errorMessage = err instanceof Error ? err.message : String(err);
