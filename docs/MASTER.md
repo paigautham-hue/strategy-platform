@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Phase 4 — Strategy Diagram Generation (Workstream 4.5)
+- **`server/agents/diagram.ts`** — turns a strategic subject into a **structured diagram spec** for one of three frameworks: Porter's Five Forces (each force graded low/medium/high with a rationale), SWOT (the four quadrants), and Three Horizons (initiatives across H1/H2/H3). Grounded in company memory. Pure normalizers guarantee well-formed output — Porter always has all five forces, Three Horizons always has H1–H3.
+- Diagrams render **natively in the browser** (CSS / layout), so they are crisp, interactive, and cost no image-generation API call. Stylised raster export (Imagen/Flux, OD9) stays infra-gated — the structured generation is the durable core.
+- **tRPC** `diagram.generate` + **UI** `/diagrams` page (pick a framework, enter a subject, render the diagram).
+- **Tests**: +9 unit tests (Porter five-force guarantee + intensity defaulting, SWOT quadrants, Three Horizons H1–H3 guarantee). 474 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-22 · Phase 5 — Execution connector framework + Linear (Workstream 5.2)
 - **Connector framework** — new `connector_credential` and `connector_link` schema tables (per-portco credentials + a stable initiative↔external-item mapping that survives renames). Generic over `ConnectorType`; the registry (`server/connectors/index.ts`) records Linear as available, Notion/Jira as sequenced next.
 - **Credential encryption** — `server/connectors/crypto.ts`: API tokens are encrypted at rest with AES-256-GCM, the key derived from `CONNECTOR_ENC_KEY` (Vault). Dev fallback stores plaintext when no key is set. Credentials are never returned to the client or logged.

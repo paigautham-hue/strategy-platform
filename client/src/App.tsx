@@ -22,6 +22,7 @@ import VoiceIntake from "./pages/VoiceIntake";
 import Brainstorm from "./pages/Brainstorm";
 import MemoDictation from "./pages/MemoDictation";
 import Personas from "./pages/Personas";
+import Diagrams from "./pages/Diagrams";
 import Decomposer from "./pages/Decomposer";
 import PreMortem from "./pages/PreMortem";
 import Drift from "./pages/Drift";
@@ -139,6 +140,7 @@ function AppShell() {
         <Route path="/brainstorm" component={() => <Brainstorm activeCompanyId={activeCompanyId} />} />
         <Route path="/memo" component={() => <MemoDictation activeCompanyId={activeCompanyId} />} />
         <Route path="/personas" component={() => <Personas activeCompanyId={activeCompanyId} />} />
+        <Route path="/diagrams" component={() => <Diagrams activeCompanyId={activeCompanyId} />} />
         <Route path="/diagnose" component={() => <Diagnosis activeCompanyId={activeCompanyId} />} />
         <Route path="/research" component={() => <Research activeCompanyId={activeCompanyId} />} />
         <Route path="/contradictions" component={() => <Contradictions activeCompanyId={activeCompanyId} />} />

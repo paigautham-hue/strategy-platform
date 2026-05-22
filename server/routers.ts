@@ -70,6 +70,7 @@ import { runSynergyScout } from "./agents/synergy-scout";
 import { distillPattern } from "./services/distillation";
 import { buildBriefing } from "./agents/briefing";
 import { listKpis, computeKpi } from "./services/kpi-library";
+import { generateDiagram } from "./agents/diagram";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1430,6 +1431,24 @@ const connectorRouter = router({
     }),
 });
 
+// ─── Diagram Router (Phase 4) ─────────────────────────────────────────────────
+
+const diagramRouter = router({
+  // Generate a structured strategy-diagram spec, rendered natively in the UI.
+  generate: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        diagramType: z.enum(["porter", "swot", "three_horizons"]),
+        subject: z.string().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return generateDiagram(input.diagramType, input.subject, input.companyId, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1473,6 +1492,7 @@ export const appRouter = router({
   briefing: briefingRouter,
   kpi: kpiRouter,
   connector: connectorRouter,
+  diagram: diagramRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
