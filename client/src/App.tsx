@@ -48,6 +48,7 @@ import UsageEvents from "./pages/UsageEvents";
 import ExportPage from "./pages/ExportPage";
 import McpTools from "./pages/McpTools";
 import Users from "./pages/Users";
+import Manual from "./pages/Manual";
 import NotFound from "./pages/NotFound";
 
 // ─── Login gate ───────────────────────────────────────────────────────────────
@@ -145,6 +146,7 @@ function AppShell() {
         <Route path="/export" component={() => <ExportPage activeCompanyId={activeCompanyId} />} />
         <Route path="/mcp" component={() => <McpTools activeCompanyId={activeCompanyId} />} />
         <Route path="/users" component={Users} />
+        <Route path="/manual" component={Manual} />
         <Route component={NotFound} />
       </Switch>
     </PlatformLayout>
