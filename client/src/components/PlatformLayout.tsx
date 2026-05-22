@@ -51,6 +51,7 @@ import {
   Calculator,
   Plug,
   PieChart,
+  Share2,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -149,6 +150,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
     label: "Knowledge",
     items: [
       { href: "/memory", label: "Memory", icon: Brain },
+      { href: "/connections", label: "Connections", icon: Share2 },
       { href: "/ingest", label: "Ingest", icon: FileInput },
       { href: "/voice-intake", label: "Voice Intake", icon: Mic },
     ],

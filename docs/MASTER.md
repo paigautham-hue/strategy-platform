@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Phase 2 — Multi-hop entity graph / HippoRAG (Workstream 2.7)
+- **`server/retrieval/graph.ts`** — the pure graph core: `buildEntityGraph` (undirected adjacency, drops dangling edges), `multiHopReach` (BFS that tags each node with its hop distance), `shortestConnection` (the connecting edge-chain between two entities). Deterministic and fully tested.
+- **`server/services/entity-graph.ts`** — `multiHopQuery` answers a question not just with the matching facts but with the **connections between them**: hybrid-search the query → extract entities + typed relations across the retrieved items (one structured call) → build the graph → traverse outward from the query's own entities to surface multi-hop chains a single memory item never states.
+- **tRPC** `entityGraph.query` + **UI** `/connections` page (entities grouped by hop distance, the relation chains between them).
+- **Tests**: +13 unit tests (id normalization, edge integrity, hop-distance BFS, shortest-path connection, extraction normalization). 484 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-22 · Phase 4 — Strategy Diagram Generation (Workstream 4.5)
 - **`server/agents/diagram.ts`** — turns a strategic subject into a **structured diagram spec** for one of three frameworks: Porter's Five Forces (each force graded low/medium/high with a rationale), SWOT (the four quadrants), and Three Horizons (initiatives across H1/H2/H3). Grounded in company memory. Pure normalizers guarantee well-formed output — Porter always has all five forces, Three Horizons always has H1–H3.
 - Diagrams render **natively in the browser** (CSS / layout), so they are crisp, interactive, and cost no image-generation API call. Stylised raster export (Imagen/Flux, OD9) stays infra-gated — the structured generation is the durable core.

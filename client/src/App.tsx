@@ -17,6 +17,7 @@ import Onboarding from "./pages/Onboarding";
 import Projects from "./pages/Projects";
 import Memory from "./pages/Memory";
 import Ingest from "./pages/Ingest";
+import EntityGraph from "./pages/EntityGraph";
 import StrategyArtifact from "./pages/StrategyArtifact";
 import VoiceIntake from "./pages/VoiceIntake";
 import Brainstorm from "./pages/Brainstorm";
@@ -134,6 +135,7 @@ function AppShell() {
         <Route path="/onboarding" component={() => <Onboarding onSelect={setActiveCompanyId} />} />
         <Route path="/projects" component={() => <Projects activeCompanyId={activeCompanyId} />} />
         <Route path="/memory" component={() => <Memory activeCompanyId={activeCompanyId} />} />
+        <Route path="/connections" component={() => <EntityGraph activeCompanyId={activeCompanyId} />} />
         <Route path="/ingest" component={() => <Ingest activeCompanyId={activeCompanyId} />} />
         <Route path="/strategy-artifacts" component={() => <StrategyArtifact activeCompanyId={activeCompanyId} />} />
         <Route path="/voice-intake" component={() => <VoiceIntake activeCompanyId={activeCompanyId} />} />
