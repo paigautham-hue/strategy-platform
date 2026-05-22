@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Visual — sidebar navigation grouped into sections
+- The sidebar had grown to ~38 destinations in a single flat list — impossible to scan. It is now grouped into eleven labelled sections (Companies, Knowledge, Strategy Intake, Reasoning, Simulation, Execution, Learning Loop, Portfolio, Operations, Help & Admin) that mirror the app's own conceptual structure and the in-app manual.
+- Each group has a small uppercase header; empty groups (all items hidden by role) collapse away. The active item now uses a left gold accent bar instead of a full border — no layout shift on selection — and item rows are slightly tighter to keep the longer, grouped list compact.
+- `NAV_ITEMS` (flat) → `NAV_GROUPS` (grouped) in `PlatformLayout.tsx`; role-based `canAccess` filtering is applied per item within each group. Typecheck + build clean; 437 tests pass.
+
 ### 2026-05-22 · Rebrand — the product is now "Cairn"
 - The platform's product name changed from MERIDIAN to **CAIRN** (the prior name clashed with a separate app the owner runs). A cairn is a trail marker built one stone at a time — the exact metaphor for memory that compounds session by session and guides the next decision.
 - **Wordmark** CAIRN, **icon** stacked layers (`Layers`), **tagline** "Strategy, stone by stone." Login subtitle: "Private strategy intelligence. Built stone by stone — every session compounds." The dark + gold theme is unchanged.
