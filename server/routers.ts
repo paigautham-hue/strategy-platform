@@ -71,6 +71,7 @@ import { distillPattern } from "./services/distillation";
 import { buildBriefing } from "./agents/briefing";
 import { listKpis, computeKpi } from "./services/kpi-library";
 import { generateDiagram } from "./agents/diagram";
+import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1449,6 +1450,18 @@ const diagramRouter = router({
     }),
 });
 
+// ─── Entity Graph Router (Phase 2) ────────────────────────────────────────────
+
+const entityGraphRouter = router({
+  // Multi-hop retrieval — surface the connections between facts, not just facts.
+  query: protectedProcedure
+    .input(z.object({ companyId: z.number(), query: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      return multiHopQuery(input.query, input.companyId, routerCtx);
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1493,6 +1506,7 @@ export const appRouter = router({
   kpi: kpiRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
+  entityGraph: entityGraphRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
