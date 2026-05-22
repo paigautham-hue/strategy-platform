@@ -17,6 +17,7 @@
 import * as router from "../ai/router";
 import type { RouterContext } from "../ai/router";
 import { hybridSearchMemory } from "../services/memory-search";
+import { getConfounderDag, renderConfounders } from "../causal/confounder-dags";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
@@ -172,6 +173,7 @@ export async function attributeInitiative(
   context: string,
   companyId: number,
   ctx: RouterContext,
+  industry?: string,
 ): Promise<AttributionResult> {
   let memoryContext = "";
   try {
@@ -187,10 +189,14 @@ export async function attributeInitiative(
     memoryContext = "";
   }
 
+  // 6.6: condition the attribution on the curated per-industry confounder DAG.
+  const confounderBlock = renderConfounders(getConfounderDag(industry));
+
   const user =
     `COMPLETED INITIATIVE:\n${initiative}\n\n` +
     `OUTCOME:\n${outcome}\n\n` +
     (context ? `Context:\n${context}\n\n` : "") +
+    `${confounderBlock}\nYour causal claims MUST account for these confounders.\n\n` +
     (memoryContext ? `What the platform knows about the company:\n${memoryContext}` : "No company memory is available.");
 
   try {

@@ -174,6 +174,11 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Phase 6 — Confounder DAGs (Workstream 6.6)
+- **`server/causal/confounder-dags.ts`** — hand-curated, per-industry directed acyclic graphs of the confounders a causal claim must be conditioned on (B2B SaaS, fintech, consumer, marketplace, healthcare, + a generic fallback). `getConfounderDag` resolves a free-text industry to the best-matching DAG; `renderConfounders` produces the prompt block; `isAcyclic` is a pure DFS check that the curated data really is a DAG.
+- **Wired into Causal Attribution (6.4)** — `attributeInitiative` now takes the company's industry, looks up the curated DAG, and instructs the agent its causal claims MUST account for those named confounders. The tRPC `attribution.analyze` fetches the company's industry automatically.
+- **Tests**: +12 unit tests (every DAG acyclic + edge integrity, industry resolution + keyword matching + fallback, rendering, cycle detection). 446 pass / 16 skipped / 0 fail; typecheck + build clean. Phase 6 workstreams 6.1–6.6 all shipped.
+
 ### 2026-05-22 · Visual polish — first-run, empty states, login, rhythm
 - **Dashboard first-run** — the Overview page now shows a "Get started" card (a 3-step checklist: onboard a company → ingest a document → run a diagnosis) until the first company exists, and a always-on **Quick actions** grid linking the six most-used surfaces. The empty dashboard is no longer a void.
 - **Empty & loading states** — new reusable `EmptyState` component (icon + title + guidance + optional CTA). Plain "Loading…" lines replaced with skeleton placeholder cards; `Calibration` and `Compliance` now use `EmptyState` for their no-data cases.
