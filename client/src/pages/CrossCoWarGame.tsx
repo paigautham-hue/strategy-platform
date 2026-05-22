@@ -13,6 +13,7 @@ import {
   Shield,
 } from "lucide-react";
 import { toast } from "sonner";
+import { SectionLabel } from "@/components/SectionLabel";
 import { cn } from "@/lib/utils";
 
 const EXPOSURE_STYLE: Record<string, string> = {
@@ -133,9 +134,7 @@ export default function CrossCoWarGame() {
           </Card>
 
           <div className="space-y-3">
-            <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
-              Per-company outcomes
-            </p>
+            <SectionLabel>Per-company outcomes</SectionLabel>
             {r.companyOutcomes.map((o) => (
               <Card key={o.companyId} className="card-glass">
                 <CardContent className="p-4 space-y-1.5">
@@ -161,9 +160,7 @@ export default function CrossCoWarGame() {
 
           {r.findings.length > 0 && (
             <div className="space-y-3">
-              <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
-                Cross-company findings
-              </p>
+              <SectionLabel>Cross-company findings</SectionLabel>
               {r.findings.map((f, i) => (
                 <Card
                   key={i}

@@ -1,6 +1,8 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/EmptyState";
 import { AlertCircle, ShieldCheck, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,9 +50,27 @@ export default function Compliance({ activeCompanyId }: ComplianceProps) {
         </p>
       </div>
 
-      {isLoading && <p className="text-sm text-muted-foreground font-sans">Running audit…</p>}
+      {isLoading && (
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <Card key={i} className="card-glass">
+              <CardContent className="p-4">
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-      {data && (
+      {data && data.sampleSize === 0 && (
+        <EmptyState
+          icon={ShieldCheck}
+          title="No ledger claims to audit yet"
+          description="The constitutional audit runs over the prediction ledger. As predictions are recorded, every claim is checked against the four principles here."
+        />
+      )}
+
+      {data && data.sampleSize > 0 && (
         <>
           <Card className="card-glass">
             <CardContent className="p-4 flex items-center gap-4">
@@ -142,11 +162,6 @@ export default function Compliance({ activeCompanyId }: ComplianceProps) {
             </Card>
           )}
 
-          {data.sampleSize === 0 && (
-            <p className="text-xs text-muted-foreground font-sans text-center">
-              No ledger claims to audit yet.
-            </p>
-          )}
         </>
       )}
     </div>

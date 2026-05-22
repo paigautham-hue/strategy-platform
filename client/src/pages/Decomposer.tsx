@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { SectionLabel } from "@/components/SectionLabel";
 
 interface DecomposerProps {
   activeCompanyId: number | null;
@@ -103,9 +104,9 @@ export default function Decomposer({ activeCompanyId }: DecomposerProps) {
             </Card>
           )}
 
-          <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
+          <SectionLabel>
             {r.initiatives.length} initiatives · {r.okrCount} OKRs
-          </p>
+          </SectionLabel>
 
           {r.initiatives.map((ini, idx) => (
             <Card key={idx} className="card-glass">

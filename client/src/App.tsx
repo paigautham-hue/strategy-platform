@@ -71,8 +71,25 @@ function LoginGate({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-8 max-w-sm px-6">
+      <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+        {/* Ambient depth — a soft gold glow + faint grid behind the mark. */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse 60% 50% at 50% 38%, rgba(212,175,55,0.12), transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            maskImage: "radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent 75%)",
+          }}
+        />
+        <div className="text-center space-y-8 max-w-sm px-6 relative">
           <div className="space-y-3">
             <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center mx-auto glow-gold">
               <Layers className="h-8 w-8 text-background" />
