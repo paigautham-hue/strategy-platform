@@ -119,47 +119,108 @@ function CompanySwitcher({ activeCompanyId, onSwitch }: CompanySwitcherProps) {
   );
 }
 
-// ─── Navigation items ─────────────────────────────────────────────────────────
+// ─── Navigation groups ────────────────────────────────────────────────────────
+// Grouped to match the platform's own conceptual structure (see the in-app
+// manual) — a flat list of ~38 destinations is impossible to scan.
 
-const NAV_ITEMS = [
-  { href: "/", label: "Overview", icon: BarChart3 },
-  { href: "/companies", label: "Companies", icon: Building2 },
-  { href: "/onboarding", label: "Onboard Company", icon: Rocket },
-  { href: "/projects", label: "Projects", icon: FolderOpen },
-  { href: "/memory", label: "Memory", icon: Brain },
-  { href: "/ingest", label: "Ingest", icon: FileInput },
-  { href: "/voice-intake", label: "Voice Intake", icon: Mic },
-  { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
-  { href: "/memo", label: "Memo Dictation", icon: FileText },
-  { href: "/personas", label: "Advisory Personas", icon: Users },
-  { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
-  { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
-  { href: "/research", label: "Research", icon: Radar },
-  { href: "/contradictions", label: "Contradictions", icon: GitFork },
-  { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
-  { href: "/options", label: "Options", icon: ListChecks },
-  { href: "/red-team", label: "Red Team", icon: Swords },
-  { href: "/war-game", label: "War-Game", icon: Crosshair },
-  { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
-  { href: "/decompose", label: "Decompose", icon: Workflow },
-  { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
-  { href: "/drift", label: "Drift Detection", icon: Gauge },
-  { href: "/predictions", label: "Predictions", icon: TrendingUp },
-  { href: "/calibration", label: "Calibration", icon: Scale },
-  { href: "/attribution", label: "Attribution", icon: Microscope },
-  { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
-  { href: "/playbooks", label: "Playbooks", icon: BookOpen },
-  { href: "/patterns", label: "Pattern Mining", icon: Boxes },
-  { href: "/synergy", label: "Synergy Scout", icon: Combine },
-  { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
-  { href: "/briefing", label: "Briefing", icon: Newspaper },
-  { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
-  { href: "/audit", label: "Audit Log", icon: Shield },
-  { href: "/usage", label: "Usage Events", icon: Activity },
-  { href: "/export", label: "Export", icon: Download },
-  { href: "/mcp", label: "MCP Tools", icon: Cpu },
-  { href: "/manual", label: "User Manual", icon: BookText },
-  { href: "/users", label: "User Management", icon: UserCog },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof BarChart3;
+}
+
+const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
+  {
+    label: null,
+    items: [{ href: "/", label: "Overview", icon: BarChart3 }],
+  },
+  {
+    label: "Companies",
+    items: [
+      { href: "/companies", label: "Companies", icon: Building2 },
+      { href: "/onboarding", label: "Onboard Company", icon: Rocket },
+      { href: "/projects", label: "Projects", icon: FolderOpen },
+    ],
+  },
+  {
+    label: "Knowledge",
+    items: [
+      { href: "/memory", label: "Memory", icon: Brain },
+      { href: "/ingest", label: "Ingest", icon: FileInput },
+      { href: "/voice-intake", label: "Voice Intake", icon: Mic },
+    ],
+  },
+  {
+    label: "Strategy Intake",
+    items: [
+      { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
+      { href: "/memo", label: "Memo Dictation", icon: FileText },
+      { href: "/personas", label: "Advisory Personas", icon: Users },
+      { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
+    ],
+  },
+  {
+    label: "Reasoning",
+    items: [
+      { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
+      { href: "/research", label: "Research", icon: Radar },
+      { href: "/contradictions", label: "Contradictions", icon: GitFork },
+      { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
+      { href: "/options", label: "Options", icon: ListChecks },
+      { href: "/red-team", label: "Red Team", icon: Swords },
+    ],
+  },
+  {
+    label: "Simulation",
+    items: [
+      { href: "/war-game", label: "War-Game", icon: Crosshair },
+      { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
+    ],
+  },
+  {
+    label: "Execution",
+    items: [
+      { href: "/decompose", label: "Decompose", icon: Workflow },
+      { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
+      { href: "/drift", label: "Drift Detection", icon: Gauge },
+    ],
+  },
+  {
+    label: "Learning Loop",
+    items: [
+      { href: "/predictions", label: "Predictions", icon: TrendingUp },
+      { href: "/calibration", label: "Calibration", icon: Scale },
+      { href: "/attribution", label: "Attribution", icon: Microscope },
+      { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
+      { href: "/playbooks", label: "Playbooks", icon: BookOpen },
+      { href: "/patterns", label: "Pattern Mining", icon: Boxes },
+    ],
+  },
+  {
+    label: "Portfolio",
+    items: [
+      { href: "/synergy", label: "Synergy Scout", icon: Combine },
+      { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
+      { href: "/briefing", label: "Briefing", icon: Newspaper },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
+      { href: "/audit", label: "Audit Log", icon: Shield },
+      { href: "/usage", label: "Usage Events", icon: Activity },
+      { href: "/export", label: "Export", icon: Download },
+      { href: "/mcp", label: "MCP Tools", icon: Cpu },
+    ],
+  },
+  {
+    label: "Help & Admin",
+    items: [
+      { href: "/manual", label: "User Manual", icon: BookText },
+      { href: "/users", label: "User Management", icon: UserCog },
+    ],
+  },
 ];
 
 const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation"];
@@ -190,8 +251,6 @@ export function PlatformLayout({
     if (OPERATOR_ITEMS.includes(href) && user.role === "portco_team") return false;
     return true;
   };
-
-  const visibleItems = NAV_ITEMS.filter((item) => canAccess(item.href));
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -227,25 +286,41 @@ export function PlatformLayout({
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2">
-          {visibleItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
+        <nav className="flex-1 overflow-y-auto py-2 px-2">
+          {NAV_GROUPS.map((group, gi) => {
+            const items = group.items.filter((item) => canAccess(item.href));
+            if (items.length === 0) return null;
             return (
-              <Link key={item.href} href={item.href}>
-                <a
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm mb-0.5 transition-colors duration-150",
-                    isActive
-                      ? "bg-gold/10 text-gold border border-gold/20"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-gold")} />
-                  <span className="font-sans">{item.label}</span>
-                </a>
-              </Link>
+              <div key={gi} className={cn(gi > 0 && "mt-3")}>
+                {group.label && (
+                  <p className="px-3 pb-1 pt-1 text-[10px] font-sans font-medium uppercase tracking-wider text-muted-foreground/50">
+                    {group.label}
+                  </p>
+                )}
+                {items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location === item.href;
+                  return (
+                    <Link key={item.href} href={item.href}>
+                      <a
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-1.5 rounded-md text-sm mb-0.5 transition-colors duration-150 relative",
+                          isActive
+                            ? "bg-gold/10 text-gold"
+                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        )}
+                      >
+                        {isActive && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-r bg-gold" />
+                        )}
+                        <Icon className={cn("h-4 w-4 shrink-0", isActive && "text-gold")} />
+                        <span className="font-sans">{item.label}</span>
+                      </a>
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </nav>
