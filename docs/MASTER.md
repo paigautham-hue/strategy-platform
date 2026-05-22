@@ -61,7 +61,7 @@
 | **5** | Strategy → Execution + Operator UX Tier | 🟡 | 2026-05-21 | — | — | 5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection shipped; 5.2 connectors / 5.3 KPI sync / 5.5 Slack bot infra-gated |
 | **6** | Learning Loop Activates | 🟡 | 2026-05-21 | — | — | 6.1–6.5 shipped (Calibration, Pattern Mining, Playbooks, Attribution, Constitutional Audit); resolver cron + 6.6 DAGs need closed-prediction data |
 | **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy, 7.2 Distillation, 7.6 Briefing builder shipped; 7.3 dashboard / 7.5 applied library / TTS audio need portfolio data + infra |
-| **8** | Harden, Optimize, On-Prem Lane | ☐ | — | — | — | Final |
+| **8** | Harden, Optimize, On-Prem Lane | 🟡 | 2026-05-22 | — | — | 8.1 caching, 8.2 prompt compression, 8.4 ADRs + runbook shipped; on-prem vLLM / perf tuning / monitoring need deploy infra |
 
 **Currently active workstream:** Phase 1 — Memory, Ingest, Voice Intake, Hygiene Crons (next to build).
 
@@ -173,6 +173,13 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-05-22 · Phase 8 — Hardening: caching, compression, ADRs, runbook
+- **`server/services/cache.ts`** — a dependency-free in-process `TtlCache` (TTL expiry + LRU eviction, hit/miss stats). The **embedding cache** is wired into `router.embed`: a text embeds to the same vector for a given model, so a cache hit returns instantly, costs nothing, and skips the budget check and call log (`EmbedResponse.cached`). A `resultCache` is available for repeated deterministic structured results (8.1).
+- **`server/services/prompt-compression.ts`** — `compressPrompt` strips slack from a prompt losslessly (trailing whitespace, blank-line runs, consecutive duplicate lines, 3+ interior spaces; optional hard char cap). Conservative — never paraphrases (8.2).
+- **`docs/ADRS.md`** — 11 Architecture Decision Records covering every major choice (MySQL, app-side cosine, the LLM router, bi-temporal memory, the prediction ledger, defensive parsing, synthetic/real separation, cross-company enforcement, tRPC, the build/deploy split, the cache) (8.4).
+- **`docs/RUNBOOK.md`** — SLO definitions, deploy procedure, required env vars, cron jobs, synthetic checks, incident playbook, disaster-recovery drill, and cross-cutting hygiene cadence (8.4 / 8.5).
+- **Tests**: +18 unit tests (cache LRU/TTL/stats/keys, prompt-compression transforms). 429 pass / 16 skipped / 0 fail; typecheck + build clean.
 
 ### 2026-05-21 · Build status — Phases 3–7 buildable surface complete
 - Every workstream across Phases 3–7 that can be built **without deployment infrastructure** is shipped: Phase 3 (3.1–3.6 all six), Phase 4 (4.2 Brainstorm, 4.4 Personas, 4.5 Memo Dictation), Phase 5 (5.1 Decomposer + Pre-Mortem, 5.4 Drift Detection), Phase 6 (6.1–6.5), Phase 7 (7.1 Synergy, 7.2 Distillation, 7.6 Briefing). 412 tests passing; typecheck + build clean throughout.
