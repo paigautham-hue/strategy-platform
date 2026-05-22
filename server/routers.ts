@@ -974,12 +974,15 @@ const attributionRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
+      // 6.6: condition attribution on the company's industry confounder DAG.
+      const company = await getCompany(ctx.user.tenantId, input.companyId);
       return attributeInitiative(
         input.initiative,
         input.outcome,
         input.context ?? "",
         input.companyId,
         routerCtx,
+        company?.industry ?? undefined,
       );
     }),
 });
