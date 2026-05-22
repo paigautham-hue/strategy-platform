@@ -47,6 +47,7 @@ import {
   Newspaper,
   UserCog,
   BookText,
+  Layers,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -205,11 +206,11 @@ export function PlatformLayout({
         {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-border/60">
           <div className="w-8 h-8 rounded gradient-gold flex items-center justify-center shrink-0">
-            <FileText className="h-4 w-4 text-background" />
+            <Layers className="h-4 w-4 text-background" />
           </div>
           <div>
             <h1 className="font-heading text-sm font-semibold text-gradient-gold leading-tight">
-              MERIDIAN
+              CAIRN
             </h1>
             <p className="text-[10px] text-muted-foreground font-sans tracking-widest uppercase">
               Strategy Platform
@@ -311,7 +312,7 @@ export function PlatformLayout({
           >
             <Menu className="h-5 w-5" />
           </button>
-          <span className="font-heading text-sm text-gradient-gold">MERIDIAN</span>
+          <span className="font-heading text-sm text-gradient-gold">CAIRN</span>
         </header>
 
         {/* Page content */}

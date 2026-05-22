@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Rebrand — the product is now "Cairn"
+- The platform's product name changed from MERIDIAN to **CAIRN** (the prior name clashed with a separate app the owner runs). A cairn is a trail marker built one stone at a time — the exact metaphor for memory that compounds session by session and guides the next decision.
+- **Wordmark** CAIRN, **icon** stacked layers (`Layers`), **tagline** "Strategy, stone by stone." Login subtitle: "Private strategy intelligence. Built stone by stone — every session compounds." The dark + gold theme is unchanged.
+- Rebrand touched UI only — `App.tsx` (login gate), `PlatformLayout.tsx` (sidebar + mobile wordmark, logo icon), and the in-app manual (`Manual.tsx`, `manual-content.ts`). Doc references to the external sibling app "Meridian" (the studied voice app, and the `paigautham-hue/meridian` repo) are deliberately left intact — they are a different app.
+- **Note:** the browser-tab title is a Manus project setting (`{{project_title}}` template token in `client/index.html`) — rename the Manus project to "Cairn" so the tab updates.
+
 ### 2026-05-22 · In-app User Manual + FAQ
 - **`client/src/pages/Manual.tsx`** + **`client/src/lib/manual-content.ts`** — a detailed in-app manual at `/manual` (visible to every role). Eleven sections cover what the platform is, getting started, knowledge & memory, strategy intake, reasoning, simulation, strategy→execution, the learning loop, portfolio intelligence, operations & access, and "the intelligence under the hood" (multi-agent orchestration, the LLM router, defensive parsing, synthetic-vs-real, namespacing, the compounding loop). Plus a 14-item FAQ.
 - Collapsible accordion sections with a jump-nav and expand/collapse-all; the content lives in a plain data module so it is easy to keep current as features change.

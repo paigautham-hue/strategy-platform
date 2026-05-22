@@ -157,7 +157,7 @@ export default function Manual() {
       </div>
 
       <p className="text-xs text-muted-foreground font-sans text-center pt-2">
-        Meridian — strategy compounds with every session.
+        Cairn — strategy, stone by stone.
       </p>
     </div>
   );
