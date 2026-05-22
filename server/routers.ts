@@ -58,6 +58,7 @@ import { minePatterns } from "./agents/pattern-mining";
 import { runSynergyScout } from "./agents/synergy-scout";
 import { distillPattern } from "./services/distillation";
 import { buildBriefing } from "./agents/briefing";
+import { listKpis, computeKpi } from "./services/kpi-library";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
 import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
 import * as mcpGateway from "./ai/mcp-gateway";
@@ -1220,6 +1221,23 @@ const userRouter = router({
     }),
 });
 
+// ─── KPI Library Router (Phase 5) ─────────────────────────────────────────────
+
+const kpiRouter = router({
+  // The reusable KPI catalog (definitions without compute functions).
+  list: protectedProcedure.query(() => listKpis()),
+
+  // Compute one KPI from named numeric inputs.
+  compute: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        inputs: z.record(z.string(), z.number()),
+      })
+    )
+    .mutation(({ input }) => computeKpi(input.id, input.inputs)),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 
 export const appRouter = router({
@@ -1261,6 +1279,7 @@ export const appRouter = router({
   synergy: synergyRouter,
   distillation: distillationRouter,
   briefing: briefingRouter,
+  kpi: kpiRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
   cost: costRouter,
