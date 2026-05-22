@@ -174,6 +174,12 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · User Management + per-company access scoping (admin)
+- **`server/services/access.ts`** — pure, tested access-control rules in one place: `canManageUsers` (admin-only), `isUnscopedRole` (gp/admin see all), `canAccessCompany`, and `filterAccessibleCompanies`. The `users` table already carried `role` and `assignedCompanyIds` — this wires them into enforcement.
+- **`company.list`** now filters to the caller's accessible companies (C1): gp/admin see every company; operator/portco_team see only their assigned companies (an empty assignment means not-yet-scoped → all). This closes a gap where scoped users could see every portco.
+- **tRPC** `user.list` / `user.updateRole` / `user.assignCompanies` — all `adminProcedure`; an admin cannot strip their own admin role (self-lockout guard); role/assignment changes emit usage events. **UI** `/users` page (admin-only in nav) — per-user role selector and per-company access toggles.
+- **Tests**: +12 unit tests (role gating, scoping rules, company filtering). 437 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-22 · Phase 8 — Hardening: caching, compression, ADRs, runbook
 - **`server/services/cache.ts`** — a dependency-free in-process `TtlCache` (TTL expiry + LRU eviction, hit/miss stats). The **embedding cache** is wired into `router.embed`: a text embeds to the same vector for a given model, so a cache hit returns instantly, costs nothing, and skips the budget check and call log (`EmbedResponse.cached`). A `resultCache` is available for repeated deterministic structured results (8.1).
 - **`server/services/prompt-compression.ts`** — `compressPrompt` strips slack from a prompt losslessly (trailing whitespace, blank-line runs, consecutive duplicate lines, 3+ interior spaces; optional hard char cap). Conservative — never paraphrases (8.2).
