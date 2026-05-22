@@ -46,6 +46,7 @@ import {
   FlaskConical,
   Newspaper,
   UserCog,
+  BookText,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -156,6 +157,7 @@ const NAV_ITEMS = [
   { href: "/usage", label: "Usage Events", icon: Activity },
   { href: "/export", label: "Export", icon: Download },
   { href: "/mcp", label: "MCP Tools", icon: Cpu },
+  { href: "/manual", label: "User Manual", icon: BookText },
   { href: "/users", label: "User Management", icon: UserCog },
 ];
 

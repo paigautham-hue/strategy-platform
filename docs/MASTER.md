@@ -174,6 +174,10 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · In-app User Manual + FAQ
+- **`client/src/pages/Manual.tsx`** + **`client/src/lib/manual-content.ts`** — a detailed in-app manual at `/manual` (visible to every role). Eleven sections cover what the platform is, getting started, knowledge & memory, strategy intake, reasoning, simulation, strategy→execution, the learning loop, portfolio intelligence, operations & access, and "the intelligence under the hood" (multi-agent orchestration, the LLM router, defensive parsing, synthetic-vs-real, namespacing, the compounding loop). Plus a 14-item FAQ.
+- Collapsible accordion sections with a jump-nav and expand/collapse-all; the content lives in a plain data module so it is easy to keep current as features change.
+
 ### 2026-05-22 · User Management + per-company access scoping (admin)
 - **`server/services/access.ts`** — pure, tested access-control rules in one place: `canManageUsers` (admin-only), `isUnscopedRole` (gp/admin see all), `canAccessCompany`, and `filterAccessibleCompanies`. The `users` table already carried `role` and `assignedCompanyIds` — this wires them into enforcement.
 - **`company.list`** now filters to the caller's accessible companies (C1): gp/admin see every company; operator/portco_team see only their assigned companies (an empty assignment means not-yet-scoped → all). This closes a gap where scoped users could see every portco.
