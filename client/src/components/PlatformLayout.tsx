@@ -49,6 +49,7 @@ import {
   BookText,
   Layers,
   Calculator,
+  Plug,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -213,6 +214,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { href: "/audit", label: "Audit Log", icon: Shield },
       { href: "/usage", label: "Usage Events", icon: Activity },
       { href: "/export", label: "Export", icon: Download },
+      { href: "/connectors", label: "Connectors", icon: Plug },
       { href: "/mcp", label: "MCP Tools", icon: Cpu },
     ],
   },
@@ -226,7 +228,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
 ];
 
 const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation"];
-const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding"];
+const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding", "/connectors"];
 const ADMIN_ONLY_ITEMS = ["/users"];
 
 // ─── PlatformLayout ───────────────────────────────────────────────────────────

@@ -174,6 +174,13 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-05-22 · Phase 5 — Execution connector framework + Linear (Workstream 5.2)
+- **Connector framework** — new `connector_credential` and `connector_link` schema tables (per-portco credentials + a stable initiative↔external-item mapping that survives renames). Generic over `ConnectorType`; the registry (`server/connectors/index.ts`) records Linear as available, Notion/Jira as sequenced next.
+- **Credential encryption** — `server/connectors/crypto.ts`: API tokens are encrypted at rest with AES-256-GCM, the key derived from `CONNECTOR_ENC_KEY` (Vault). Dev fallback stores plaintext when no key is set. Credentials are never returned to the client or logged.
+- **Linear connector** — `server/connectors/linear.ts`: a defensive GraphQL client — connection test (`viewer`), team listing, and issue creation. **tRPC** `connector.{list,connect,test,teams,setTeam,disconnect,pushInitiative,links}` (operator-tier). **UI** `/connectors` page — paste a Linear key, test, pick a target team, push initiatives as issues, and see the synced-items list.
+- **Migration note:** Manus runs one schema migration (the two new tables) on next publish; set `CONNECTOR_ENC_KEY` in the Vault. The GraphQL field shapes are verified against the live Linear API on first use.
+- **Tests**: +9 unit tests (crypto round-trip with/without a key, fresh-IV, registry). 466 pass / 16 skipped / 0 fail; typecheck + build clean.
+
 ### 2026-05-22 · Phase 5 — KPI Definition Library (Workstream 5.3)
 - **`server/services/kpi-library.ts`** — a reusable catalog of 15 standard operating KPIs across five categories (unit-economics, retention, growth, efficiency, liquidity): CAC, LTV, LTV:CAC, CAC payback, NRR, GRR, logo retention, ARR, growth rate, Rule of 40, magic number, gross margin, burn multiple, runway. Each definition carries its inputs, a human-readable formula, a unit, a direction, and a **pure `compute` function** (safe division → null on a zero denominator).
 - `listKpis` returns a serialisable catalog (compute fns stripped); `computeKpi` runs one; `formatKpiValue` renders by unit. This is what KPI sync maps live metrics onto and what the OKR auto-mapper matches against (when connectors land).

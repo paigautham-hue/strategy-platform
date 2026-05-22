@@ -10,11 +10,17 @@ import {
   auditLogs,
   usageEvents,
   llmCallLogs,
+  connectorCredentials,
+  connectorLinks,
   type Company,
   type StrategyProject,
   type Session,
   type User,
   type UserRole,
+  type ConnectorCredential,
+  type ConnectorLink,
+  type ConnectorType,
+  type ConnectorStatus,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -131,6 +137,182 @@ export async function setAssignedCompanies(
     .update(users)
     .set({ assignedCompanyIds: companyIds })
     .where(and(eq(users.tenantId, tenantId), eq(users.id, userId)));
+}
+
+// ─── Connectors (Phase 5, Workstream 5.2) ─────────────────────────────────────
+
+/** Fetch one connector credential row for a company. */
+export async function getConnectorCredential(
+  tenantId: string,
+  companyId: number,
+  connectorType: ConnectorType,
+): Promise<ConnectorCredential | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select()
+    .from(connectorCredentials)
+    .where(
+      and(
+        eq(connectorCredentials.tenantId, tenantId),
+        eq(connectorCredentials.companyId, companyId),
+        eq(connectorCredentials.connectorType, connectorType),
+      ),
+    )
+    .limit(1);
+  return rows[0];
+}
+
+/** List every connector credential row for a company. */
+export async function listConnectorCredentials(
+  tenantId: string,
+  companyId: number,
+): Promise<ConnectorCredential[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(connectorCredentials)
+    .where(
+      and(
+        eq(connectorCredentials.tenantId, tenantId),
+        eq(connectorCredentials.companyId, companyId),
+      ),
+    );
+}
+
+/** Store (or replace) a connector credential. Resets status to disconnected. */
+export async function upsertConnectorCredential(params: {
+  tenantId: string;
+  companyId: number;
+  connectorType: ConnectorType;
+  credential: string;
+  config?: Record<string, string>;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .insert(connectorCredentials)
+    .values({
+      tenantId: params.tenantId,
+      companyId: params.companyId,
+      connectorType: params.connectorType,
+      credential: params.credential,
+      config: params.config,
+      status: "disconnected",
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        credential: params.credential,
+        config: params.config,
+        status: "disconnected",
+        lastError: null,
+      },
+    });
+}
+
+/** Update a connector's status after a connection test. */
+export async function updateConnectorStatus(
+  tenantId: string,
+  companyId: number,
+  connectorType: ConnectorType,
+  status: ConnectorStatus,
+  lastError?: string | null,
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(connectorCredentials)
+    .set({ status, lastError: lastError ?? null, lastTestedAt: new Date() })
+    .where(
+      and(
+        eq(connectorCredentials.tenantId, tenantId),
+        eq(connectorCredentials.companyId, companyId),
+        eq(connectorCredentials.connectorType, connectorType),
+      ),
+    );
+}
+
+/** Update a connector's config blob (e.g. the chosen Linear team). */
+export async function updateConnectorConfig(
+  tenantId: string,
+  companyId: number,
+  connectorType: ConnectorType,
+  config: Record<string, string>,
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(connectorCredentials)
+    .set({ config })
+    .where(
+      and(
+        eq(connectorCredentials.tenantId, tenantId),
+        eq(connectorCredentials.companyId, companyId),
+        eq(connectorCredentials.connectorType, connectorType),
+      ),
+    );
+}
+
+/** Remove a connector credential. */
+export async function deleteConnectorCredential(
+  tenantId: string,
+  companyId: number,
+  connectorType: ConnectorType,
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(connectorCredentials)
+    .where(
+      and(
+        eq(connectorCredentials.tenantId, tenantId),
+        eq(connectorCredentials.companyId, companyId),
+        eq(connectorCredentials.connectorType, connectorType),
+      ),
+    );
+}
+
+/** Record a stable initiative ↔ external-item link. */
+export async function recordConnectorLink(params: {
+  tenantId: string;
+  companyId: number;
+  connectorType: ConnectorType;
+  localKey: string;
+  externalId: string;
+  externalUrl?: string;
+  externalState?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(connectorLinks).values({
+    tenantId: params.tenantId,
+    companyId: params.companyId,
+    connectorType: params.connectorType,
+    localKey: params.localKey,
+    externalId: params.externalId,
+    externalUrl: params.externalUrl,
+    externalState: params.externalState,
+  });
+}
+
+/** List the external links recorded for a company. */
+export async function listConnectorLinks(
+  tenantId: string,
+  companyId: number,
+): Promise<ConnectorLink[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(connectorLinks)
+    .where(
+      and(
+        eq(connectorLinks.tenantId, tenantId),
+        eq(connectorLinks.companyId, companyId),
+      ),
+    )
+    .orderBy(connectorLinks.createdAt);
 }
 
 // ─── Tenants ──────────────────────────────────────────────────────────────────

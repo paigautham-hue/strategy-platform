@@ -444,6 +444,59 @@ export const exportJobs = mysqlTable(
 );
 
 // ─────────────────────────────────────────────
+// EXECUTION-TOOL CONNECTORS (Phase 5, Workstream 5.2)
+// ─────────────────────────────────────────────
+
+export const connectorTypeEnum = ["linear", "notion", "jira"] as const;
+export type ConnectorType = (typeof connectorTypeEnum)[number];
+
+export const connectorStatusEnum = ["disconnected", "connected", "error"] as const;
+export type ConnectorStatus = (typeof connectorStatusEnum)[number];
+
+/** Per-portco execution-tool credentials — one row per (company, connector). */
+export const connectorCredentials = mysqlTable(
+  "connector_credential",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    connectorType: mysqlEnum("connectorType", connectorTypeEnum).notNull(),
+    /** API token — encrypted at rest when CONNECTOR_ENC_KEY is configured. */
+    credential: text("credential").notNull(),
+    /** Connector-specific config, e.g. the chosen Linear team id. */
+    config: json("config").$type<Record<string, string>>(),
+    status: mysqlEnum("status", connectorStatusEnum).notNull().default("disconnected"),
+    lastTestedAt: timestamp("lastTestedAt"),
+    lastError: text("lastError"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [
+    unique("uq_connector_company_type").on(t.tenantId, t.companyId, t.connectorType),
+    index("idx_connector_company").on(t.tenantId, t.companyId),
+  ]
+);
+
+/** Stable mapping: a local initiative ↔ an external tool item. Survives renames. */
+export const connectorLinks = mysqlTable(
+  "connector_link",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    connectorType: mysqlEnum("connectorType", connectorTypeEnum).notNull(),
+    /** The local initiative key this links to. */
+    localKey: varchar("localKey", { length: 512 }).notNull(),
+    externalId: varchar("externalId", { length: 128 }).notNull(),
+    externalUrl: text("externalUrl"),
+    externalState: varchar("externalState", { length: 64 }),
+    lastSyncedAt: timestamp("lastSyncedAt").defaultNow().notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (t) => [index("idx_connector_link_company").on(t.tenantId, t.companyId)]
+);
+
+// ─────────────────────────────────────────────
 // EXPORTS
 // ─────────────────────────────────────────────
 
@@ -461,3 +514,5 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 export type UsageEvent = typeof usageEvents.$inferSelect;
 export type LlmCallLog = typeof llmCallLogs.$inferSelect;
 export type ExportJob = typeof exportJobs.$inferSelect;
+export type ConnectorCredential = typeof connectorCredentials.$inferSelect;
+export type ConnectorLink = typeof connectorLinks.$inferSelect;
