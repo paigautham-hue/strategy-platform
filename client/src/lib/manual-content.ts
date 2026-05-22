@@ -32,9 +32,9 @@ export interface FaqItem {
 export const MANUAL_SECTIONS: ManualSection[] = [
   {
     id: "welcome",
-    title: "1 · What Meridian is",
+    title: "1 · What Cairn is",
     intro:
-      "Meridian is a private strategy platform for an investor and their portfolio companies. " +
+      "Cairn is a private strategy platform for an investor and their portfolio companies. " +
       "It is not a chatbot. It is a system that remembers, reasons, simulates, translates strategy " +
       "into execution, and — crucially — learns over time which of its judgements were right.",
     entries: [
@@ -48,7 +48,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       {
         term: "Diagnosis before frameworks",
         body:
-          "Meridian never opens with a menu of strategy frameworks. It first diagnoses the real " +
+          "Cairn never opens with a menu of strategy frameworks. It first diagnoses the real " +
           "question — what kind of problem this is — and only then selects the few frameworks that " +
           "actually fit. A framework is a tool, not a ritual.",
       },
@@ -437,7 +437,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
     id: "intelligence",
     title: "11 · The intelligence under the hood",
     intro:
-      "What makes Meridian more than a prompt. These are the principles that govern how the engine " +
+      "What makes Cairn more than a prompt. These are the principles that govern how the engine " +
       "reasons — worth understanding so you can trust, and challenge, what it tells you.",
     entries: [
       {

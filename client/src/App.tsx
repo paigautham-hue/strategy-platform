@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { Layers } from "lucide-react";
 
 // Pages
 import Overview from "./pages/Overview";
@@ -61,7 +61,7 @@ function LoginGate({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center mx-auto animate-pulse">
-            <FileText className="h-6 w-6 text-background" />
+            <Layers className="h-6 w-6 text-background" />
           </div>
           <p className="text-muted-foreground font-sans text-sm">Loading...</p>
         </div>
@@ -75,11 +75,11 @@ function LoginGate({ children }: { children: React.ReactNode }) {
         <div className="text-center space-y-8 max-w-sm px-6">
           <div className="space-y-3">
             <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center mx-auto glow-gold">
-              <FileText className="h-8 w-8 text-background" />
+              <Layers className="h-8 w-8 text-background" />
             </div>
-            <h1 className="font-heading text-3xl text-gradient-gold">MERIDIAN</h1>
+            <h1 className="font-heading text-3xl text-gradient-gold">CAIRN</h1>
             <p className="text-muted-foreground font-body text-sm leading-relaxed">
-              Private equity intelligence platform. Strategy compounds with every session.
+              Private strategy intelligence. Built stone by stone — every session compounds.
             </p>
           </div>
           <a href={getLoginUrl()}>
