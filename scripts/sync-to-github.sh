@@ -10,7 +10,11 @@
 
 set -euo pipefail
 
-REPO="https://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@github.com/paigautham-hue/strategy-platform.git"
+# Set GITHUB_TOKEN env var before running:
+#   export GITHUB_TOKEN=<your-pat>
+: "${GITHUB_TOKEN:?GITHUB_TOKEN must be set}"
+
+REPO="https://${GITHUB_TOKEN}@github.com/paigautham-hue/strategy-platform.git"
 BRANCH="main"
 
 echo "==> Ensuring 'github' remote exists..."
