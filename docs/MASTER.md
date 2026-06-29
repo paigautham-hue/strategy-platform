@@ -92,6 +92,8 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 | 8 research specialist agents | 2 | ☐ | Parallel within $5 budget |
 | Live deep-research view | 2 | ☐ | Agents working visualization |
 | Code interpreter (financial modeling) | 2 | ☐ | Sandboxed (OD11) |
+| Monte Carlo financial simulation | 2 | 🟡 | Pure seeded NPV/IRR/VaR/CVaR/Sharpe + sensitivity + scenarios (`server/services/monte-carlo.ts`, salvaged StrategyForge); partial fill of the code-interpreter gap |
+| Dual-currency (USD / INR-Crore) | 5 | 🟡 | Pure convert + crore/million format + parse (`server/services/currency.ts`, salvaged StrategyForge); live FX via an `fx_rate` MCP tool pending |
 | Contradiction review UI | 2 | ☐ | Open contradictions → 4 resolution states |
 | **Share-and-Apply (Strategy Replication)** | 2 | ☐ | External artifact → portco application |
 | 8-framework library (system-selected) | 3 | ☐ | Porter, Ansoff, JTBD, Wardley, 3H, BCG, Blue Ocean, Disruption |
@@ -173,6 +175,14 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-06-29 · Prototype consolidation (1/n) — Monte Carlo + dual-currency salvaged from StrategyForge
+- **Context**: an audit of the three sibling strategy repos (Cairn, StrategyForge, Dynamo) recommended folding the genuinely useful, self-contained modules of the two older prototypes into Cairn, then archiving them. This is the first salvage slice — the two zero-dependency wins.
+- **`server/services/monte-carlo.ts`** — probabilistic NPV / IRR / risk engine (mean/median/σ, P10–P90, probability-of-loss, VaR95/99, CVaR/expected-shortfall, Sharpe), plus single-variable sensitivity sweeps and best/base/worst scenario comparison. Salvaged from StrategyForge's `monteCarloSimulation.ts` and **hardened**: the RNG is now a seeded, pure mulberry32 generator (deterministic ⇒ unit-testable AND reproducible for prediction-ledger audit), and the donor's NaN/Infinity edge cases (Box-Muller `log(0)`, non-positive cap rate, zero-variance Sharpe) are guarded. Partially fills the Phase 2 "code-interpreter / financial-modelling" gap with a real computational core the reasoning agents can call.
+- **`server/services/currency.ts`** — pure USD ↔ INR-Crore conversion + crore/million formatting + suffix-aware parsing + percentage-change. The anchor customer (MGPS) reports in ₹ Crore. Made **pure**: the FX rate is injected (documented fallback when absent), not fetched — a live `fx_rate` MCP tool is the C3-compliant follow-up.
+- **tRPC**: `simulation.{run,sensitivity,scenarios}` and `currency.{dual,rate}` (protected). No schema change, no new dependency, no migration.
+- **Tests**: +21 unit tests (13 Monte Carlo incl. an exact hand-computed zero-volatility NPV of 600 and seed-determinism; 8 currency). **521 pass / 16 skipped / 0 fail**; typecheck clean.
+- **Not ported (deliberately)**: StrategyForge's stubbed "5-layer document processing" (placeholder text — to be reimplemented with the `mammoth`/`pdfjs-dist` deps already present). Next salvage slices: structured-output auto-write pattern, the MGPS golden fixture, and Dynamo's conversational-interview ("Digital Twin") intake.
 
 ### 2026-05-22 · Phase 2 — Multi-hop entity graph / HippoRAG (Workstream 2.7)
 - **`server/retrieval/graph.ts`** — the pure graph core: `buildEntityGraph` (undirected adjacency, drops dangling edges), `multiHopReach` (BFS that tags each node with its hop distance), `shortestConnection` (the connecting edge-chain between two entities). Deterministic and fully tested.
