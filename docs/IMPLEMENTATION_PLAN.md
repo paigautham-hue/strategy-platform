@@ -3,6 +3,13 @@
 > Detailed phase-by-phase plan. Companion to [GUIDING_PRINCIPLES.md](./GUIDING_PRINCIPLES.md) and [DEFERRED_BACKLOG.md](./DEFERRED_BACKLOG.md).
 > Every deliverable cites the principle(s) it enforces. Every phase has a measurable acceptance gate that requires real usage.
 
+> ⚠️ **STACK NOTE.** This is a *forward-looking design doc* and still describes the
+> original Python/FastAPI + Vue + Zep/pgvector architecture. **The built product
+> (Cairn) is TypeScript** — React 19 + Express + tRPC v11 + Drizzle on MySQL/TiDB,
+> deployed on Manus. Read deliverables for their *intent and acceptance gates*, not
+> their stack/paths. See the Stack Correction at the top of [CLAUDE.md](./CLAUDE.md)
+> for the doc→code mapping. Phase/workstream *status* lives in [MASTER.md](./MASTER.md).
+
 ---
 
 ## How to read this plan
