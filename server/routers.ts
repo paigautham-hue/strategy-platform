@@ -72,6 +72,8 @@ import { buildBriefing } from "./agents/briefing";
 import { listKpis, computeKpi } from "./services/kpi-library";
 import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services/monte-carlo";
 import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
+import { DIMENSIONS, scoreDimensionCoverage, completenessGates } from "./services/digital-twin";
+import { nextDiscoveryTurn, generateAiStrategy } from "./agents/digital-twin-interview";
 import { generateDiagram } from "./agents/diagram";
 import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
@@ -1345,6 +1347,55 @@ const currencyRouter = router({
   })),
 });
 
+// ─── Digital Twin Router (Phase 1 — conversational intake; salvaged from Dynamo) ─
+
+const conversationMessageSchema = z.object({ role: z.string(), content: z.string() });
+
+const digitalTwinRouter = router({
+  // The five business dimensions the discovery covers.
+  dimensions: protectedProcedure.query(() => DIMENSIONS),
+
+  // Pure, graded per-dimension coverage + funnel gates for a conversation.
+  coverage: protectedProcedure
+    .input(z.object({ messages: z.array(conversationMessageSchema) }))
+    .query(({ input }) => {
+      const coverage = scoreDimensionCoverage(input.messages);
+      return { coverage, gates: completenessGates(coverage) };
+    }),
+
+  // Next consultant turn, with the under-explored dimension steered into the prompt.
+  nextTurn: protectedProcedure
+    .input(
+      z.object({
+        history: z.array(conversationMessageSchema).default([]),
+        userMessage: z.string().min(1),
+        companyId: z.number().optional(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      nextDiscoveryTurn(input.history, input.userMessage, buildRouterCtx(ctx, { companyId: input.companyId }))
+    ),
+
+  // Generate an AI-transformation strategy from the assembled Digital Twin.
+  generateStrategy: protectedProcedure
+    .input(
+      z.object({
+        twin: z.object({
+          businessModel: z.string().optional(),
+          financials: z.string().optional(),
+          operations: z.string().optional(),
+          organization: z.string().optional(),
+          technology: z.string().optional(),
+        }),
+        companyName: z.string().optional(),
+        companyId: z.number().optional(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      generateAiStrategy(input.twin, buildRouterCtx(ctx, { companyId: input.companyId }), input.companyName)
+    ),
+});
+
 // ─── Connector Router (Phase 5, Workstream 5.2) ───────────────────────────────
 
 const connectorTypeSchema = z.enum(["linear", "notion", "jira"]);
@@ -1600,6 +1651,7 @@ export const appRouter = router({
   kpi: kpiRouter,
   simulation: simulationRouter,
   currency: currencyRouter,
+  digitalTwin: digitalTwinRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
   entityGraph: entityGraphRouter,
