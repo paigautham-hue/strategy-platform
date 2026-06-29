@@ -92,6 +92,7 @@ badly under-reported, marking shipped+tested features as ☐):
 | Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
 | Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
 | Universal ingest | 1 | 🟡 | text / markdown / html / URL / **PDF / DOCX** live; audio / video / image pending |
+| Conversational "Digital Twin" intake | 1 | 🟡 | Dimension-steered interview + graded coverage + funnel gates + strategy synthesis (`server/services/digital-twin.ts` + `server/agents/digital-twin-interview.ts`, salvaged Dynamo). Stateless engine; `digital_twin`/`completeness_tracking` persistence is the next migration |
 | GraphRAG with dimensional auto-tagging | 1 | ✅ | Dimensional tags at write time; entity-graph multi-hop (`server/services/entity-graph.ts`) |
 | Voice intake (one-shot) | 1 | ✅ | Browser STT → strict-JSON intent parse. Realtime voice is a separate (☐) row |
 | Portco onboarding wizard | 1 | ✅ | 4-step wizard: create → seed memory → ingest doc → done |
@@ -185,6 +186,14 @@ badly under-reported, marking shipped+tested features as ☐):
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-06-29 · Prototype consolidation (2/n) — Dynamo "Digital Twin" conversational intake
+- The single most novel idea salvaged from Dynamo: a dimension-steered discovery **interview** as an intake modality complementing the form/ingest pipeline.
+- **`server/services/digital-twin.ts`** (pure) — five business dimensions; a **graded** per-dimension coverage scorer (4 facets each ⇒ 0/25/50/75/100; the donor's was effectively binary 0/20); the "Internal Note" steering builder that tells the model which dimension to move toward next; and monotonic funnel gates (preview ≥40, full strategy ≥70 — the donor's were inverted). Fully unit-tested.
+- **`server/agents/digital-twin-interview.ts`** — `nextDiscoveryTurn` (next consultant turn with the under-explored dimension steered into the system prompt) and `generateAiStrategy` (JSON-schema-constrained AI-transformation strategy: readiness score, exec summary, opportunities, use cases, risks). Both route through `server/ai/router.ts` (C3) — the donor hardwired a single Gemini proxy — with defensive normalizers and best-effort fallback.
+- **tRPC**: `digitalTwin.{dimensions,coverage,nextTurn,generateStrategy}`.
+- **Tests**: +10 unit tests (graded scoring, steering, gates, strategy normalizer). **531 pass / 16 skipped / 0 fail**; typecheck clean.
+- **Stateless by design** — the engine operates on the messages passed in; DB persistence (`digital_twin` + `completeness_tracking` tables) is the next slice (a Manus migration). **Not ported**: the donor's hardcoded roadmap/ROI, fake multi-model fallback, and cosmetic "web-search grounding".
 
 ### 2026-06-29 · Doc reconciliation — correct the stack references + Feature Matrix
 - **Stack correction**: `CLAUDE.md` and `IMPLEMENTATION_PLAN.md` described a Python/FastAPI + Vue + Zep/pgvector stack that **was never built** — the real product is TypeScript (React 19 + Express + tRPC v11 + Drizzle on MySQL/TiDB, deployed on Manus). Added a prominent Stack Correction banner to `CLAUDE.md` with a doc→code path mapping, corrected the Project Facts table, and annotated the (Python) Subsystem Map as the original plan, not the built layout. The C1–C25 principles remain valid; only their language/paths were illustrative.
