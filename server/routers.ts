@@ -70,6 +70,8 @@ import { runSynergyScout } from "./agents/synergy-scout";
 import { distillPattern } from "./services/distillation";
 import { buildBriefing } from "./agents/briefing";
 import { listKpis, computeKpi } from "./services/kpi-library";
+import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services/monte-carlo";
+import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
 import { generateDiagram } from "./agents/diagram";
 import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
@@ -1251,6 +1253,98 @@ const kpiRouter = router({
     .mutation(({ input }) => computeKpi(input.id, input.inputs)),
 });
 
+// ─── Simulation Router (Phase 2 — financial modelling; salvaged from StrategyForge) ─
+
+const monteCarloInputSchema = z.object({
+  baseRevenue: z.number(),
+  growthRates: z.array(z.number()).min(1).max(20),
+  ebitdaMargin: z.number(),
+  taxRate: z.number(),
+  discountRate: z.number(),
+  terminalGrowthRate: z.number(),
+  revenueVolatility: z.number().min(0),
+  marginVolatility: z.number().min(0),
+  growthVolatility: z.number().min(0),
+});
+
+const simulationRouter = router({
+  // Probabilistic NPV / IRR / risk distribution over a multi-year projection.
+  run: protectedProcedure
+    .input(
+      z.object({
+        input: monteCarloInputSchema,
+        numSimulations: z.number().int().min(1).max(100_000).optional(),
+        seed: z.number().int().optional(),
+      })
+    )
+    .mutation(({ input }) =>
+      runMonteCarlo(input.input, { numSimulations: input.numSimulations, seed: input.seed })
+    ),
+
+  // Sweep one input variable across a range; mean NPV at each step.
+  sensitivity: protectedProcedure
+    .input(
+      z.object({
+        input: monteCarloInputSchema,
+        variable: z.enum([
+          "baseRevenue",
+          "ebitdaMargin",
+          "taxRate",
+          "discountRate",
+          "terminalGrowthRate",
+          "revenueVolatility",
+          "marginVolatility",
+          "growthVolatility",
+        ]),
+        range: z.object({
+          min: z.number(),
+          max: z.number(),
+          steps: z.number().int().min(1).max(100),
+        }),
+        numSimulations: z.number().int().min(1).max(20_000).optional(),
+        seed: z.number().int().optional(),
+      })
+    )
+    .mutation(({ input }) =>
+      runSensitivity(input.input, input.variable, input.range, {
+        numSimulations: input.numSimulations,
+        seed: input.seed,
+      })
+    ),
+
+  // Best / base / worst comparison.
+  scenarios: protectedProcedure
+    .input(
+      z.object({
+        input: monteCarloInputSchema,
+        numSimulations: z.number().int().min(1).max(50_000).optional(),
+        seed: z.number().int().optional(),
+      })
+    )
+    .mutation(({ input }) =>
+      runScenarioComparison(input.input, {
+        numSimulations: input.numSimulations,
+        seed: input.seed,
+      })
+    ),
+});
+
+// ─── Currency Router (Phase 5 — dual USD/INR-Crore; salvaged from StrategyForge) ─
+
+const currencyRouter = router({
+  // Dual USD + INR-Crore display. `rate` is optional; absent ⇒ documented fallback.
+  dual: protectedProcedure
+    .input(z.object({ usdAmount: z.number(), rate: z.number().positive().optional() }))
+    .query(({ input }) => dualCurrencyDisplay(input.usdAmount, input.rate ?? FALLBACK_USD_INR)),
+
+  // The rate currently in effect. Honest: a documented fallback, not a live quote.
+  rate: protectedProcedure.query(() => ({
+    rate: FALLBACK_USD_INR,
+    source: "fallback" as const,
+    note: "Live FX pending an fx_rate MCP tool (C3). This is a documented fallback, not a live quote.",
+  })),
+});
+
 // ─── Connector Router (Phase 5, Workstream 5.2) ───────────────────────────────
 
 const connectorTypeSchema = z.enum(["linear", "notion", "jira"]);
@@ -1504,6 +1598,8 @@ export const appRouter = router({
   distillation: distillationRouter,
   briefing: briefingRouter,
   kpi: kpiRouter,
+  simulation: simulationRouter,
+  currency: currencyRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
   entityGraph: entityGraphRouter,
