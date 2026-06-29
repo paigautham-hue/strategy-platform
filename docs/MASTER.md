@@ -69,7 +69,17 @@
 
 ## Feature Status Matrix
 
-Tracks the headline capabilities of the platform. Updated as features ship.
+Tracks the headline capabilities of the platform.
+
+**Status legend** (corrected 2026-06-29 against the actual code — the prior matrix
+badly under-reported, marking shipped+tested features as ☐):
+- ✅ = **code-shipped + unit-tested**. This is NOT the same as the phase
+  acceptance gate being met — gate status (which requires real usage / data /
+  deploy) lives in the **Phase Status** table above. Most ✅ rows below sit under
+  phases whose gate is not yet met.
+- 🟡 = partially shipped — core logic exists but a piece is gated on deploy,
+  accumulated data, an external integration, or GPU.
+- ☐ = not built.
 
 | Capability | Phase | Status | Notes |
 |---|---|---|---|
@@ -82,51 +92,51 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 | Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
 | Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
 | Universal ingest | 1 | 🟡 | text / markdown / html / URL / **PDF / DOCX** live; audio / video / image pending |
-| GraphRAG with dimensional auto-tagging | 1 | ☐ | Inferred at write time |
-| Voice intake (one-shot) | 1 | ☐ | Whisper + strict-JSON intent parser |
+| GraphRAG with dimensional auto-tagging | 1 | ✅ | Dimensional tags at write time; entity-graph multi-hop (`server/services/entity-graph.ts`) |
+| Voice intake (one-shot) | 1 | ✅ | Browser STT → strict-JSON intent parse. Realtime voice is a separate (☐) row |
 | Portco onboarding wizard | 1 | ✅ | 4-step wizard: create → seed memory → ingest doc → done |
-| Decay / consolidation / dedup crons | 1 | ☐ | Memory hygiene from this phase |
-| User + global memory layers | 1 | ☐ | GP preferences + framework canon |
-| Diagnosis agent | 2 | ☐ | Reframes question before frameworks |
-| Chief Strategist orchestrator | 2 | ☐ | Hierarchical dispatch + budgets |
-| 8 research specialist agents | 2 | ☐ | Parallel within $5 budget |
-| Live deep-research view | 2 | ☐ | Agents working visualization |
-| Code interpreter (financial modeling) | 2 | ☐ | Sandboxed (OD11) |
+| Decay / consolidation / dedup crons | 1 | 🟡 | Decay + exact-dedup crons shipped; semantic CONSOLIDATION cron still pending |
+| User + global memory layers | 1 | ✅ | `server/services/memory-layers.ts` (GP preferences + framework canon) |
+| Diagnosis agent | 2 | ✅ | `server/agents/diagnosis.ts` — reframes question before frameworks |
+| Chief Strategist orchestrator | 2 | ✅ | `server/agents/research.ts` — hierarchical dispatch + budgets |
+| 8 research specialist agents | 2 | ✅ | Parallel mesh grounded in company memory |
+| Live deep-research view | 2 | ☐ | No streaming "agents working" surface yet |
+| Code interpreter (financial modeling) | 2 | ☐ | Sandboxed (OD11). See Monte Carlo row for a partial computational core |
 | Monte Carlo financial simulation | 2 | 🟡 | Pure seeded NPV/IRR/VaR/CVaR/Sharpe + sensitivity + scenarios (`server/services/monte-carlo.ts`, salvaged StrategyForge); partial fill of the code-interpreter gap |
 | Dual-currency (USD / INR-Crore) | 5 | 🟡 | Pure convert + crore/million format + parse (`server/services/currency.ts`, salvaged StrategyForge); live FX via an `fx_rate` MCP tool pending |
-| Contradiction review UI | 2 | ☐ | Open contradictions → 4 resolution states |
-| **Share-and-Apply (Strategy Replication)** | 2 | ☐ | External artifact → portco application |
-| 8-framework library (system-selected) | 3 | ☐ | Porter, Ansoff, JTBD, Wardley, 3H, BCG, Blue Ocean, Disruption |
-| Option generator + MCDA + sensitivity | 3 | ☐ | Ensemble vote across 3 models |
-| Red-team / critic ensemble | 3 | ☐ | Claude + GPT-5 + Gemini diversity |
-| 4-arena simulation (customer / talent / capital / regulator) | 3 | ☐ | Extends OASIS dual-platform |
-| Cross-company war-game (GP only) | 3 | ☐ | Permissioned 3-layer |
-| TTS war-game playback | 3 | ☐ | ElevenLabs per persona |
+| Contradiction review UI | 2 | ✅ | `server/services/contradictions.ts` + resolution states |
+| **Share-and-Apply (Strategy Replication)** | 2 | ✅ | `server/agents/apply-strategy.ts` — external artifact → portco application |
+| 8-framework library (system-selected) | 3 | ✅ | Porter, Ansoff, JTBD, Wardley, 3H, BCG, Blue Ocean, Disruption |
+| Option generator + MCDA + sensitivity | 3 | ✅ | `server/agents/options.ts` |
+| Red-team / critic ensemble | 3 | ✅ | `server/agents/red-team.ts` shipped (single-model today; multi-model diversity pending) |
+| 4-arena simulation (customer / talent / capital / regulator) | 3 | ✅ | `server/agents/war-game.ts` writes synthetic outcomes to the ledger |
+| Cross-company war-game (GP only) | 3 | ✅ | `server/agents/cross-co-war-game.ts` — permissioned 3-layer |
+| TTS war-game playback | 3 | ☐ | ElevenLabs per persona — no TTS code |
 | WebRTC realtime voice | 4 | ☐ | OpenAI Realtime / Gemini Live abstraction |
-| Brainstorm Mode (4 phases) | 4 | ☐ | Diverge → Probe → Sharpen → Lock |
+| Brainstorm Mode (4 phases) | 4 | ✅ | `server/agents/brainstorm.ts` — 5 silent extractors + recap |
 | Voice mini-player (persistent) | 4 | ☐ | Decoupled from full overlay (C14) |
-| Persona swap mid-session | 4 | ☐ | "Let me hear from the regulator" |
+| Persona swap mid-session | 4 | 🟡 | Advisory personas shipped (`server/agents/personas.ts`); live mid-session swap pending |
 | Vision-in (slides, whiteboards, charts) | 4 | ☐ | Vision model extracts to structured |
-| Image-out (Wardley, Porter, BCG, 3H) | 4 | ☐ | Imagen 4 / Flux (OD9) |
-| Memo dictation | 4 | ☐ | One-shot → 1-page memo |
-| Hot-path distillation | 4 | ☐ | ≥ 5× cost reduction on extraction/classification |
-| Strategy decomposer (Initiative → OKR → Task) | 5 | ☐ | With pre-mortem launch ritual |
-| Linear connector (bi-directional) | 5 | ☐ | First execution tool |
-| Notion connector | 5 | ☐ | Second |
-| Jira connector | 5 | ☐ | Third |
-| KPI sync (Stripe, GA4, Salesforce, Warehouse) | 5 | ☐ | Auto-map to OKR key results |
-| Drift detectors (Schedule / KPI / Thesis) | 5 | ☐ | With replan engine |
+| Image-out (Wardley, Porter, BCG, 3H) | 4 | 🟡 | Native CSS diagram specs shipped (`server/agents/diagram.ts`); raster export (Imagen/Flux, OD9) gated |
+| Memo dictation | 4 | ✅ | `server/agents/memo-dictation.ts` — monologue → 1-page memo |
+| Hot-path distillation | 4 | 🟡 | Distillation logic shipped (`server/services/distillation.ts`); ≥5× GPU path config-only |
+| Strategy decomposer (Initiative → OKR → Task) | 5 | ✅ | `server/agents/decomposer.ts` + pre-mortem |
+| Linear connector (bi-directional) | 5 | ✅ | `server/connectors/linear.ts` (AES-256-GCM creds, push-initiative) |
+| Notion connector | 5 | ☐ | Registered as `available:false` stub |
+| Jira connector | 5 | ☐ | Registered as `available:false` stub |
+| KPI sync (Stripe, GA4, Salesforce, Warehouse) | 5 | ☐ | Internal KPI library exists (`kpi-library.ts`); external data connectors absent |
+| Drift detectors (Schedule / KPI / Thesis) | 5 | ✅ | `server/agents/drift.ts` + replan engine |
 | Operator-tier UX (Slack + Notion + Linear embed) | 5 | ☐ | 1-page memo default |
-| Calibration cron + scorecard | 6 | ☐ | Per-framework × dimension × model |
-| Pattern mining + Playbook engine | 6 | ☐ | Auto-draft after ≥ 3 evidence projects |
-| Causal-lite attribution | 6 | ☐ | Post-mortem with counterfactual |
-| Anti-hallucination memory audit | 6 | ☐ | Nightly sampling |
-| 9-axis Synergy Scout | 7 | ☐ | Capability, customer, supplier, channel, geo, talent, tech, capital, macro |
-| Pattern distillation (anonymized) | 7 | ☐ | Min N=3 portcos before cross-co publication |
-| Portfolio dashboard (GP only) | 7 | ☐ | Thesis health, synergy queue, calibration |
-| Voice briefing (daily / weekly) | 7 | ☐ | Podcast-style with chapter markers |
-| Performance + cost optimization | 8 | ☐ | P95 latencies + numeric cost SLO |
-| On-prem model lane | 8 | ☐ | vLLM with Llama 4 / DeepSeek / Qwen |
+| Calibration cron + scorecard | 6 | 🟡 | Scorecard math shipped (`server/services/calibration.ts`); resolver cron needs deploy + ≥20 closed real predictions (currently 0) |
+| Pattern mining + Playbook engine | 6 | ✅ | `server/agents/pattern-mining.ts` + `playbook.ts` (promotion gate) |
+| Causal-lite attribution | 6 | ✅ | `server/agents/attribution.ts` — DAG-conditioned |
+| Anti-hallucination memory audit | 6 | ✅ | `server/services/audit-constitution.ts` |
+| 9-axis Synergy Scout | 7 | ✅ | `server/agents/synergy-scout.ts` (GP-only, 3-layer) |
+| Pattern distillation (anonymized) | 7 | ✅ | `server/services/distillation.ts` (N≥3 publication gate) |
+| Portfolio dashboard (GP only) | 7 | ☐ | Needs ≥3 onboarded portcos + accumulated data |
+| Voice briefing (daily / weekly) | 7 | 🟡 | Text builder shipped (`server/agents/briefing.ts`); TTS audio pending |
+| Performance + cost optimization | 8 | 🟡 | Embedding cache + prompt compression shipped; P95 + cost SLO unmeasured (no deploy metrics) |
+| On-prem model lane | 8 | ☐ | vLLM lane is a config-only deferred slot |
 
 ---
 
@@ -175,6 +185,10 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-06-29 · Doc reconciliation — correct the stack references + Feature Matrix
+- **Stack correction**: `CLAUDE.md` and `IMPLEMENTATION_PLAN.md` described a Python/FastAPI + Vue + Zep/pgvector stack that **was never built** — the real product is TypeScript (React 19 + Express + tRPC v11 + Drizzle on MySQL/TiDB, deployed on Manus). Added a prominent Stack Correction banner to `CLAUDE.md` with a doc→code path mapping, corrected the Project Facts table, and annotated the (Python) Subsystem Map as the original plan, not the built layout. The C1–C25 principles remain valid; only their language/paths were illustrative.
+- **Feature Status Matrix**: the prior matrix badly under-reported — ~20 shipped, unit-tested capabilities (diagnosis, research mesh, frameworks, options/MCDA, red-team, war-game, cross-co, share-and-apply, brainstorm, memo, decomposer, drift, pattern mining, playbooks, attribution, anti-hallucination audit, synergy, distillation, briefing, Linear connector, entity-graph, contradictions, memory layers) were marked ☐. Corrected each against the actual code, and added a legend: ✅ = code-shipped + unit-tested (NOT the same as the phase acceptance gate, which is tracked in Phase Status and mostly still unmet).
 
 ### 2026-06-29 · Prototype consolidation (1/n) — Monte Carlo + dual-currency salvaged from StrategyForge
 - **Context**: an audit of the three sibling strategy repos (Cairn, StrategyForge, Dynamo) recommended folding the genuinely useful, self-contained modules of the two older prototypes into Cairn, then archiving them. This is the first salvage slice — the two zero-dependency wins.
