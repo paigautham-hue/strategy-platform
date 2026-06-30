@@ -95,9 +95,22 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeKpi({ label: "x", status: "on track for Q2" }).status).toBe("on-track");
     expect(normalizeMilestone({ title: "x", status: "in progress, on schedule" }).status).toBe("in-progress");
     expect(normalizeKpi({ label: "x", status: "high risk" }).status).toBe("at-risk");
-    // negation must beat the bare "started" alias
+    // negation must never flip to the positive token it contains
     expect(normalizeMilestone({ title: "x", status: "not yet started" }).status).toBe("planned");
     expect(normalizeMilestone({ title: "x", status: "not started yet" }).status).toBe("planned");
+    expect(normalizeMilestone({ title: "x", status: "not done yet" }).status).toBe("planned");
+    expect(normalizeMilestone({ title: "x", status: "not complete" }).status).toBe("planned");
+    expect(normalizeKpi({ label: "x", status: "not at risk" }).status).toBe("unknown");
+  });
+
+  it("caps bounded strings to their column widths (MySQL strict-mode safety)", () => {
+    const k = normalizeKpi({ label: "L".repeat(300), unit: "U".repeat(50) });
+    expect(k.label.length).toBe(255);
+    expect(k.unit?.length).toBe(32);
+    const m = normalizeMilestone({ title: "T".repeat(300), quarter: "Q".repeat(20), fiscalYear: "F".repeat(20) });
+    expect(m.title.length).toBe(255);
+    expect(m.quarter?.length).toBe(16);
+    expect(m.fiscalYear?.length).toBe(16);
   });
 
   it("drops untitled rows and bounds the set", () => {
