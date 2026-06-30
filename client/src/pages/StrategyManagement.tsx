@@ -75,7 +75,12 @@ export default function StrategyManagement({ activeCompanyId }: Props) {
           <CardTitle className="font-heading text-lg">Generate from context</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <label htmlFor="strategy-context" className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+            Strategy context
+          </label>
           <Textarea
+            id="strategy-context"
+            aria-label="Strategy context"
             value={context}
             onChange={(e) => setContext(e.target.value)}
             placeholder="Paste the strategy context — goals, growth plan, segments, constraints…"
