@@ -34,6 +34,7 @@ import Simulation from "./pages/Simulation";
 import StrategyManagement from "./pages/StrategyManagement";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
+import LiveResearch from "./pages/LiveResearch";
 import Contradictions from "./pages/Contradictions";
 import Frameworks from "./pages/Frameworks";
 import Options from "./pages/Options";
@@ -151,6 +152,7 @@ function AppShell() {
         <Route path="/diagrams" component={() => <Diagrams activeCompanyId={activeCompanyId} />} />
         <Route path="/diagnose" component={() => <Diagnosis activeCompanyId={activeCompanyId} />} />
         <Route path="/research" component={() => <Research activeCompanyId={activeCompanyId} />} />
+        <Route path="/live-research" component={() => <LiveResearch activeCompanyId={activeCompanyId} />} />
         <Route path="/contradictions" component={() => <Contradictions activeCompanyId={activeCompanyId} />} />
         <Route path="/frameworks" component={() => <Frameworks activeCompanyId={activeCompanyId} />} />
         <Route path="/options" component={() => <Options activeCompanyId={activeCompanyId} />} />

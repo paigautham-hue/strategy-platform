@@ -57,6 +57,7 @@ import {
   ClipboardList,
   Eye,
   LayoutDashboard,
+  RadioTower,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -176,6 +177,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
     items: [
       { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
       { href: "/research", label: "Research", icon: Radar },
+      { href: "/live-research", label: "Live Research", icon: RadioTower },
       { href: "/contradictions", label: "Contradictions", icon: GitFork },
       { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
       { href: "/diagrams", label: "Diagrams", icon: PieChart },
