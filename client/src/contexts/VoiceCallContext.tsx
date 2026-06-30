@@ -23,6 +23,23 @@ import {
   OpenAIRealtimeWsEngine,
   type RealtimeWsCallbacks,
 } from "@/lib/openaiRealtimeWsEngine";
+import { GeminiLiveEngine } from "@/lib/geminiLiveEngine";
+
+/**
+ * The public surface both engines expose, so the provider can be swapped
+ * transparently (C16: Gemini Live default, OpenAI Realtime opt-in). Both
+ * GeminiLiveEngine and OpenAIRealtimeWsEngine satisfy this structurally.
+ */
+interface VoiceEngine {
+  connect(opts?: { prewarmedMicStream?: MediaStream }): Promise<void>;
+  disconnect(): Promise<void>;
+  sendToolResponse(callId: string, name: string, result: Record<string, any>): void;
+  sendTextMessage(text: string): void;
+  interrupt(): void;
+  sendEvent(event: Record<string, any>): void;
+  isOpen(): boolean;
+  setMicMuted(muted: boolean): void;
+}
 
 export type VoiceStatus =
   | "idle"
@@ -72,7 +89,7 @@ const LIVE_STATUSES: VoiceStatus[] = [
 
 export function VoiceCallProvider({ children }: { children: ReactNode }) {
   const utils = trpc.useUtils();
-  const engineRef = useRef<OpenAIRealtimeWsEngine | null>(null);
+  const engineRef = useRef<VoiceEngine | null>(null);
   const companyIdRef = useRef<number | null>(null);
   const partialRef = useRef<{ user: string; assistant: string }>({ user: "", assistant: "" });
 
@@ -114,7 +131,15 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
       setStatus("connecting");
       setIsOverlayOpen(true);
 
-      let session: { ephemeralToken: string; model: string; voice: string };
+      let session: {
+        provider: "gemini" | "openai";
+        ephemeralToken: string;
+        authMethod?: "ephemeral" | "raw";
+        model: string;
+        voice: string;
+        setup?: Record<string, any>;
+        companyName?: string;
+      };
       try {
         session = await utils.client.realtime.createSession.mutate({ companyId: cid });
       } catch (err: any) {
@@ -163,17 +188,36 @@ export function VoiceCallProvider({ children }: { children: ReactNode }) {
         },
       };
 
-      const engine = new OpenAIRealtimeWsEngine(
-        { ephemeralToken: session.ephemeralToken, model: session.model, voice: session.voice },
-        callbacks,
-      );
+      // Pick the engine by provider. Gemini Live is the default (the
+      // iOS-proven path); OpenAI Realtime is the opt-in fallback. Both
+      // satisfy the VoiceEngine surface, so everything below is identical.
+      const engine: VoiceEngine =
+        session.provider === "openai"
+          ? new OpenAIRealtimeWsEngine(
+              { ephemeralToken: session.ephemeralToken, model: session.model, voice: session.voice },
+              callbacks,
+            )
+          : new GeminiLiveEngine(
+              {
+                ephemeralToken: session.ephemeralToken,
+                authMethod: session.authMethod,
+                model: session.model,
+                voice: session.voice,
+                setup: session.setup as any,
+              },
+              callbacks,
+            );
       engineRef.current = engine;
       try {
         await engine.connect();
-        // Nudge the model to open with a greeting.
-        engine.sendTextMessage(
-          "Greet me briefly by voice and ask what I want to think through about this company.",
-        );
+        // The OpenAI engine doesn't self-greet, so nudge it. The Gemini
+        // engine sends its own greeting trigger on setupComplete — nudging
+        // it too would double-fire the opening turn.
+        if (session.provider === "openai") {
+          engine.sendTextMessage(
+            "Greet me briefly by voice and ask what I want to think through about this company.",
+          );
+        }
       } catch {
         // connect() already surfaced the error via callbacks.
       }

@@ -151,7 +151,9 @@ export const MANUAL_SECTIONS: ManualSection[] = [
           "look up the company's profile, memory, and predictions mid-conversation to stay grounded. " +
           "Closing the call window does not hang up: a small player stays pinned in the corner so you " +
           "can keep working while the call continues, then re-open or end it whenever you like. " +
-          "(Requires the deployment's OpenAI key to have Realtime API access.)",
+          "It runs on Google's Gemini Live by default (the most reliable engine, especially on mobile), " +
+          "with OpenAI's realtime voice available as a fallback. Requires the deployment to hold the " +
+          "matching API key — a Google Gemini key with Live API access for the default engine.",
       },
       {
         term: "How retrieval works",
