@@ -1456,7 +1456,7 @@ const strategyManagementRouter = router({
   generate: operatorProcedure
     .input(
       z.object({
-        context: z.string().min(1),
+        context: z.string().min(1).max(20_000),
         companyId: z.number(),
         projectId: z.number().optional(),
       })

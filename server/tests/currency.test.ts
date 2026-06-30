@@ -85,25 +85,32 @@ describe("currency — edge-case guards", () => {
     expect(percentageChange(Number.NaN, 5)).toEqual({ percentage: 0, direction: "neutral" });
   });
 
-  it("parseCurrencyInput rejects malformed numbers and only honours an end suffix", () => {
-    expect(parseCurrencyInput("1-2-3", "USD")).toBeNull();
-    expect(parseCurrencyInput("1.2.3", "USD")).toBeNull();
-    expect(parseCurrencyInput("", "USD")).toBeNull();
-    // a stray "m"/"cr" that is not a standalone unit token must NOT rescale
-    expect(parseCurrencyInput("5 (amt)", "USD")).toBe(5);
-    expect(parseCurrencyInput("12 across", "INR")).toBe(12);
-    expect(parseCurrencyInput("5 minimum", "USD")).toBe(5);
-    expect(parseCurrencyInput("10 sum", "USD")).toBe(10);
-    expect(parseCurrencyInput("3 term", "USD")).toBe(3);
-    // genuine trailing suffixes still scale — abbreviations and full words
+  it("strictly parses [symbol] number [unit] and rejects everything else", () => {
+    // valid forms scale correctly
+    expect(parseCurrencyInput("1234", "USD")).toBe(1234);
     expect(parseCurrencyInput("2M", "USD")).toBe(2_000_000);
+    expect(parseCurrencyInput("$2.5M", "USD")).toBe(2_500_000);
     expect(parseCurrencyInput("5.68 Cr", "INR")).toBe(56_800_000);
+    expect(parseCurrencyInput("₹5.68 Cr", "INR")).toBe(56_800_000);
     expect(parseCurrencyInput("5 crore", "INR")).toBe(50_000_000);
     expect(parseCurrencyInput("3 crores", "INR")).toBe(30_000_000);
     expect(parseCurrencyInput("10 million", "USD")).toBe(10_000_000);
     expect(parseCurrencyInput("10mn", "USD")).toBe(10_000_000);
-    // ambiguous decimal-comma is rejected (not silently turned into 125), pure thousands grouping is kept
-    expect(parseCurrencyInput("12,5", "INR")).toBeNull();
-    expect(parseCurrencyInput("1,000", "USD")).toBe(1000);
+    expect(parseCurrencyInput("1,000", "USD")).toBe(1000); // pure thousands grouping
+
+    // malformed / ambiguous → null (never a silently wrong number)
+    expect(parseCurrencyInput("1-2-3", "USD")).toBeNull();
+    expect(parseCurrencyInput("1.2.3", "USD")).toBeNull();
+    expect(parseCurrencyInput("", "USD")).toBeNull();
+    expect(parseCurrencyInput("abc", "USD")).toBeNull();
+    expect(parseCurrencyInput("2.5e6", "USD")).toBeNull(); // scientific notation, not 2.56
+    expect(parseCurrencyInput("12,5", "INR")).toBeNull(); // decimal-comma, not 125
+    expect(parseCurrencyInput("5 (amt)", "USD")).toBeNull();
+    expect(parseCurrencyInput("5 minimum", "USD")).toBeNull();
+    expect(parseCurrencyInput("12 across", "INR")).toBeNull();
+
+    // a recognised unit that mismatches the currency → null, not a silent 1e6/1e7 drop
+    expect(parseCurrencyInput("5 million", "INR")).toBeNull();
+    expect(parseCurrencyInput("5 cr", "USD")).toBeNull();
   });
 });

@@ -102,29 +102,30 @@ export function dualCurrencyDisplay(
  * (crore) and "M" (million) suffixes. Returns null on non-numeric input. Pure.
  */
 export function parseCurrencyInput(input: string, currencyCode: string): number | null {
-  const trimmed = input.trim().toLowerCase();
+  // Strict shape: an optional leading currency symbol, a number (optional pure
+  // thousands grouping), and an optional trailing magnitude UNIT TOKEN. Anything
+  // else — scientific notation ("2.5e6"), stray words ("5 minimum"), parentheticals,
+  // multiple separators — is rejected as null rather than silently mis-parsed.
+  const body = input.trim().toLowerCase().replace(/^[\s$₹]*/, "");
+  const m = /^(-?[\d,]*\.?\d+)\s*([a-z]+)?$/.exec(body);
+  if (!m) return null;
 
-  // The trailing magnitude unit, as a STANDALONE token (strip leading symbols + the
-  // number) — so a stray word ending in "m"/"cr" ("minimum", "across") can't scale.
-  const unit = trimmed.replace(/^[\s$₹]*-?[\d.,]+\s*/, "").trim();
+  const numPart = m[1];
+  const unit = m[2] ?? "";
 
-  // The numeric core (strip leading symbols + a trailing unit word).
-  const core = trimmed
-    .replace(/^[\s$₹]*/, "")
-    .replace(/\s*(?:cr|crores?|m|mn|mm|million)\s*$/i, "")
-    .trim();
-
-  // Reject ambiguous commas (e.g. "12,5" decimal-comma → would silently 10× a value);
-  // only pure thousands grouping ("1,000") is accepted and then stripped.
-  if (/,/.test(core) && !/^-?\d{1,3}(?:,\d{3})+(?:\.\d+)?$/.test(core)) return null;
-  const cleaned = core.replace(/,/g, "").replace(/[^0-9.\-]/g, "");
-  if (!/^-?\d*\.?\d+$/.test(cleaned)) return null;
-  const parsed = parseFloat(cleaned);
+  // Allow only pure thousands grouping ("1,000"); reject ambiguous commas ("12,5").
+  if (/,/.test(numPart) && !/^-?\d{1,3}(?:,\d{3})+(?:\.\d+)?$/.test(numPart)) return null;
+  const numeric = numPart.replace(/,/g, "");
+  if (!/^-?\d*\.?\d+$/.test(numeric)) return null;
+  const parsed = parseFloat(numeric);
   if (!Number.isFinite(parsed)) return null;
 
-  if (currencyCode === "INR" && /^(?:cr|crores?)$/.test(unit)) return parsed * CRORE;
-  if (currencyCode === "USD" && /^(?:m|mn|mm|million)$/.test(unit)) return parsed * MILLION;
-  return parsed;
+  if (!unit) return parsed;
+  // A recognised magnitude unit must MATCH the currency; a recognised-but-mismatched
+  // or unrecognised trailing token is rejected (never silently dropped).
+  if (/^(?:cr|crores?)$/.test(unit)) return currencyCode === "INR" ? parsed * CRORE : null;
+  if (/^(?:m|mn|mm|million)$/.test(unit)) return currencyCode === "USD" ? parsed * MILLION : null;
+  return null;
 }
 
 export interface PercentageChange {
