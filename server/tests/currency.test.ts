@@ -49,6 +49,11 @@ describe("currency — formatting", () => {
     expect(formatUsdMillions(-1_200_000)).toBe("-$1.20M");
   });
 
+  it("does not show a minus on a value that rounds to zero", () => {
+    expect(formatInrCrores(-1000)).toBe("₹0.00 Cr");
+    expect(formatUsdMillions(-100)).toBe("$0.00M");
+  });
+
   it("builds a dual display from a USD amount", () => {
     const d = dualCurrencyDisplay(1_000_000, 80);
     expect(d.usd).toBe("$1.00M");
@@ -74,6 +79,11 @@ describe("currency — parsing + change", () => {
     expect(percentageChange(100, 125)).toEqual({ percentage: 25, direction: "up" });
     expect(percentageChange(100, 80)).toEqual({ percentage: 20, direction: "down" });
     expect(percentageChange(0, 50)).toEqual({ percentage: 0, direction: "neutral" });
+  });
+
+  it("reports direction by value movement even when the base is negative", () => {
+    expect(percentageChange(-100, -150).direction).toBe("down"); // more negative = worse
+    expect(percentageChange(-100, -50).direction).toBe("up"); // improving toward zero
   });
 });
 

@@ -55,14 +55,20 @@ export function inrCroresToUsd(inrCrores: number, rate: number = FALLBACK_USD_IN
 export function formatInrCrores(inrAbsolute: number): string {
   if (!Number.isFinite(inrAbsolute)) return "—";
   const v = inrAbsolute / CRORE;
-  return `${v < 0 ? "-" : ""}₹${Math.abs(v).toFixed(2)} Cr`;
+  const rounded = Math.abs(v).toFixed(2);
+  // Decide the sign from the ROUNDED magnitude so a tiny negative rounding to 0
+  // doesn't render a contradictory "-₹0.00 Cr".
+  const sign = v < 0 && parseFloat(rounded) !== 0 ? "-" : "";
+  return `${sign}₹${rounded} Cr`;
 }
 
 /** Format an absolute USD amount as millions (e.g. "$1.20M"). Non-finite → "—". Pure. */
 export function formatUsdMillions(usdAbsolute: number): string {
   if (!Number.isFinite(usdAbsolute)) return "—";
   const v = usdAbsolute / MILLION;
-  return `${v < 0 ? "-" : ""}$${Math.abs(v).toFixed(2)}M`;
+  const rounded = Math.abs(v).toFixed(2);
+  const sign = v < 0 && parseFloat(rounded) !== 0 ? "-" : "";
+  return `${sign}$${rounded}M`;
 }
 
 /**
@@ -147,6 +153,8 @@ export function percentageChange(oldValue: number, newValue: number): Percentage
     return { percentage: 0, direction: "neutral" };
   }
   const change = ((newValue - oldValue) / oldValue) * 100;
-  const direction = change > 0 ? "up" : change < 0 ? "down" : "neutral";
+  // Direction reflects the actual value movement, not the sign of the ratio
+  // (which inverts when the base is negative).
+  const direction = newValue > oldValue ? "up" : newValue < oldValue ? "down" : "neutral";
   return { percentage: Math.round(Math.abs(change) * 100) / 100, direction };
 }

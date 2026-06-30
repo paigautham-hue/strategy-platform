@@ -1345,7 +1345,9 @@ const simulationRouter = router({
     .input(
       z.object({
         input: monteCarloInputSchema,
-        numSimulations: z.number().int().min(1).max(50_000).optional(),
+        // Lower than `run` because this fans out to THREE Monte Carlos, keeping the
+        // worst-case synchronous workload in line with simulation.run.
+        numSimulations: z.number().int().min(1).max(16_000).optional(),
         seed: z.number().int().optional(),
       })
     )
