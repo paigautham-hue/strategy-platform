@@ -26,6 +26,9 @@ export default function Discovery({ activeCompanyId }: Props) {
   const [gates, setGates] = useState({ overall: 0, previewAvailable: false, fullStrategyAvailable: false });
   const [drafts, setDrafts] = useState<Partial<Record<Dimension, string>>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Track the current company so a turn that resolves AFTER a company switch is ignored.
+  const activeCompanyIdRef = useRef(activeCompanyId);
+  activeCompanyIdRef.current = activeCompanyId;
 
   const { data: dimensions } = trpc.digitalTwin.dimensions.useQuery();
   const twinQuery = trpc.digitalTwin.twin.useQuery(
@@ -64,6 +67,7 @@ export default function Discovery({ activeCompanyId }: Props) {
   function send() {
     const text = input.trim();
     if (!text || turnMut.isPending) return;
+    const reqCompany = activeCompanyId; // the company this turn was issued for
     const history = messages;
     setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
@@ -71,11 +75,13 @@ export default function Discovery({ activeCompanyId }: Props) {
       { history, userMessage: text, companyId: activeCompanyId ?? undefined },
       {
         onSuccess: (res) => {
+          if (activeCompanyIdRef.current !== reqCompany) return; // switched mid-flight — drop stale reply
           setMessages((m) => [...m, { role: "assistant", content: res.reply }]);
           setCoverage(res.coverage as Coverage);
           setGates(res.gates);
         },
         onError: () => {
+          if (activeCompanyIdRef.current !== reqCompany) return;
           // Roll back the optimistic user bubble and restore the text so it isn't lost.
           setMessages((m) => m.slice(0, -1));
           setInput(text);
