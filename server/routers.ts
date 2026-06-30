@@ -74,6 +74,15 @@ import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services
 import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
 import { DIMENSIONS, scoreDimensionCoverage, completenessGates } from "./services/digital-twin";
 import { nextDiscoveryTurn, generateAiStrategy } from "./agents/digital-twin-interview";
+import { upsertTwinDimension, getTwinSummary, saveCompleteness } from "./services/digital-twin-store";
+import { extractStrategicItems } from "./agents/strategic-extract";
+import {
+  writeStrategicItems,
+  listKpis as listStrategyKpis,
+  listMilestones as listStrategyMilestones,
+  listRisks as listStrategyRisks,
+} from "./services/strategy-management";
+import { twinDimensionEnum } from "../drizzle/schema";
 import { generateDiagram } from "./agents/diagram";
 import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
@@ -1394,6 +1403,89 @@ const digitalTwinRouter = router({
     .mutation(({ ctx, input }) =>
       generateAiStrategy(input.twin, buildRouterCtx(ctx, { companyId: input.companyId }), input.companyName)
     ),
+
+  // Persist one captured dimension of a company's Digital Twin (upsert).
+  saveDimension: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        projectId: z.number().optional(),
+        dimension: z.enum(twinDimensionEnum),
+        summary: z.string().min(1),
+        structured: z.record(z.string(), z.unknown()).optional(),
+        confidence: z.number().min(0).max(100).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await upsertTwinDimension({ tenantId: ctx.user.tenantId, ...input });
+      return { ok: true };
+    }),
+
+  // Read the assembled Digital Twin (dimension → summary) for a company.
+  twin: protectedProcedure
+    .input(z.object({ companyId: z.number() }))
+    .query(({ ctx, input }) => getTwinSummary(ctx.user.tenantId, input.companyId)),
+
+  // Compute coverage from a conversation and persist the completeness signal.
+  recordCompleteness: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        sessionId: z.number().optional(),
+        messages: z.array(conversationMessageSchema),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      saveCompleteness({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        sessionId: input.sessionId,
+        coverage: scoreDimensionCoverage(input.messages),
+      })
+    ),
+});
+
+// ─── Strategic Management Router (Phase 5 — structured-output auto-write; from StrategyForge) ─
+
+const strategyManagementRouter = router({
+  // Generate KPIs / milestones / risks from a strategy context and write them.
+  generate: operatorProcedure
+    .input(
+      z.object({
+        context: z.string().min(1),
+        companyId: z.number(),
+        projectId: z.number().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const items = await extractStrategicItems(
+        input.context,
+        buildRouterCtx(ctx, { companyId: input.companyId, projectId: input.projectId }),
+      );
+      const written = await writeStrategicItems(
+        { tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId },
+        items,
+      );
+      return { written, items };
+    }),
+
+  listKpis: protectedProcedure
+    .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
+    .query(({ ctx, input }) =>
+      listStrategyKpis({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId })
+    ),
+
+  listMilestones: protectedProcedure
+    .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
+    .query(({ ctx, input }) =>
+      listStrategyMilestones({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId })
+    ),
+
+  listRisks: protectedProcedure
+    .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
+    .query(({ ctx, input }) =>
+      listStrategyRisks({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId })
+    ),
 });
 
 // ─── Connector Router (Phase 5, Workstream 5.2) ───────────────────────────────
@@ -1652,6 +1744,7 @@ export const appRouter = router({
   simulation: simulationRouter,
   currency: currencyRouter,
   digitalTwin: digitalTwinRouter,
+  strategyManagement: strategyManagementRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
   entityGraph: entityGraphRouter,
