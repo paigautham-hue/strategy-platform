@@ -185,6 +185,15 @@ export const MANUAL_SECTIONS: ManualSection[] = [
           "The Challenger, The Devil's Advocate, The Consultant, or The Chief of Staff — each answers " +
           "in its own stance, grounded in your company's memory.",
       },
+      {
+        term: "Discovery — the Digital Twin",
+        body:
+          "A guided interview that builds a structured picture of a business across five dimensions — " +
+          "Business Model, Financials, Operations, Organization, Technology. As you answer, the " +
+          "consultant steers toward whatever is still under-explored, live coverage meters fill, and " +
+          "two gates unlock: a quick opportunity preview, then a full AI-transformation strategy " +
+          "(readiness score, opportunities, use cases, risks) generated from the captured twin.",
+      },
     ],
   },
   {
@@ -271,6 +280,15 @@ export const MANUAL_SECTIONS: ManualSection[] = [
           "synthetic and scored separately, so simulation never contaminates the platform's real-world " +
           "calibration record.",
       },
+      {
+        term: "Financial Simulation",
+        body:
+          "A Monte Carlo projection of a multi-year revenue plan: enter base revenue, per-year growth, " +
+          "margins and volatilities, and it runs thousands of seeded paths to produce a mean and median " +
+          "NPV, a percentile distribution, downside risk (probability of loss, Value-at-Risk, expected " +
+          "shortfall, Sharpe), and a best/base/worst comparison. Seeded, so the same inputs reproduce " +
+          "the same distribution. Amounts show in ₹ Crore with a USD equivalent.",
+      },
     ],
   },
   {
@@ -301,6 +319,14 @@ export const MANUAL_SECTIONS: ManualSection[] = [
           "progress), KPI (a leading indicator vs expected, gated on a minimum sample size), and " +
           "thesis (the assumption invalidated). When drift is found, a replan engine proposes Continue, " +
           "Adjust-pace, Pivot, or Kill.",
+      },
+      {
+        term: "Strategic Tracker",
+        body:
+          "Turns a strategy context into trackable artifacts: paste the goals and plan, and it generates " +
+          "and saves KPIs (with targets, units, and a category), roadmap milestones (with quarter and " +
+          "fiscal year), and a scored risk register (probability × impact). Each item is validated " +
+          "before it is written, and the three live in tabs you can browse per company.",
       },
     ],
   },
@@ -563,6 +589,25 @@ export const FAQ_ITEMS: FaqItem[] = [
     a: "Memo Dictation structures one monologue into a one-page memo. The Briefing synthesises recent " +
       "platform signals into a daily or weekly read. Research produces a brief that answers a " +
       "specific question.",
+  },
+  {
+    q: "What is the Digital Twin, and how is Discovery different from Ingest?",
+    a: "Ingest pulls facts from documents into memory. Discovery is a conversation: it interviews you " +
+      "across five business dimensions and assembles a structured 'Digital Twin' you can save and turn " +
+      "into an AI-transformation strategy. Use Ingest for documents you have, Discovery for what is in " +
+      "your head.",
+  },
+  {
+    q: "Can I model financial scenarios?",
+    a: "Yes — Financial Simulation runs a seeded Monte Carlo over a multi-year plan and reports NPV, a " +
+      "percentile distribution, and downside risk (probability of loss, VaR, expected shortfall, " +
+      "Sharpe), plus a best/base/worst comparison. The same inputs always reproduce the same result.",
+  },
+  {
+    q: "Where do KPIs, milestones, and risks live?",
+    a: "On the Strategic Tracker (operator and above). Generate them from a strategy context and they " +
+      "are validated, saved, and tracked per company — KPIs with targets and status, milestones with " +
+      "timing, and a probability × impact risk register.",
   },
   {
     q: "I found a bug — what now?",
