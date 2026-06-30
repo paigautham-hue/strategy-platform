@@ -43,7 +43,6 @@ export function completenessRow(coverage: DimensionCoverage): CompletenessRow {
 export interface UpsertDimensionInput {
   tenantId: string;
   companyId: number;
-  projectId?: number;
   dimension: Dimension;
   summary: string;
   structured?: Record<string, unknown>;
@@ -63,12 +62,15 @@ export async function upsertTwinDimension(input: UpsertDimensionInput): Promise<
   if (input.structured !== undefined) updateSet.structured = input.structured;
   if (hasConfidence) updateSet.confidence = confidence;
 
+  // The Digital Twin is company-level — its unique key is (tenant, company,
+  // dimension), and getTwinSummary reads by company. projectId is intentionally
+  // NOT written: it isn't in the key, so writing it would let one project's
+  // dimension overwrite another's row and leave projectId pointing at the wrong one.
   await db
     .insert(digitalTwins)
     .values({
       tenantId: input.tenantId,
       companyId: input.companyId,
-      projectId: input.projectId,
       dimension: input.dimension,
       summary: input.summary,
       structured: input.structured,

@@ -1382,7 +1382,7 @@ const digitalTwinRouter = router({
     .input(
       z.object({
         history: conversationArray.default([]),
-        userMessage: z.string().min(1),
+        userMessage: z.string().min(1).max(10_000),
         companyId: z.number().optional(),
       })
     )
@@ -1414,9 +1414,8 @@ const digitalTwinRouter = router({
     .input(
       z.object({
         companyId: z.number(),
-        projectId: z.number().optional(),
         dimension: z.enum(twinDimensionEnum),
-        summary: z.string().min(1),
+        summary: z.string().min(1).max(10_000),
         structured: z.record(z.string(), z.unknown()).optional(),
         confidence: z.number().min(0).max(100).optional(),
       })
