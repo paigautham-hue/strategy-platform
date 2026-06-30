@@ -9,7 +9,7 @@
 
 import { eq, and } from "drizzle-orm";
 import { getDb } from "../db";
-import { digitalTwins, completenessTracking } from "../../drizzle/schema";
+import { digitalTwins, completenessTracking, sessions } from "../../drizzle/schema";
 import {
   type Dimension,
   type DimensionCoverage,
@@ -94,6 +94,25 @@ export async function getTwinSummary(tenantId: string, companyId: number): Promi
     }
   }
   return out;
+}
+
+/**
+ * True if the session exists within (tenant, company). Permissive when there is
+ * no DB (dev/test). Used to reject a sessionId the caller doesn't legitimately own.
+ */
+export async function isSessionInCompany(
+  tenantId: string,
+  companyId: number,
+  sessionId: number,
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return true;
+  const [row] = await db
+    .select({ id: sessions.id })
+    .from(sessions)
+    .where(and(eq(sessions.id, sessionId), eq(sessions.tenantId, tenantId), eq(sessions.companyId, companyId)))
+    .limit(1);
+  return !!row;
 }
 
 export interface SaveCompletenessInput {

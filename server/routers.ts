@@ -74,10 +74,11 @@ import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services
 import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
 import { DIMENSIONS, scoreDimensionCoverage, completenessGates } from "./services/digital-twin";
 import { nextDiscoveryTurn, generateAiStrategy } from "./agents/digital-twin-interview";
-import { upsertTwinDimension, getTwinSummary, saveCompleteness } from "./services/digital-twin-store";
+import { upsertTwinDimension, getTwinSummary, saveCompleteness, isSessionInCompany } from "./services/digital-twin-store";
 import { extractStrategicItems } from "./agents/strategic-extract";
 import {
   writeStrategicItems,
+  isProjectInCompany,
   listKpis as listStrategyKpis,
   listMilestones as listStrategyMilestones,
   listRisks as listStrategyRisks,
@@ -1457,8 +1458,14 @@ const digitalTwinRouter = router({
         messages: conversationArray,
       })
     )
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       assertCompanyAccess(ctx.user, input.companyId);
+      if (
+        input.sessionId !== undefined &&
+        !(await isSessionInCompany(ctx.user.tenantId, input.companyId, input.sessionId))
+      ) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Session not found in this company" });
+      }
       return saveCompleteness({
         tenantId: ctx.user.tenantId,
         companyId: input.companyId,
@@ -1482,6 +1489,12 @@ const strategyManagementRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       assertCompanyAccess(ctx.user, input.companyId);
+      if (
+        input.projectId !== undefined &&
+        !(await isProjectInCompany(ctx.user.tenantId, input.companyId, input.projectId))
+      ) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found in this company" });
+      }
       const items = await extractStrategicItems(
         input.context,
         buildRouterCtx(ctx, { companyId: input.companyId, projectId: input.projectId }),

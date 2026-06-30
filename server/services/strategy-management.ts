@@ -13,6 +13,7 @@
 import { eq, and, desc } from "drizzle-orm";
 import { getDb } from "../db";
 import {
+  strategyProjects,
   strategyKpis,
   strategyMilestones,
   strategyRisks,
@@ -202,6 +203,31 @@ export interface WriteResult {
   kpis: number;
   milestones: number;
   risks: number;
+}
+
+/**
+ * True if the project exists within (tenant, company). Permissive when there is
+ * no DB (dev/test). Used to reject a projectId the caller doesn't legitimately own.
+ */
+export async function isProjectInCompany(
+  tenantId: string,
+  companyId: number,
+  projectId: number,
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return true;
+  const [row] = await db
+    .select({ id: strategyProjects.id })
+    .from(strategyProjects)
+    .where(
+      and(
+        eq(strategyProjects.id, projectId),
+        eq(strategyProjects.tenantId, tenantId),
+        eq(strategyProjects.companyId, companyId),
+      ),
+    )
+    .limit(1);
+  return !!row;
 }
 
 /** Insert normalised strategic items for a project. No-op (zeros) when no DB. */
