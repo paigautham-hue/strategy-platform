@@ -183,7 +183,9 @@ function clampScore(v: unknown): number {
 }
 
 function asArray(v: unknown): Record<string, unknown>[] {
-  return Array.isArray(v) ? (v.filter((x) => x && typeof x === "object") as Record<string, unknown>[]).slice(0, MAX_ITEMS) : [];
+  // No slice here — cap AFTER the title/risk filter so valid rows past index N
+  // aren't dropped in favour of earlier untitled objects.
+  return Array.isArray(v) ? (v.filter((x) => x && typeof x === "object") as Record<string, unknown>[]) : [];
 }
 
 /** Normalise raw LLM output into an AiStrategy. Exported for unit testing. Pure. */
@@ -199,7 +201,8 @@ export function normalizeStrategy(raw: unknown): AiStrategy {
         impact: asString(x.impact),
         feasibility: asString(x.feasibility),
       }))
-      .filter((it) => it.title),
+      .filter((it) => it.title)
+      .slice(0, MAX_ITEMS),
     useCases: asArray(o.useCases)
       .map((x) => ({
         title: asString(x.title),
@@ -207,13 +210,15 @@ export function normalizeStrategy(raw: unknown): AiStrategy {
         roiPotential: asString(x.roiPotential),
         timeline: asString(x.timeline),
       }))
-      .filter((it) => it.title),
+      .filter((it) => it.title)
+      .slice(0, MAX_ITEMS),
     risks: asArray(o.risks)
       .map((x) => ({
         risk: asString(x.risk),
         mitigation: asString(x.mitigation),
       }))
-      .filter((it) => it.risk),
+      .filter((it) => it.risk)
+      .slice(0, MAX_ITEMS),
   };
 }
 

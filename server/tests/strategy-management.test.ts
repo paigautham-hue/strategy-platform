@@ -95,6 +95,9 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeKpi({ label: "x", status: "on track for Q2" }).status).toBe("on-track");
     expect(normalizeMilestone({ title: "x", status: "in progress, on schedule" }).status).toBe("in-progress");
     expect(normalizeKpi({ label: "x", status: "high risk" }).status).toBe("at-risk");
+    // negation must beat the bare "started" alias
+    expect(normalizeMilestone({ title: "x", status: "not yet started" }).status).toBe("planned");
+    expect(normalizeMilestone({ title: "x", status: "not started yet" }).status).toBe("planned");
   });
 
   it("drops untitled rows and bounds the set", () => {

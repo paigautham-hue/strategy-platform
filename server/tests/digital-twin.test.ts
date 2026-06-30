@@ -124,6 +124,11 @@ describe("digital-twin — strategy normalizer", () => {
     expect(s.risks).toHaveLength(1);
   });
 
+  it("caps AFTER filtering so an untitled row doesn't steal a slot", () => {
+    const opportunities = [{}, ...Array.from({ length: 9 }, (_, i) => ({ title: `O${i}` }))];
+    expect(normalizeStrategy({ opportunities }).opportunities).toHaveLength(8); // MAX_ITEMS
+  });
+
   it("clamps a negative score to zero", () => {
     expect(normalizeStrategy({ aiReadinessScore: -5 }).aiReadinessScore).toBe(0);
   });
