@@ -104,6 +104,7 @@ describe("strategy-management — item normalisers", () => {
     // multi-token enum value embedded mid-phrase
     expect(normalizeMilestone({ title: "x", status: "work in progress" }).status).toBe("in-progress");
     expect(normalizeMilestone({ title: "x", status: "on schedule, in progress" }).status).toBe("in-progress");
+    expect(normalizeMilestone({ title: "x", status: "no, in progress" }).status).toBe("in-progress"); // bare "no" isn't negation
   });
 
   it("caps bounded strings to their column widths (MySQL strict-mode safety)", () => {

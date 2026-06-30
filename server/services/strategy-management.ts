@@ -152,8 +152,9 @@ function resolveStatus<T extends string>(
   // to the positive token it contains (e.g. "not done"→done, "not yet started"→started,
   // "not at risk"→at-risk). Map a negated "started" to not-started; any other negated
   // status drops to the safe fallback rather than flipping to its positive meaning.
-  const negated =
-    tokens.includes("not") || tokens.includes("no") || tokens.includes("isn") || tokens.includes("won");
+  // "no" is excluded — it's an ambiguous standalone token ("no, in progress",
+  // "no blockers, done") that would wrongly suppress an embedded status.
+  const negated = tokens.includes("not") || tokens.includes("isn") || tokens.includes("won");
   if (negated) {
     if (tokens.some((t) => t.startsWith("start"))) return aliases["not-started"] ?? fallback;
     return fallback;
