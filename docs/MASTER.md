@@ -188,6 +188,11 @@ badly under-reported, marking shipped+tested features as ☐):
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-06-30 · Prototype consolidation COMPLETE — merged after a 31-pass ultra-audit
+- The salvage work (Monte Carlo + currency, MGPS fixture, doc reconciliation, Dynamo Digital Twin intake, persistence + structured-output auto-write, UI surfaces) is complete and merged to `main`.
+- **Ultra-audit hardening**: ran a 7-dimension adversarial multi-agent audit (tenancy, provider-abstraction, finance correctness, logic correctness, migration/schema, react/UX, cost/DoS) over the full salvage surface **31 times**, fixing every confirmed defect and re-auditing. **71 defects fixed** across the campaign (incl. an intra-tenant authorization gap, a company-grain data-integrity bug, a MySQL strict-mode varchar-overflow crash, NPV/percentile/currency edge cases, and exhaustive free-text status-resolution + a11y hardening). Test suite grew 500 → 557.
+- Net state of the salvaged modules: tsc clean · 557 tests / 0 fail · production build clean · additive migration `0003` applied by Manus on publish. A systemic company-access-guard gap in the PRE-EXISTING routers was flagged as a separate task (out of this PR's scope).
+
 ### 2026-06-30 · Feature map + governance + in-app help; ultra-audit fixes
 - **`docs/PROJECT_MAP.md`** (new) — the navigable feature & file map: every surface → route → page → tRPC router → service/agent files → status, plus the cross-cutting systems. It is now the **mandatory first read**, wired into `CLAUDE.md`'s companion-docs table and its named-file shipping rule (a feature change must update PROJECT_MAP **and** the in-app help in the same commit). This is how the large codebase stays manageable.
 - **In-app help** (`client/src/lib/manual-content.ts`) — added Discovery (Digital Twin), Financial Simulation, and Strategic Tracker to the manual + three new FAQ entries, so the `/manual` surface reflects the new features.
