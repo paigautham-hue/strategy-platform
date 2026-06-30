@@ -213,6 +213,12 @@ function simulateOnePath(
  * (input, seed).
  */
 export function runMonteCarlo(input: MonteCarloInput, opts: MonteCarloOptions = {}): MonteCarloResult {
+  // A discount rate at/below -100% makes every path NPV non-finite and would
+  // silently NaN the entire result (sort/mean/percentile/VaR). Reject it as a
+  // detectable error instead. (`!(x > -100)` also rejects NaN.)
+  if (!(input.discountRate > -100)) {
+    throw new Error("runMonteCarlo: discountRate must be greater than -100%");
+  }
   const numSimulations = Math.max(1, Math.floor(opts.numSimulations ?? 10_000));
   const seed = opts.seed ?? 1;
   const years = input.growthRates.length;
@@ -323,14 +329,16 @@ export interface ScenarioComparison {
 export function runScenarioComparison(input: MonteCarloInput, opts: MonteCarloOptions = {}): ScenarioComparison {
   const sims = opts.numSimulations ?? 2_000;
   const seed = opts.seed ?? 1;
+  // Additive delta around |g| so the best case is always ≥ g and worst ≤ g — a
+  // multiplicative scale would invert best/worst for a negative (declining) year.
   const best: MonteCarloInput = {
     ...input,
-    growthRates: input.growthRates.map((g) => g * 1.5),
+    growthRates: input.growthRates.map((g) => g + Math.abs(g) * 0.5),
     revenueVolatility: input.revenueVolatility * 0.5,
   };
   const worst: MonteCarloInput = {
     ...input,
-    growthRates: input.growthRates.map((g) => g * 0.5),
+    growthRates: input.growthRates.map((g) => g - Math.abs(g) * 0.5),
     revenueVolatility: input.revenueVolatility * 1.5,
   };
   return {

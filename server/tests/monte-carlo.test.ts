@@ -67,6 +67,11 @@ describe("monte-carlo — pure npv / irr", () => {
     expect(Number.isNaN(npv([100, 200], -100))).toBe(true);
     expect(Number.isFinite(npv([100, 200], 10))).toBe(true);
   });
+
+  it("runMonteCarlo throws on discountRate <= -100 (no silent all-NaN result)", () => {
+    expect(() => runMonteCarlo({ ...ZERO_VOL, discountRate: -100 }, { numSimulations: 10 })).toThrow();
+    expect(() => runMonteCarlo({ ...ZERO_VOL, discountRate: -150 }, { numSimulations: 10 })).toThrow();
+  });
 });
 
 describe("monte-carlo — deterministic zero-volatility path", () => {
