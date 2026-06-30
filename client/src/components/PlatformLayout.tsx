@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useVoiceCall } from "@/contexts/VoiceCallContext";
 import { getLoginUrl } from "@/const";
 import {
   Building2,
@@ -58,6 +59,7 @@ import {
   Eye,
   LayoutDashboard,
   RadioTower,
+  Radio,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -126,6 +128,38 @@ function CompanySwitcher({ activeCompanyId, onSwitch }: CompanySwitcherProps) {
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+// ─── Voice launch ─────────────────────────────────────────────────────────────
+// Starts (or re-opens) a realtime voice call grounded in the active company.
+// The call itself lives in VoiceCallProvider (C14), so this button only kicks
+// it off — navigating away keeps it alive via the mini-player.
+
+function VoiceLaunchButton({ activeCompanyId }: { activeCompanyId: number | null }) {
+  const { data: companies } = trpc.company.list.useQuery();
+  const { isCallActive, startCall, openOverlay } = useVoiceCall();
+  const active = companies?.find((c) => c.id === activeCompanyId);
+
+  const onClick = () => {
+    if (isCallActive) {
+      openOverlay();
+      return;
+    }
+    if (activeCompanyId == null || !active) return;
+    void startCall(activeCompanyId, active.name);
+  };
+
+  return (
+    <Button
+      size="sm"
+      onClick={onClick}
+      disabled={!isCallActive && activeCompanyId == null}
+      className="w-full mt-2 gap-2 gradient-gold text-background font-sans h-8"
+    >
+      <Radio className="h-3.5 w-3.5" />
+      {isCallActive ? "Open voice call" : "Talk to Cairn"}
+    </Button>
   );
 }
 
@@ -303,6 +337,7 @@ export function PlatformLayout({
             activeCompanyId={activeCompanyId}
             onSwitch={onCompanySwitch}
           />
+          <VoiceLaunchButton activeCompanyId={activeCompanyId} />
         </div>
 
         {/* Nav */}

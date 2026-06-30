@@ -4,6 +4,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlatformLayout } from "./components/PlatformLayout";
+import { VoiceOverlay } from "./components/VoiceOverlay";
+import { VoiceMiniPlayer } from "./components/VoiceMiniPlayer";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -186,6 +188,9 @@ function AppShell() {
         <Route path="/manual" component={Manual} />
         <Route component={NotFound} />
       </Switch>
+      {/* Realtime voice surfaces — decoupled from any single page (C14). */}
+      <VoiceOverlay />
+      <VoiceMiniPlayer />
     </PlatformLayout>
   );
 }
