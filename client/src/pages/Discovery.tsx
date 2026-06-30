@@ -63,6 +63,11 @@ export default function Discovery({ activeCompanyId }: Props) {
           setCoverage(res.coverage as Coverage);
           setGates(res.gates);
         },
+        onError: () => {
+          // Roll back the optimistic user bubble and restore the text so it isn't lost.
+          setMessages((m) => m.slice(0, -1));
+          setInput(text);
+        },
       },
     );
   }

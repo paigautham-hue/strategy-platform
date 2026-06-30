@@ -254,7 +254,9 @@ export function runMonteCarlo(input: MonteCarloInput, opts: MonteCarloOptions = 
       p90: round2(percentile(sorted, 0.9)),
     },
     riskMetrics: {
-      probabilityOfLoss: round2(npvs.filter((v) => v < 0).length / numSimulations),
+      // A [0,1] tail probability — round to 4 dp, not 2, so a 0.4% loss chance
+      // (40 of 10,000 paths) isn't flattened to 0.00.
+      probabilityOfLoss: Math.round((npvs.filter((v) => v < 0).length / numSimulations) * 1e4) / 1e4,
       valueAtRisk95: round2(percentile(sorted, 0.05)),
       valueAtRisk99: round2(percentile(sorted, 0.01)),
       expectedShortfall: round2(expectedShortfall),

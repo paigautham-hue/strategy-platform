@@ -1284,7 +1284,8 @@ const simulationRouter = router({
     .input(
       z.object({
         input: monteCarloInputSchema,
-        numSimulations: z.number().int().min(1).max(100_000).optional(),
+        // Bounded to keep the synchronous CPU loop in line with the sibling caps.
+        numSimulations: z.number().int().min(1).max(50_000).optional(),
         seed: z.number().int().optional(),
       })
     )
@@ -1359,7 +1360,10 @@ const currencyRouter = router({
 
 // ─── Digital Twin Router (Phase 1 — conversational intake; salvaged from Dynamo) ─
 
-const conversationMessageSchema = z.object({ role: z.string(), content: z.string() });
+const conversationMessageSchema = z.object({ role: z.string().max(32), content: z.string().max(10_000) });
+// Bounds the pure (un-budgeted) scoreDimensionCoverage work — consistent with the
+// other array caps in this file (memory.query 100, ingest maxChunks 100, etc.).
+const conversationArray = z.array(conversationMessageSchema).max(200);
 
 const digitalTwinRouter = router({
   // The five business dimensions the discovery covers.
@@ -1367,7 +1371,7 @@ const digitalTwinRouter = router({
 
   // Pure, graded per-dimension coverage + funnel gates for a conversation.
   coverage: protectedProcedure
-    .input(z.object({ messages: z.array(conversationMessageSchema) }))
+    .input(z.object({ messages: conversationArray }))
     .query(({ input }) => {
       const coverage = scoreDimensionCoverage(input.messages);
       return { coverage, gates: completenessGates(coverage) };
@@ -1377,7 +1381,7 @@ const digitalTwinRouter = router({
   nextTurn: protectedProcedure
     .input(
       z.object({
-        history: z.array(conversationMessageSchema).default([]),
+        history: conversationArray.default([]),
         userMessage: z.string().min(1),
         companyId: z.number().optional(),
       })
@@ -1433,7 +1437,7 @@ const digitalTwinRouter = router({
       z.object({
         companyId: z.number(),
         sessionId: z.number().optional(),
-        messages: z.array(conversationMessageSchema),
+        messages: conversationArray,
       })
     )
     .mutation(({ ctx, input }) =>
