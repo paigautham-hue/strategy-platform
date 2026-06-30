@@ -245,7 +245,7 @@ export default function Simulation() {
                   {Math.round(result.riskMetrics.probabilityOfLoss * 100)}%
                 </p>
                 <p className="text-[11px] text-muted-foreground font-body">
-                  Sharpe {result.riskMetrics.sharpeRatio === null ? "—" : result.riskMetrics.sharpeRatio}
+                  Sharpe {result.riskMetrics.sharpeRatio === null ? "—" : result.riskMetrics.sharpeRatio.toFixed(2)}
                 </p>
               </CardContent>
             </Card>
