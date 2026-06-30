@@ -56,6 +56,12 @@ export default function Simulation() {
   const runMut = trpc.simulation.run.useMutation({ onError: (e) => toast.error(e.message) });
   const scenMut = trpc.simulation.scenarios.useMutation({ onError: (e) => toast.error(e.message) });
 
+  // Once inputs change, the displayed results/charts no longer match — clear them.
+  const clearResults = () => {
+    runMut.reset();
+    scenMut.reset();
+  };
+
   const growthRates = useMemo(
     () =>
       growth
@@ -136,7 +142,10 @@ export default function Simulation() {
             <Input
               id="growth-rates"
               value={growth}
-              onChange={(e) => setGrowth(e.target.value)}
+              onChange={(e) => {
+                setGrowth(e.target.value);
+                clearResults();
+              }}
               placeholder="18, 17, 20, 18"
               className="bg-secondary/50 border-border/60 font-body h-9"
             />
@@ -155,7 +164,10 @@ export default function Simulation() {
                   id={`sim-${f.id}`}
                   type="number"
                   value={form[f.id]}
-                  onChange={(e) => setForm((p) => ({ ...p, [f.id]: e.target.value }))}
+                  onChange={(e) => {
+                    setForm((p) => ({ ...p, [f.id]: e.target.value }));
+                    clearResults();
+                  }}
                   className="bg-secondary/50 border-border/60 font-body h-9"
                 />
               </div>
@@ -168,7 +180,10 @@ export default function Simulation() {
                 id="sim-seed"
                 type="number"
                 value={seed}
-                onChange={(e) => setSeed(e.target.value)}
+                onChange={(e) => {
+                  setSeed(e.target.value);
+                  clearResults();
+                }}
                 className="bg-secondary/50 border-border/60 font-body h-9"
               />
             </div>

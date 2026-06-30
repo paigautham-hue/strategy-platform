@@ -54,7 +54,15 @@ export interface UpsertDimensionInput {
 export async function upsertTwinDimension(input: UpsertDimensionInput): Promise<void> {
   const db = await getDb();
   if (!db) return;
-  const confidence = Math.max(0, Math.min(100, Math.round(input.confidence ?? 0)));
+  const hasConfidence = input.confidence !== undefined && input.confidence !== null;
+  const confidence = hasConfidence ? Math.max(0, Math.min(100, Math.round(input.confidence as number))) : 0;
+
+  // On update, only touch fields that were actually provided — re-saving a loaded
+  // dimension (summary only) must NOT clobber a prior confidence/structured to a default.
+  const updateSet: Record<string, unknown> = { summary: input.summary };
+  if (input.structured !== undefined) updateSet.structured = input.structured;
+  if (hasConfidence) updateSet.confidence = confidence;
+
   await db
     .insert(digitalTwins)
     .values({
@@ -66,9 +74,7 @@ export async function upsertTwinDimension(input: UpsertDimensionInput): Promise<
       structured: input.structured,
       confidence,
     })
-    .onDuplicateKeyUpdate({
-      set: { summary: input.summary, structured: input.structured, confidence },
-    });
+    .onDuplicateKeyUpdate({ set: updateSet });
 }
 
 /** Read the assembled Digital Twin (dimension → summary) for a company. */

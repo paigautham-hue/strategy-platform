@@ -108,11 +108,12 @@ export function parseCurrencyInput(input: string, currencyCode: string): number 
   const parsed = parseFloat(cleaned);
   if (!Number.isFinite(parsed)) return null;
 
-  // Anchor the magnitude suffix to the END so a stray "m"/"cr" mid-string can't
-  // misscale, while accepting the common full-word/abbreviated forms.
-  const lower = input.trim().toLowerCase();
-  if (currencyCode === "INR" && /(?:cr|crores?)\s*$/.test(lower)) return parsed * CRORE;
-  if (currencyCode === "USD" && /(?:m|mn|mm|million)\s*$/.test(lower)) return parsed * MILLION;
+  // Extract the trailing unit token (strip leading symbols + the number) and match
+  // it EXACTLY — so a stray word ending in "m"/"cr" ("minimum", "across") can't
+  // trigger the multiplier, while "5 crore"/"10 million"/"10mn" still scale.
+  const unit = input.trim().toLowerCase().replace(/^[\s$₹]*-?[\d.,]+\s*/, "").trim();
+  if (currencyCode === "INR" && /^(?:cr|crores?)$/.test(unit)) return parsed * CRORE;
+  if (currencyCode === "USD" && /^(?:m|mn|mm|million)$/.test(unit)) return parsed * MILLION;
   return parsed;
 }
 

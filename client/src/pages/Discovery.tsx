@@ -143,6 +143,7 @@ export default function Discovery({ activeCompanyId }: Props) {
             </CardContent>
             <div className="border-t border-border/50 p-3 flex gap-2">
               <Input
+                aria-label="Type your answer"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -155,6 +156,7 @@ export default function Discovery({ activeCompanyId }: Props) {
                 className="bg-secondary/50 border-border/60 font-body"
               />
               <Button
+                aria-label="Send message"
                 className="gradient-gold text-background gap-1.5"
                 disabled={!input.trim() || turnMut.isPending}
                 onClick={send}
@@ -239,8 +241,10 @@ export default function Discovery({ activeCompanyId }: Props) {
                         saveMut.mutate({
                           companyId: activeCompanyId,
                           dimension: d,
+                          // Omit a stale 0 (coverage resets on company switch and only
+                          // fills from live chat) so re-saving doesn't clobber prior confidence.
                           summary: shown.trim(),
-                          confidence: coverage[d],
+                          confidence: coverage[d] || undefined,
                         })
                       }
                     >

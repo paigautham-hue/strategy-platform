@@ -97,7 +97,7 @@ export function mapKpiCategory(raw: unknown): StrategyKpiCategory {
   const s = str(raw).toLowerCase();
   if (/financ|revenue|cost|margin|cash|budget|profit|ebitda/.test(s)) return "financial";
   if (/market|growth|customer|competit|sales|brand|demand/.test(s)) return "market";
-  if (/organi|people|talent|team|culture|\bhr\b|hiring|headcount/.test(s)) return "organizational";
+  if (/organi[sz]|people|talent|team|culture|\bhr\b|hiring|headcount/.test(s)) return "organizational";
   // efficiency, operational, technical, technology, process, quality → operational
   return "operational";
 }
