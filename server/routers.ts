@@ -47,6 +47,14 @@ import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
+import {
+  mintRealtimeSession,
+  buildVoiceSystemPrompt,
+  checkVoiceRateLimit,
+  acquireVoiceLock,
+  releaseVoiceLock,
+  REALTIME_VOICES,
+} from "./_core/realtime";
 import { runFrameworks } from "./agents/frameworks";
 import { runOptionAnalysis } from "./agents/options";
 import { redTeamStrategy } from "./agents/red-team";
@@ -708,6 +716,133 @@ const researchRouter = router({
         routerCtx,
       );
       return { diagnosis, brief };
+    }),
+});
+
+// ─── Realtime Voice Router (Phase 7) ──────────────────────────────────────────
+// Mints OpenAI Realtime ephemeral tokens (server-only key) and dispatches the
+// model's read-only lookup tool calls. C16 (corrected): WebSocket + PCM16
+// transport, ported from Meridian's iOS-proven engine.
+
+const realtimeRouter = router({
+  createSession: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        voice: z.enum(REALTIME_VOICES).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      checkVoiceRateLimit(ctx.user.id);
+      const company = await getCompany(ctx.user.tenantId, input.companyId);
+      const systemPrompt = buildVoiceSystemPrompt({
+        name: company?.name,
+        industry: (company as any)?.industry,
+        description: (company as any)?.description,
+      });
+      try {
+        const minted = await mintRealtimeSession({ systemPrompt, voice: input.voice });
+        acquireVoiceLock(ctx.user.id);
+        void emitUsage({
+          tenantId: ctx.user.tenantId,
+          companyId: input.companyId,
+          userId: ctx.user.id,
+          role: ctx.user.role as "gp" | "operator" | "portco_team" | "admin",
+          surface: "voice",
+          action: "voice-session-start",
+          metadata: { model: minted.model, voice: minted.voice },
+        });
+        return {
+          ephemeralToken: minted.ephemeralToken,
+          model: minted.model,
+          voice: minted.voice,
+          companyName: company?.name ?? "this company",
+        };
+      } catch (err) {
+        releaseVoiceLock(ctx.user.id);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err instanceof Error ? err.message : "Failed to start voice session",
+        });
+      }
+    }),
+
+  endSession: protectedProcedure.mutation(async ({ ctx }) => {
+    releaseVoiceLock(ctx.user.id);
+    return { ok: true };
+  }),
+
+  // Read-only tool dispatch for the realtime model. Every branch is a SELECT —
+  // no writes (C13). Results are JSON-stringified back to OpenAI by the client.
+  executeTool: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        name: z.string(),
+        args: z.record(z.string(), z.any()).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      const args = input.args ?? {};
+      switch (input.name) {
+        case "lookup_company": {
+          const company = await getCompany(ctx.user.tenantId, input.companyId);
+          if (!company) return { error: "Company not found." };
+          return {
+            name: company.name,
+            industry: (company as any).industry ?? null,
+            description: (company as any).description ?? null,
+          };
+        }
+        case "lookup_memory": {
+          const query = typeof args.query === "string" ? args.query.trim() : "";
+          if (!query) return { error: "No query provided." };
+          const items = await hybridSearchMemory({
+            tenantId: ctx.user.tenantId,
+            companyId: input.companyId,
+            query,
+            limit: 6,
+            ctx: buildRouterCtx(ctx, { companyId: input.companyId }),
+          });
+          return {
+            results: items.map((m: any) => ({
+              content: m.content,
+              layer: m.layer ?? m.kind ?? null,
+              validAt: m.validAt ?? null,
+            })),
+          };
+        }
+        case "lookup_predictions": {
+          const overdueOnly = args.overdueOnly === true;
+          const [open, records] = await Promise.all([
+            listOpenPredictions({
+              tenantId: ctx.user.tenantId,
+              companyId: input.companyId,
+              overdueOnly,
+              limit: 15,
+            }),
+            getCalibrationRecords({ tenantId: ctx.user.tenantId, companyId: input.companyId }),
+          ]);
+          const scorecard = computeScorecard(records);
+          return {
+            openCount: open.length,
+            predictions: open.map((p: any) => ({
+              claim: p.claim ?? null,
+              confidence: p.confidence ?? null,
+              targetDate: p.targetDate ?? null,
+            })),
+            calibration: {
+              brierScore: scorecard.real.brier,
+              hitRate: scorecard.real.hitRate,
+              resolvedCount: scorecard.real.count,
+            },
+          };
+        }
+        default:
+          return { error: `Unknown tool: ${input.name}` };
+      }
     }),
 });
 
@@ -1848,6 +1983,7 @@ export const appRouter = router({
   voice: voiceRouter,
   diagnosis: diagnosisRouter,
   research: researchRouter,
+  realtime: realtimeRouter,
   frameworks: frameworksRouter,
   options: optionsRouter,
   redTeam: redTeamRouter,
