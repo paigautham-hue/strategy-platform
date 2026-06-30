@@ -70,6 +70,15 @@ function strOrNull(v: unknown): string | null {
   const s = str(v);
   return s ? s : null;
 }
+// Cap strings to their DB varchar widths — MySQL strict mode THROWS ER_DATA_TOO_LONG
+// on an over-length value, which would abort the whole multi-row batch insert.
+function strCapped(v: unknown, max: number): string {
+  return str(v).slice(0, max);
+}
+function strOrNullCapped(v: unknown, max: number): string | null {
+  const s = strOrNull(v);
+  return s === null ? null : s.slice(0, max);
+}
 /** Coerce a number or a numeric string to a finite number; otherwise null. */
 function toNum(v: unknown): number | null {
   if (typeof v === "string") {
@@ -139,10 +148,15 @@ function resolveStatus<T extends string>(
   if (prefix) return prefix as T;
   if (aliases[s]) return aliases[s];
   const tokens = s.split("-");
-  // A negated "not ... start(ed)" must resolve BEFORE the bare "started" token
-  // alias wins (e.g. "not yet started" must be planned, not in-progress).
-  if (aliases["not-started"] && tokens.includes("not") && tokens.some((t) => t.startsWith("start"))) {
-    return aliases["not-started"];
+  // Negation: a "not / no / isn / won … <positive token>" status must never resolve
+  // to the positive token it contains (e.g. "not done"→done, "not yet started"→started,
+  // "not at risk"→at-risk). Map a negated "started" to not-started; any other negated
+  // status drops to the safe fallback rather than flipping to its positive meaning.
+  const negated =
+    tokens.includes("not") || tokens.includes("no") || tokens.includes("isn") || tokens.includes("won");
+  if (negated) {
+    if (tokens.some((t) => t.startsWith("start"))) return aliases["not-started"] ?? fallback;
+    return fallback;
   }
   for (const tok of tokens) {
     if (enumSet.includes(tok)) return tok as T;
@@ -167,10 +181,10 @@ export function computeRiskScore(probability: number, impact: number): number {
 export function normalizeKpi(raw: unknown): NormalizedKpi {
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   return {
-    label: str(o.label),
+    label: strCapped(o.label, 255), // strategy_kpi.label varchar(255)
     target: numOrNull(o.target),
     current: numOrNull(o.current),
-    unit: strOrNull(o.unit),
+    unit: strOrNullCapped(o.unit, 32), // varchar(32)
     category: mapKpiCategory(o.category),
     status: mapKpiStatus(o.status),
   };
@@ -179,10 +193,10 @@ export function normalizeKpi(raw: unknown): NormalizedKpi {
 export function normalizeMilestone(raw: unknown): NormalizedMilestone {
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   return {
-    title: str(o.title),
-    description: strOrNull(o.description),
-    quarter: strOrNull(o.quarter),
-    fiscalYear: strOrNull(o.fiscalYear),
+    title: strCapped(o.title, 255), // strategy_milestone.title varchar(255)
+    description: strOrNull(o.description), // TEXT — no cap
+    quarter: strOrNullCapped(o.quarter, 16), // varchar(16)
+    fiscalYear: strOrNullCapped(o.fiscalYear, 16), // varchar(16)
     status: mapMilestoneStatus(o.status),
   };
 }
@@ -192,12 +206,12 @@ export function normalizeRisk(raw: unknown): NormalizedRisk {
   const probability = clamp0to100(o.probability);
   const impact = clamp0to100(o.impact);
   return {
-    title: str(o.title),
-    description: strOrNull(o.description),
+    title: strCapped(o.title, 255), // strategy_risk.title varchar(255)
+    description: strOrNull(o.description), // TEXT — no cap
     probability,
     impact,
     riskScore: computeRiskScore(probability, impact),
-    mitigation: strOrNull(o.mitigation),
+    mitigation: strOrNull(o.mitigation), // TEXT — no cap
   };
 }
 
