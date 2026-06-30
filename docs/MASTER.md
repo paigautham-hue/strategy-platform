@@ -188,6 +188,13 @@ badly under-reported, marking shipped+tested features as ☐):
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-06-30 · Prototype consolidation (4/n) — UI surfaces for the salvaged modules
+- **`client/src/pages/Simulation.tsx`** (`/simulation`, Simulation group) — Monte Carlo projection: inputs form, run 10k paths, stat cards (mean/median NPV with a USD equivalent via the FX rate), a percentile distribution bar chart (recharts), risk metrics (prob-of-loss, VaR95/99, expected shortfall, Sharpe), and a best/base/worst comparison. Dual-currency woven into the NPV display.
+- **`client/src/pages/Discovery.tsx`** (`/discovery`, Strategy Intake group) — the Digital Twin interview: a chat that calls `digitalTwin.nextTurn` with live per-dimension coverage meters + funnel-gate badges, a capture panel that persists each dimension (`saveDimension`), and AI-strategy generation from the assembled twin.
+- **`client/src/pages/StrategyManagement.tsx`** (`/strategy-management`, Execution group, operator-tier) — generate KPIs/milestones/risks from a strategy context (`strategyManagement.generate`) and browse them in tabs with category/status/score.
+- Wired routes in `App.tsx` and nav items in `PlatformLayout.tsx` (matching the existing CAIRN design system — card-glass, gradient-gold, font-heading). `/strategy-management` gated to operator+.
+- **Verification**: typecheck + production build clean; 539 server tests still pass. The salvaged modules are now usable end-to-end through the UI.
+
 ### 2026-06-30 · Prototype consolidation (3/n) — persistence + structured-output auto-write (DB migration)
 - **Migration `drizzle/0003_light_grey_gargoyle.sql`** — **additive only** (5 `CREATE TABLE`, no `ALTER`/`DROP`; existing tables and data untouched). Manus applies it on the next publish (ADR-010). Schema is now 21 tables.
 - **Digital Twin persistence** (makes the salvaged engine stateful): `digital_twin` (one row per company × dimension, with structured facts + confidence) and `completeness_tracking` (the funnel signal). `server/services/digital-twin-store.ts` — `upsertTwinDimension`, `getTwinSummary`, `saveCompleteness` (tenant-scoped, C1; getDb-guarded). **tRPC** `digitalTwin.{saveDimension,twin,recordCompleteness}`.

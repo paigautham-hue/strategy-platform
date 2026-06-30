@@ -52,6 +52,9 @@ import {
   Plug,
   PieChart,
   Share2,
+  Compass,
+  Dices,
+  ClipboardList,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -158,6 +161,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   {
     label: "Strategy Intake",
     items: [
+      { href: "/discovery", label: "Discovery (Digital Twin)", icon: Compass },
       { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
       { href: "/memo", label: "Memo Dictation", icon: FileText },
       { href: "/personas", label: "Advisory Personas", icon: Users },
@@ -181,6 +185,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
     items: [
       { href: "/war-game", label: "War-Game", icon: Crosshair },
       { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
+      { href: "/simulation", label: "Financial Simulation", icon: Dices },
     ],
   },
   {
@@ -190,6 +195,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
       { href: "/drift", label: "Drift Detection", icon: Gauge },
       { href: "/kpi-library", label: "KPI Library", icon: Calculator },
+      { href: "/strategy-management", label: "Strategic Tracker", icon: ClipboardList },
     ],
   },
   {
@@ -232,7 +238,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
 ];
 
 const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation"];
-const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding", "/connectors"];
+const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding", "/connectors", "/strategy-management"];
 const ADMIN_ONLY_ITEMS = ["/users"];
 
 // ─── PlatformLayout ───────────────────────────────────────────────────────────
