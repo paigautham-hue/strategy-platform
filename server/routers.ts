@@ -1286,7 +1286,7 @@ const monteCarloInputSchema = z.object({
   growthRates: z.array(z.number()).min(1).max(20),
   ebitdaMargin: z.number(),
   taxRate: z.number(),
-  discountRate: z.number(),
+  discountRate: z.number().gt(-100), // below -100% makes NPV non-finite
   terminalGrowthRate: z.number(),
   revenueVolatility: z.number().min(0),
   marginVolatility: z.number().min(0),
@@ -1401,9 +1401,10 @@ const digitalTwinRouter = router({
         companyId: z.number().optional(),
       })
     )
-    .mutation(({ ctx, input }) =>
-      nextDiscoveryTurn(input.history, input.userMessage, buildRouterCtx(ctx, { companyId: input.companyId }))
-    ),
+    .mutation(({ ctx, input }) => {
+      if (input.companyId !== undefined) assertCompanyAccess(ctx.user, input.companyId);
+      return nextDiscoveryTurn(input.history, input.userMessage, buildRouterCtx(ctx, { companyId: input.companyId }));
+    }),
 
   // Generate an AI-transformation strategy from the assembled Digital Twin.
   generateStrategy: protectedProcedure
@@ -1420,9 +1421,10 @@ const digitalTwinRouter = router({
         companyId: z.number().optional(),
       })
     )
-    .mutation(({ ctx, input }) =>
-      generateAiStrategy(input.twin, buildRouterCtx(ctx, { companyId: input.companyId }), input.companyName)
-    ),
+    .mutation(({ ctx, input }) => {
+      if (input.companyId !== undefined) assertCompanyAccess(ctx.user, input.companyId);
+      return generateAiStrategy(input.twin, buildRouterCtx(ctx, { companyId: input.companyId }), input.companyName);
+    }),
 
   // Persist one captured dimension of a company's Digital Twin (upsert).
   saveDimension: protectedProcedure
