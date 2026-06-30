@@ -131,6 +131,9 @@ function percentile(sortedAsc: number[], p: number): number {
 
 /** Net present value of period cash flows (period 1..n) at a percentage discount rate. */
 export function npv(cashFlows: number[], discountRatePct: number): number {
+  // A discount rate of -100% (or below) makes (1 + r) ≤ 0 and divides by zero,
+  // leaking Infinity/NaN into the statistics — guard the degenerate base.
+  if (discountRatePct <= -100) return NaN;
   const r = discountRatePct / 100;
   return cashFlows.reduce((acc, cf, i) => acc + cf / Math.pow(1 + r, i + 1), 0);
 }
