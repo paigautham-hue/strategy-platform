@@ -102,5 +102,8 @@ describe("currency — edge-case guards", () => {
     expect(parseCurrencyInput("3 crores", "INR")).toBe(30_000_000);
     expect(parseCurrencyInput("10 million", "USD")).toBe(10_000_000);
     expect(parseCurrencyInput("10mn", "USD")).toBe(10_000_000);
+    // ambiguous decimal-comma is rejected (not silently turned into 125), pure thousands grouping is kept
+    expect(parseCurrencyInput("12,5", "INR")).toBeNull();
+    expect(parseCurrencyInput("1,000", "USD")).toBe(1000);
   });
 });

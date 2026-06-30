@@ -102,16 +102,26 @@ export function dualCurrencyDisplay(
  * (crore) and "M" (million) suffixes. Returns null on non-numeric input. Pure.
  */
 export function parseCurrencyInput(input: string, currencyCode: string): number | null {
-  const cleaned = input.replace(/[^0-9.\-]/g, "");
-  // Reject malformed input ("1-2-3", "1.2.3", "") rather than silently accepting a partial number.
+  const trimmed = input.trim().toLowerCase();
+
+  // The trailing magnitude unit, as a STANDALONE token (strip leading symbols + the
+  // number) — so a stray word ending in "m"/"cr" ("minimum", "across") can't scale.
+  const unit = trimmed.replace(/^[\s$₹]*-?[\d.,]+\s*/, "").trim();
+
+  // The numeric core (strip leading symbols + a trailing unit word).
+  const core = trimmed
+    .replace(/^[\s$₹]*/, "")
+    .replace(/\s*(?:cr|crores?|m|mn|mm|million)\s*$/i, "")
+    .trim();
+
+  // Reject ambiguous commas (e.g. "12,5" decimal-comma → would silently 10× a value);
+  // only pure thousands grouping ("1,000") is accepted and then stripped.
+  if (/,/.test(core) && !/^-?\d{1,3}(?:,\d{3})+(?:\.\d+)?$/.test(core)) return null;
+  const cleaned = core.replace(/,/g, "").replace(/[^0-9.\-]/g, "");
   if (!/^-?\d*\.?\d+$/.test(cleaned)) return null;
   const parsed = parseFloat(cleaned);
   if (!Number.isFinite(parsed)) return null;
 
-  // Extract the trailing unit token (strip leading symbols + the number) and match
-  // it EXACTLY — so a stray word ending in "m"/"cr" ("minimum", "across") can't
-  // trigger the multiplier, while "5 crore"/"10 million"/"10mn" still scale.
-  const unit = input.trim().toLowerCase().replace(/^[\s$₹]*-?[\d.,]+\s*/, "").trim();
   if (currencyCode === "INR" && /^(?:cr|crores?)$/.test(unit)) return parsed * CRORE;
   if (currencyCode === "USD" && /^(?:m|mn|mm|million)$/.test(unit)) return parsed * MILLION;
   return parsed;

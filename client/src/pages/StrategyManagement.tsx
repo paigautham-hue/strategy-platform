@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,14 @@ export default function StrategyManagement({ activeCompanyId }: Props) {
     },
     onError: (e) => toast.error(e.message),
   });
+
+  // Reset the pasted context when the active company changes, so a context typed
+  // for one company can't be generated/saved under another (mirrors Discovery).
+  useEffect(() => {
+    setContext("");
+    genMut.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCompanyId]);
 
   if (!enabled) {
     return (

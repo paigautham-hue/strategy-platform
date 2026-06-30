@@ -66,7 +66,7 @@ const FACETS: Record<Dimension, RegExp[]> = {
   ],
   organization: [
     /\bteam|headcount|staff|employee|workforce/i,
-    /culture|leadership|management|governance/i,
+    /culture|leadership|\bmanagement team\b|senior management|governance/i,
     /talent|\bhir(e|ing)|recruit|\bskill/i,
     /change readiness|training|upskill|reorg/i,
   ],
