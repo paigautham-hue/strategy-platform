@@ -135,6 +135,25 @@ export const MANUAL_SECTIONS: ManualSection[] = [
           "diagnosis, and so on.",
       },
       {
+        term: "Vision Studio (image in / image out)",
+        body:
+          "Vision Studio turns pictures into structure and structure into pictures. Extract: upload a " +
+          "slide, a whiteboard photo, or a chart and a multimodal model reads it into structured text " +
+          "you can push to memory. Generate: describe a diagram or visual and the platform renders an " +
+          "image. The image is stored privately and only its URL is sent to the model, so large uploads " +
+          "never blow the token budget.",
+      },
+      {
+        term: "Talk to Cairn (realtime voice)",
+        body:
+          "The \"Talk to Cairn\" button in the sidebar starts a live, spoken conversation about the " +
+          "active company. It is a real-time voice call — you speak, Cairn answers out loud, and it can " +
+          "look up the company's profile, memory, and predictions mid-conversation to stay grounded. " +
+          "Closing the call window does not hang up: a small player stays pinned in the corner so you " +
+          "can keep working while the call continues, then re-open or end it whenever you like. " +
+          "(Requires the deployment's OpenAI key to have Realtime API access.)",
+      },
+      {
         term: "How retrieval works",
         body:
           "When an agent needs context it runs a hybrid search: semantic similarity (vector) fused with " +
@@ -216,6 +235,14 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         body:
           "A research mesh dispatches specialist agents to gather and synthesise what is known, " +
           "grounded in company memory, and returns a structured brief rather than a wall of text.",
+      },
+      {
+        term: "Live Research",
+        body:
+          "The same research mesh, watched live. Instead of waiting for the finished brief, each " +
+          "specialist appears in an activity tree and fills in the moment it finishes — then the Chief " +
+          "Strategist synthesises at the end. Use it when you want to see the reasoning unfold and read " +
+          "early findings while the rest are still running.",
       },
       {
         term: "Contradictions",
@@ -390,6 +417,16 @@ export const MANUAL_SECTIONS: ManualSection[] = [
       "Portfolio surfaces look across companies. Because they deliberately cross the company boundary, " +
       "they are GP-only and every cross-company read is audit-logged.",
     entries: [
+      {
+        term: "Portfolio Dashboard & closing the learning loop",
+        body:
+          "The Portfolio Dashboard shows calibration across every company side by side — Brier score and " +
+          "hit rate — so you can see where the platform's forecasts have actually been reliable. It is " +
+          "also where you close the loop: open predictions that have come due are listed with simple " +
+          "'Held' / 'Didn't hold' buttons. Resolving one records the real outcome, which feeds " +
+          "calibration. This is what makes the learning data-dependent — the scorecards improve only as " +
+          "you tell the platform what really happened. A nightly snapshot keeps the figures current.",
+      },
       {
         term: "Synergy Scout",
         body:
@@ -581,8 +618,28 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Can I use voice instead of typing?",
-    a: "Yes. Voice Intake captures a one-shot note or question, and Brainstorm and Memo Dictation " +
-      "both support browser dictation. Always-on realtime voice is a later addition.",
+    a: "Yes, three ways. Voice Intake captures a one-shot note or question; Brainstorm and Memo " +
+      "Dictation support browser dictation; and \"Talk to Cairn\" in the sidebar opens a live, " +
+      "spoken back-and-forth about the active company. The live call needs the deployment's OpenAI " +
+      "key to have Realtime API access.",
+  },
+  {
+    q: "If I close the voice call window, does it hang up?",
+    a: "No. The call is deliberately kept separate from its window — closing the overlay just minimises " +
+      "it to a small player in the corner so you can keep navigating while the call runs. Only the " +
+      "End button actually hangs up.",
+  },
+  {
+    q: "Can the platform read a slide, whiteboard photo, or chart?",
+    a: "Yes — Vision Studio's Extract tab reads an uploaded image into structured text you can push to " +
+      "memory, and the Generate tab renders an image from a description. Uploads are stored privately; " +
+      "only the image URL is sent to the model.",
+  },
+  {
+    q: "How do calibration scores actually improve?",
+    a: "By you resolving predictions. On the Portfolio Dashboard, predictions that have come due show " +
+      "'Held' / 'Didn't hold' buttons; marking one records the real outcome, which feeds the Brier and " +
+      "hit-rate scorecards. The learning is data-dependent — it only sharpens as real outcomes come in.",
   },
   {
     q: "What is the difference between a memo, a briefing, and a brief?",

@@ -4,6 +4,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlatformLayout } from "./components/PlatformLayout";
+import { VoiceOverlay } from "./components/VoiceOverlay";
+import { VoiceMiniPlayer } from "./components/VoiceMiniPlayer";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -17,6 +19,7 @@ import Onboarding from "./pages/Onboarding";
 import Projects from "./pages/Projects";
 import Memory from "./pages/Memory";
 import Ingest from "./pages/Ingest";
+import Vision from "./pages/Vision";
 import EntityGraph from "./pages/EntityGraph";
 import StrategyArtifact from "./pages/StrategyArtifact";
 import VoiceIntake from "./pages/VoiceIntake";
@@ -33,6 +36,7 @@ import Simulation from "./pages/Simulation";
 import StrategyManagement from "./pages/StrategyManagement";
 import Diagnosis from "./pages/Diagnosis";
 import Research from "./pages/Research";
+import LiveResearch from "./pages/LiveResearch";
 import Contradictions from "./pages/Contradictions";
 import Frameworks from "./pages/Frameworks";
 import Options from "./pages/Options";
@@ -46,6 +50,7 @@ import Compliance from "./pages/Compliance";
 import Playbooks from "./pages/Playbooks";
 import PatternMining from "./pages/PatternMining";
 import SynergyScout from "./pages/SynergyScout";
+import Portfolio from "./pages/Portfolio";
 import Distillation from "./pages/Distillation";
 import Briefing from "./pages/Briefing";
 import CostDashboard from "./pages/CostDashboard";
@@ -140,6 +145,7 @@ function AppShell() {
         <Route path="/memory" component={() => <Memory activeCompanyId={activeCompanyId} />} />
         <Route path="/connections" component={() => <EntityGraph activeCompanyId={activeCompanyId} />} />
         <Route path="/ingest" component={() => <Ingest activeCompanyId={activeCompanyId} />} />
+        <Route path="/vision" component={() => <Vision activeCompanyId={activeCompanyId} />} />
         <Route path="/strategy-artifacts" component={() => <StrategyArtifact activeCompanyId={activeCompanyId} />} />
         <Route path="/voice-intake" component={() => <VoiceIntake activeCompanyId={activeCompanyId} />} />
         <Route path="/brainstorm" component={() => <Brainstorm activeCompanyId={activeCompanyId} />} />
@@ -148,6 +154,7 @@ function AppShell() {
         <Route path="/diagrams" component={() => <Diagrams activeCompanyId={activeCompanyId} />} />
         <Route path="/diagnose" component={() => <Diagnosis activeCompanyId={activeCompanyId} />} />
         <Route path="/research" component={() => <Research activeCompanyId={activeCompanyId} />} />
+        <Route path="/live-research" component={() => <LiveResearch activeCompanyId={activeCompanyId} />} />
         <Route path="/contradictions" component={() => <Contradictions activeCompanyId={activeCompanyId} />} />
         <Route path="/frameworks" component={() => <Frameworks activeCompanyId={activeCompanyId} />} />
         <Route path="/options" component={() => <Options activeCompanyId={activeCompanyId} />} />
@@ -168,6 +175,7 @@ function AppShell() {
         <Route path="/playbooks" component={() => <Playbooks activeCompanyId={activeCompanyId} />} />
         <Route path="/patterns" component={() => <PatternMining activeCompanyId={activeCompanyId} />} />
         <Route path="/synergy" component={SynergyScout} />
+        <Route path="/portfolio" component={() => <Portfolio activeCompanyId={activeCompanyId} />} />
         <Route path="/distillation" component={Distillation} />
         <Route path="/briefing" component={() => <Briefing activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
@@ -180,6 +188,9 @@ function AppShell() {
         <Route path="/manual" component={Manual} />
         <Route component={NotFound} />
       </Switch>
+      {/* Realtime voice surfaces — decoupled from any single page (C14). */}
+      <VoiceOverlay />
+      <VoiceMiniPlayer />
     </PlatformLayout>
   );
 }

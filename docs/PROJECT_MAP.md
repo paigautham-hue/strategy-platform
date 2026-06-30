@@ -75,6 +75,7 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 | Connections | `/connections` | EntityGraph | `entityGraph` | services/entity-graph.ts, retrieval/graph.ts | ✅ | Multi-hop entity graph (HippoRAG) |
 | Ingest | `/ingest` | Ingest | `ingest` | services/ingest-pipeline.ts, ingest/*, extraction/* | 🟡 | text/md/html/url/PDF/DOCX live; audio/video/image pending |
 | Voice Intake | `/voice-intake` | VoiceIntake | `voice` | services/voice-intent.ts, _core/voiceTranscription.ts | ✅ | One-shot STT → intent parse |
+| 🆕 Vision Studio | `/vision` | Vision | `vision` | agents/vision.ts; _core/imageGeneration.ts | ✅ | Vision-in (extract from slide/whiteboard/chart image, multimodal via S3 URL) + image-out (generateImage) |
 
 ### Strategy intake
 | Feature | Route | Page | Router | Server files | Status | Notes |
@@ -90,6 +91,7 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 |---|---|---|---|---|---|---|
 | Diagnose | `/diagnose` | Diagnosis | `diagnosis` | agents/diagnosis.ts | ✅ | Reframe + classify before frameworks (P4) |
 | Research | `/research` | Research | `research` | agents/research.ts | ✅ | Chief Strategist + 8 specialists, memory-grounded |
+| 🆕 Live Research | `/live-research` | LiveResearch | `research` (SSE) | agents/research.ts (streamResearchMesh); _core/researchStream.ts | ✅ | Same mesh, streamed via SSE — specialists fill in live, then synthesis |
 | Contradictions | `/contradictions` | Contradictions | `contradiction` | services/contradictions.ts | ✅ | Find + resolve conflicting beliefs |
 | Frameworks | `/frameworks` | Frameworks | `frameworks` | agents/frameworks.ts | ✅ | 8-framework library, diagnosis-selected |
 | Diagrams | `/diagrams` | Diagrams | `diagram` | agents/diagram.ts | 🟡 | Porter/SWOT/3H CSS specs; raster export gated |
@@ -115,7 +117,7 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 ### Learning loop
 | Feature | Route | Page | Router | Server files | Status | Notes |
 |---|---|---|---|---|---|---|
-| Predictions | `/predictions` | Predictions | `prediction` | services/predictions.ts | ✅ | The prediction ledger |
+| Predictions | `/predictions` | Predictions | `prediction` | services/predictions.ts | ✅ | The prediction ledger — record, list open/overdue, resolve (held? → errorDelta) to feed calibration |
 | Calibration | `/calibration` | Calibration | `calibration` | services/calibration.ts | 🟡 | Brier/Murphy scorecard; needs closed real predictions |
 | Attribution | `/attribution` | Attribution | `attribution` | agents/attribution.ts, causal/confounder-dags.ts | ✅ | Causal-lite, DAG-conditioned |
 | Constitutional Audit | `/compliance` | Compliance | `compliance` | services/audit-constitution.ts | ✅ | Anti-hallucination principle audit |
@@ -125,6 +127,7 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 ### Portfolio intelligence (GP-only)
 | Feature | Route | Page | Router | Server files | Status | Notes |
 |---|---|---|---|---|---|---|
+| 🆕 Portfolio Dashboard | `/portfolio` | Portfolio | `portfolio` | services/portfolio.ts; cron/calibration-snapshot.ts | ✅ | Cross-company calibration table (Brier/hit-rate) + open-prediction resolution panel (data-dependent learning loop) |
 | Synergy Scout | `/synergy` | SynergyScout | `synergy` | agents/synergy-scout.ts | ✅ | 9-axis cross-portfolio synergies (audited) |
 | Pattern Distillation | `/distillation` | Distillation | `distillation` | services/distillation.ts | ✅ | Anonymised, N≥3 publication gate |
 | Briefing | `/briefing` | Briefing | `briefing` | agents/briefing.ts | 🟡 | Daily/weekly text briefing; TTS audio pending |
@@ -152,7 +155,8 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 | Memory engine | `server/services/memory*.ts`, `retrieval/{cosine,rrf,mmr,graph}.ts` | Bi-temporal, dimensional, hybrid retrieval (C19–C24). |
 | Prediction ledger | `server/services/predictions.ts`, drizzle `prediction`/`outcome` | Every shipped claim recorded (C2); real vs synthetic strata (C25). |
 | Ontology | `shared/ontology.ts` | 15 entities / 9 relations with edge validation. |
-| Crons | `server/cron/{backup,memory-hygiene,memory-reflection,handlers}.ts` | Manus invokes via authenticated cron endpoints (see CRON_REGISTRY.md). |
+| Realtime voice | `server/_core/realtime.ts` (mint), `client/src/lib/openaiRealtimeWsEngine.ts` (transport), `client/src/contexts/VoiceCallContext.tsx` (call, C14), `VoiceOverlay.tsx` / `VoiceMiniPlayer.tsx` | Launched from the sidebar ("Talk to Cairn"), not a route. OpenAI Realtime over WebSocket + PCM16 (C16 corrected). Read-only lookup tools `lookup_company`/`lookup_memory`/`lookup_predictions` (`realtime.executeTool`). Needs OPENAI_API_KEY with Realtime entitlement. |
+| Crons | `server/cron/{backup,memory-hygiene,memory-reflection,calibration-snapshot,handlers}.ts` | Manus invokes via authenticated cron endpoints (see CRON_REGISTRY.md). |
 | Cost/perf | `server/services/cache.ts`, `prompt-compression.ts` | Embedding cache + lossless prompt compression (Phase 8). |
 | Tenancy & audit | every service + `server/middleware/audit.ts` | C1 on every row; cross-company reads audited. |
 
@@ -164,7 +168,7 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 - **Notion / Jira connectors** — currently `available:false` stubs; implement to the Linear standard (`server/connectors/`).
 - **Live FX rate** — `currency.ts` uses an injected fallback; add an `fx_rate` MCP tool (C3) for live rates.
 - **External KPI sync** (Stripe/GA4/Salesforce) — the KPI library exists; live connectors do not.
-- **Realtime WebRTC voice + TTS**, **vision-in ingest**, **live deep-research streaming UI** — see MASTER Feature Matrix (☐ rows).
+- ~~Realtime WebRTC voice + TTS, vision-in ingest, live deep-research streaming UI~~ — **all four shipped (Phase 7, 2026-06):** realtime voice (WebSocket, C16 corrected), Vision Studio (in/out), Live Research (SSE), and the data-dependent learning loop (prediction resolution + Portfolio calibration dashboard + nightly calibration-snapshot cron). The only remaining caveat is the realtime voice **runtime entitlement** (the deployed `OPENAI_API_KEY` must have Realtime API access) — code is complete and built.
 - Acceptance-gate items (real weekly usage, ≥20 closed real predictions, ≥3 onboarded portcos) are usage/data milestones, not code — tracked in MASTER Phase Status.
 
 ---
@@ -172,3 +176,4 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 ## Change log for this file
 
 - **2026-06-30** — Created. Full feature map of all surfaces + cross-cutting systems; documented the read-before / update-after protocol and wired it into CLAUDE.md. Salvaged modules (Discovery, Financial Simulation, Strategic Tracker) included.
+- **2026-06-30** — Phase 7 gated-features build: added **Vision Studio** (`/vision`), **Live Research** (`/live-research`, SSE), **Portfolio Dashboard** (`/portfolio`) + prediction resolution (data-dependent learning), and **realtime voice** (sidebar-launched, OpenAI Realtime over WebSocket). Corrected **C16** (WebRTC → WebSocket + PCM16, the real Meridian lesson). Added the `calibration-snapshot` cron. Flipped the four previously-gated rows to shipped.

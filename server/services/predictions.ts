@@ -7,7 +7,7 @@
  * extract_claims(): uses router.structured to extract claims from LLM output.
  */
 
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { predictions, outcomes, type Prediction, type Outcome } from "../../drizzle/schema";
 import * as router from "../ai/router";
@@ -203,6 +203,83 @@ export async function extractClaims(
 }
 
 // ─── list_predictions ─────────────────────────────────────────────────────────
+
+/**
+ * List OPEN predictions (no recorded outcome) for a company — the ones awaiting
+ * real-world resolution. Only `real` predictions need human resolution; synthetic
+ * (war-game) closes are written by the simulation itself. `overdueOnly` keeps just
+ * those whose targetDate has passed.
+ */
+export async function listOpenPredictions(params: {
+  tenantId: string;
+  companyId: number;
+  overdueOnly?: boolean;
+  limit?: number;
+}): Promise<Prediction[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select()
+    .from(predictions)
+    .where(
+      and(
+        eq(predictions.tenantId, params.tenantId),
+        eq(predictions.companyId, params.companyId),
+        isNull(predictions.outcomeId),
+        eq(predictions.outcomeClass, "real"),
+      ),
+    )
+    .limit(params.limit ?? 50)
+    .orderBy(predictions.targetDate);
+  if (!params.overdueOnly) return rows;
+  const now = Date.now();
+  return rows.filter((r) => r.targetDate != null && new Date(r.targetDate).getTime() <= now);
+}
+
+/**
+ * Resolve an open prediction with its real-world outcome. Translates a simple
+ * "did the claim hold?" boolean into the ledger's errorDelta (= |forecast −
+ * outcome|, the form `getCalibrationRecords` reads), then closes the prediction.
+ */
+export async function resolvePrediction(params: {
+  tenantId: string;
+  companyId: number;
+  predictionId: number;
+  held: boolean;
+  actualValue: string;
+  measuredAt: Date;
+  source?: string;
+}): Promise<Outcome> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [pred] = await db
+    .select()
+    .from(predictions)
+    .where(
+      and(
+        eq(predictions.id, params.predictionId),
+        eq(predictions.tenantId, params.tenantId),
+        eq(predictions.companyId, params.companyId),
+      ),
+    )
+    .limit(1);
+  if (!pred) throw new Error(`Prediction ${params.predictionId} not found or access denied`);
+
+  const raw = Number(pred.confidence);
+  const forecast = Math.max(0, Math.min(1, raw > 1 ? raw / 100 : raw));
+  const outcome = params.held ? 1 : 0;
+  const errorDelta = Math.abs(forecast - outcome);
+  return closePrediction({
+    predictionId: params.predictionId,
+    tenantId: params.tenantId,
+    companyId: params.companyId,
+    actualValue: params.actualValue,
+    measuredAt: params.measuredAt,
+    source: params.source,
+    errorDelta,
+    outcomeClass: "real",
+  });
+}
 
 export async function listPredictions(params: {
   tenantId: string;

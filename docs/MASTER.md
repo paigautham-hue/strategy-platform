@@ -113,12 +113,14 @@ badly under-reported, marking shipped+tested features as ☐):
 | 4-arena simulation (customer / talent / capital / regulator) | 3 | ✅ | `server/agents/war-game.ts` writes synthetic outcomes to the ledger |
 | Cross-company war-game (GP only) | 3 | ✅ | `server/agents/cross-co-war-game.ts` — permissioned 3-layer |
 | TTS war-game playback | 3 | ☐ | ElevenLabs per persona — no TTS code |
-| WebRTC realtime voice | 4 | ☐ | OpenAI Realtime / Gemini Live abstraction |
+| Realtime voice (WebSocket + PCM16) | 4/7 | 🟡 | **Code shipped** — `server/_core/realtime.ts` (ephemeral-token mint) + `client/src/lib/openaiRealtimeWsEngine.ts` (ported from Meridian) + `VoiceCallContext.tsx`. OpenAI Realtime over WebSocket, **C16 corrected** (WebRTC dropped audio on iOS WKWebView at Meridian). Read-only lookup tools (`realtime.executeTool`). Runtime-gated on an OPENAI_API_KEY with Realtime entitlement |
 | Brainstorm Mode (4 phases) | 4 | ✅ | `server/agents/brainstorm.ts` — 5 silent extractors + recap |
-| Voice mini-player (persistent) | 4 | ☐ | Decoupled from full overlay (C14) |
+| Voice mini-player (persistent) | 4/7 | ✅ | `client/src/components/VoiceMiniPlayer.tsx` — decoupled from the overlay (C14); call survives navigation |
 | Persona swap mid-session | 4 | 🟡 | Advisory personas shipped (`server/agents/personas.ts`); live mid-session swap pending |
-| Vision-in (slides, whiteboards, charts) | 4 | ☐ | Vision model extracts to structured |
+| Vision-in (slides, whiteboards, charts) | 4/7 | ✅ | `server/agents/vision.ts` `extractFromImage` (multimodal via private S3 URL) + `/vision` Vision Studio |
+| Live deep-research streaming UI | 4/7 | ✅ | `server/agents/research.ts` `streamResearchMesh` + `_core/researchStream.ts` (SSE) + `/live-research` activity tree |
 | Image-out (Wardley, Porter, BCG, 3H) | 4 | 🟡 | Native CSS diagram specs shipped (`server/agents/diagram.ts`); raster export (Imagen/Flux, OD9) gated |
+| Free-form image generation | 4/7 | ✅ | `server/agents/vision.ts` `generateVisual` → real `generateImage` (forge ImageService) + Vision Studio Generate tab |
 | Memo dictation | 4 | ✅ | `server/agents/memo-dictation.ts` — monologue → 1-page memo |
 | Hot-path distillation | 4 | 🟡 | Distillation logic shipped (`server/services/distillation.ts`); ≥5× GPU path config-only |
 | Strategy decomposer (Initiative → OKR → Task) | 5 | ✅ | `server/agents/decomposer.ts` + pre-mortem |
@@ -129,13 +131,13 @@ badly under-reported, marking shipped+tested features as ☐):
 | KPI sync (Stripe, GA4, Salesforce, Warehouse) | 5 | ☐ | Internal KPI library exists (`kpi-library.ts`); external data connectors absent |
 | Drift detectors (Schedule / KPI / Thesis) | 5 | ✅ | `server/agents/drift.ts` + replan engine |
 | Operator-tier UX (Slack + Notion + Linear embed) | 5 | ☐ | 1-page memo default |
-| Calibration cron + scorecard | 6 | 🟡 | Scorecard math shipped (`server/services/calibration.ts`); resolver cron needs deploy + ≥20 closed real predictions (currently 0) |
+| Calibration cron + scorecard | 6/7 | ✅ | Scorecard math (`server/services/calibration.ts`) + **prediction resolution** (`predictions.ts` `listOpenPredictions`/`resolvePrediction` → errorDelta) + nightly `calibration-snapshot` cron. Acceptance gate (≥20 closed real predictions) is a data milestone, not code |
 | Pattern mining + Playbook engine | 6 | ✅ | `server/agents/pattern-mining.ts` + `playbook.ts` (promotion gate) |
 | Causal-lite attribution | 6 | ✅ | `server/agents/attribution.ts` — DAG-conditioned |
 | Anti-hallucination memory audit | 6 | ✅ | `server/services/audit-constitution.ts` |
 | 9-axis Synergy Scout | 7 | ✅ | `server/agents/synergy-scout.ts` (GP-only, 3-layer) |
 | Pattern distillation (anonymized) | 7 | ✅ | `server/services/distillation.ts` (N≥3 publication gate) |
-| Portfolio dashboard (GP only) | 7 | ☐ | Needs ≥3 onboarded portcos + accumulated data |
+| Portfolio dashboard (GP only) | 7 | ✅ | `client/src/pages/Portfolio.tsx` + `server/services/portfolio.ts` — cross-company calibration table + open-prediction resolution panel (data-dependent learning loop). Richer once ≥3 portcos carry closed predictions |
 | Voice briefing (daily / weekly) | 7 | 🟡 | Text builder shipped (`server/agents/briefing.ts`); TTS audio pending |
 | Performance + cost optimization | 8 | 🟡 | Embedding cache + prompt compression shipped; P95 + cost SLO unmeasured (no deploy metrics) |
 | On-prem model lane | 8 | ☐ | vLLM lane is a config-only deferred slot |
@@ -192,6 +194,13 @@ badly under-reported, marking shipped+tested features as ☐):
 - The salvage work (Monte Carlo + currency, MGPS fixture, doc reconciliation, Dynamo Digital Twin intake, persistence + structured-output auto-write, UI surfaces) is complete and merged to `main`.
 - **Ultra-audit hardening**: ran a 7-dimension adversarial multi-agent audit (tenancy, provider-abstraction, finance correctness, logic correctness, migration/schema, react/UX, cost/DoS) over the full salvage surface **31 times**, fixing every confirmed defect and re-auditing. **71 defects fixed** across the campaign (incl. an intra-tenant authorization gap, a company-grain data-integrity bug, a MySQL strict-mode varchar-overflow crash, NPV/percentile/currency edge cases, and exhaustive free-text status-resolution + a11y hardening). Test suite grew 500 → 557.
 - Net state of the salvaged modules: tsc clean · 557 tests / 0 fail · production build clean · additive migration `0003` applied by Manus on publish. A systemic company-access-guard gap in the PRE-EXISTING routers was flagged as a separate task (out of this PR's scope).
+
+### 2026-06-30 · Phase 7 gated-features — vision, learning loop, live research, realtime voice
+- **Vision in/out** — `server/agents/vision.ts`: `extractFromImage` uploads the image to private S3 and passes only the URL to a multimodal model (keeps base64 out of the token budget), `generateVisual` calls the real forge ImageService. UI: `client/src/pages/Vision.tsx` (`/vision` "Vision Studio", Extract/Generate tabs). tRPC `vision.extract` / `vision.generate`.
+- **Data-dependent learning loop** — `server/services/predictions.ts`: `listOpenPredictions` + `resolvePrediction` (held? → `errorDelta = |forecast − outcome|` → `closePrediction`, feeding calibration). `server/services/portfolio.ts` aggregates cross-company Brier/hit-rate; `client/src/pages/Portfolio.tsx` (`/portfolio`, GP-only) is the calibration table + resolution panel. Nightly `calibration-snapshot` cron (read-only) keeps figures current. Honest limit: the platform can't invent outcomes — the loop sharpens only as the GP resolves due predictions.
+- **Live research streaming** — `server/agents/research.ts` `streamResearchMesh` emits `start`/`memory`/`specialist`/`synthesizing`/`complete` events; `server/_core/researchStream.ts` is the SSE endpoint (`GET /api/research/stream`, authenticated via `sdk.authenticateRequest`, C1 company-access enforced). `client/src/pages/LiveResearch.tsx` (`/live-research`) renders the activity tree live.
+- **Realtime voice** — ported Meridian's WebSocket + PCM16 engine (`client/src/lib/openaiRealtimeWsEngine.ts`); `server/_core/realtime.ts` mints ephemeral tokens via `POST /v1/realtime/client_secrets` (raw key stays server-side) with a compact prompt (C17) + read-only lookup tools (C13-safe). Call lives in `VoiceCallContext.tsx` decoupled from the overlay (C14) with a persistent `VoiceMiniPlayer`. **Corrected C16** (WebRTC→WebSocket — the real iOS lesson). Launched from the sidebar "Talk to Cairn". Runtime-gated on an OPENAI_API_KEY with Realtime entitlement; the live browser+API last mile can't be verified headless.
+- **Verification**: tsc clean + production build clean for all four. Docs updated in the same change (PROJECT_MAP, CRON_REGISTRY, in-app manual + FAQ), per the named-file governance rule.
 
 ### 2026-06-30 · Feature map + governance + in-app help; ultra-audit fixes
 - **`docs/PROJECT_MAP.md`** (new) — the navigable feature & file map: every surface → route → page → tRPC router → service/agent files → status, plus the cross-cutting systems. It is now the **mandatory first read**, wired into `CLAUDE.md`'s companion-docs table and its named-file shipping rule (a feature change must update PROJECT_MAP **and** the in-app help in the same commit). This is how the large codebase stays manageable.

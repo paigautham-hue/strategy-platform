@@ -148,8 +148,10 @@ Voice extracts go to `*_drafts` tables. User reviews in a tray and confirms befo
 ## C15 · Two UX tiers, one backend (P7)
 Same backend powers both GP tier (deep, multi-surface) and Operator tier (voice-first, briefing-default, embedded in Slack/Notion/Linear). **Never** fork backend logic by tier. UX complexity is a presentation-layer concern.
 
-## C16 · WebRTC for realtime voice — not WebSocket + PCM (Meridian lesson)
-We learned this expensively at Meridian: manual mic-gating, echo prevention, AI-cooldown windows, and noise-gate thresholds added hundreds of lines and never fully worked. WebRTC handles echo cancellation natively. Use it.
+## C16 · Realtime voice over WebSocket + PCM16 — NOT WebRTC (corrected Meridian lesson)
+**This rule was reversed by Meridian's own later experience — heed the corrected version.** The original rule said "use WebRTC for native echo cancellation." That was right on desktop but failed in production: WebRTC dropped audio on iOS WKWebView, and four PRs (#276/#278/#279/#283) could not fix it. Meridian demoted WebRTC to opt-in (2026-05-11) and shipped a **WebSocket + PCM16 24kHz** engine — the same transport Gemini Live uses, which works reliably on the same iPhones WebRTC broke on.
+
+Cairn ships the ported WebSocket engine: `client/src/lib/openaiRealtimeWsEngine.ts` (mic capture → Int16 PCM → base64 `input_audio_buffer.append`; playback via AudioContext + compressor/gain). The manual mic-gating the original rule warned about IS handled here (250ms post-speech unmute delay, hard mic-duck during AI speech) — it's a bounded ~150 lines, not the unbounded mess feared, and it's the price of iOS support. Echo cancellation is requested at `getUserMedia` (`echoCancellation:true`). Tokens are minted server-side via the GA endpoint `POST /v1/realtime/client_secrets` (`server/_core/realtime.ts`); the raw `OPENAI_API_KEY` never reaches the browser. Do NOT send the `openai-beta.realtime-v1` subprotocol — a GA client secret cannot start a Beta session.
 
 ## C17 · Compact prompt + on-demand lookup tools — never dump context (Meridian lesson)
 At Meridian, dumping all user data into the system prompt blew up at 15-30K tokens and caused mid-sentence truncation. Strategy data is much larger. Default system prompts are < 5K tokens; agents call `lookup_company`, `lookup_segment`, `lookup_competitor`, `lookup_memory` on demand.
