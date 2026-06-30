@@ -71,8 +71,16 @@ export default function Simulation() {
     [growth],
   );
 
+  // Mirror the backend monteCarloInputSchema so the form never fires a request the
+  // server will reject with a raw Zod error: growthRates 1..20, discountRate > -100%,
+  // volatilities ≥ 0, all fields finite.
   const valid =
     growthRates.length >= 1 &&
+    growthRates.length <= 20 &&
+    Number(form.discountRate) > -100 &&
+    Number(form.revenueVolatility) >= 0 &&
+    Number(form.marginVolatility) >= 0 &&
+    Number(form.growthVolatility) >= 0 &&
     FIELDS.every((f) => form[f.id] !== "" && Number.isFinite(Number(form[f.id])));
 
   function buildInput() {
@@ -151,6 +159,7 @@ export default function Simulation() {
             />
             <p className="text-[11px] text-muted-foreground font-body">
               {growthRates.length} year{growthRates.length === 1 ? "" : "s"} parsed
+              {growthRates.length > 20 ? " — max 20" : ""}
             </p>
           </div>
 
