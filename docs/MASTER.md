@@ -188,6 +188,11 @@ badly under-reported, marking shipped+tested features as ☐):
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-06-30 · Feature map + governance + in-app help; ultra-audit fixes
+- **`docs/PROJECT_MAP.md`** (new) — the navigable feature & file map: every surface → route → page → tRPC router → service/agent files → status, plus the cross-cutting systems. It is now the **mandatory first read**, wired into `CLAUDE.md`'s companion-docs table and its named-file shipping rule (a feature change must update PROJECT_MAP **and** the in-app help in the same commit). This is how the large codebase stays manageable.
+- **In-app help** (`client/src/lib/manual-content.ts`) — added Discovery (Digital Twin), Financial Simulation, and Strategic Tracker to the manual + three new FAQ entries, so the `/manual` surface reflects the new features.
+- **Ultra-audit (pass 1)** — a 7-dimension adversarial multi-agent audit (33 agents) over the whole salvage surface found 9 confirmed defects (1 Blocker, 2 Major, 5 Minor, 1 Nit); **all fixed** (see commit `09dbb1a`): the `saveCompleteness` NULL/0 upsert sentinel (Blocker), Monte Carlo percentile off-by-one, currency NaN/parse guards, form-label a11y, Discovery unsaved-draft merge, and tighter `simulation.sensitivity` caps. Re-audited to convergence. 542 tests pass; tsc + build clean.
+
 ### 2026-06-30 · Prototype consolidation (4/n) — UI surfaces for the salvaged modules
 - **`client/src/pages/Simulation.tsx`** (`/simulation`, Simulation group) — Monte Carlo projection: inputs form, run 10k paths, stat cards (mean/median NPV with a USD equivalent via the FX rate), a percentile distribution bar chart (recharts), risk metrics (prob-of-loss, VaR95/99, expected shortfall, Sharpe), and a best/base/worst comparison. Dual-currency woven into the NPV display.
 - **`client/src/pages/Discovery.tsx`** (`/discovery`, Strategy Intake group) — the Digital Twin interview: a chat that calls `digitalTwin.nextTurn` with live per-dimension coverage meters + funnel-gate badges, a capture panel that persists each dimension (`saveDimension`), and AI-strategy generation from the assembled twin.

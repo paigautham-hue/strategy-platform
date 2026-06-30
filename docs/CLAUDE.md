@@ -49,6 +49,7 @@ map them to the real TypeScript locations:
 
 | Doc | When to read |
 |---|---|
+| [PROJECT_MAP.md](./PROJECT_MAP.md) | **FIRST.** The feature & file map — every surface → route → page → router → service/agent files → status. Use it to locate code, and **update it in the same commit as any feature change.** |
 | [GUIDING_PRINCIPLES.md](./GUIDING_PRINCIPLES.md) | Before any architecture debate. Cite Pn / Hn in PRs. |
 | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | To find which phase a deliverable belongs to + acceptance gates. |
 | [MASTER.md](./MASTER.md) | To get current project state, recent changes, feature status. Updated on every major change. |
@@ -212,6 +213,7 @@ When a new feature ships in a PR, the **same PR** must update these named files:
 
 | Type of feature | Files to update in the same PR |
 |---|---|
+| **Any new or changed feature/surface (always)** | **`docs/PROJECT_MAP.md`** (add/edit the feature row — files, status, one-liner) **+ `client/src/lib/manual-content.ts`** (a manual entry and/or FAQ item, so the in-app `/manual` help stays current) |
 | New backend service or agent | `docs/strategy-platform/MASTER.md` (Recent Changes + Feature Status table) + `docs/strategy-platform/IMPLEMENTATION_PLAN.md` (mark workstream complete) |
 | New API endpoint | OpenAPI spec + `docs/strategy-platform/MASTER.md` API section |
 | New UI surface | `docs/strategy-platform/UX_DESIGN.md` (surface-by-surface section) + `docs/strategy-platform/MASTER.md` |
