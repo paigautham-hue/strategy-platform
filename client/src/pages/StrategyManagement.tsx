@@ -21,7 +21,6 @@ const KPI_STATUS_TONE: Record<string, string> = {
 
 export default function StrategyManagement({ activeCompanyId }: Props) {
   const [context, setContext] = useState("");
-  const companyId = activeCompanyId ?? undefined;
   const enabled = activeCompanyId != null;
 
   const kpis = trpc.strategyManagement.listKpis.useQuery({ companyId: activeCompanyId ?? 0 }, { enabled });
