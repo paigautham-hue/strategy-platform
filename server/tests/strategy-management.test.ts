@@ -107,6 +107,11 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeMilestone({ title: "x", status: "no, in progress" }).status).toBe("in-progress"); // bare "no" isn't negation
     expect(normalizeMilestone({ title: "x", status: "deal won, shipped" }).status).toBe("done"); // bare "won" isn't negation
     expect(normalizeMilestone({ title: "x", status: "won't start yet" }).status).toBe("planned"); // contraction IS negation
+    // generic n't contractions negate (must not flip to the positive token)
+    expect(normalizeMilestone({ title: "x", status: "hasn't started" }).status).toBe("planned");
+    expect(normalizeMilestone({ title: "x", status: "wasn't done" }).status).toBe("planned");
+    expect(normalizeKpi({ label: "x", status: "wasn't good" }).status).toBe("unknown");
+    expect(normalizeMilestone({ title: "x", status: "cannot start" }).status).toBe("planned");
   });
 
   it("caps bounded strings to their column widths (MySQL strict-mode safety)", () => {

@@ -125,6 +125,13 @@ const MILESTONE_STATUS_ALIASES: Record<string, StrategyMilestoneStatus> = {
   "not-started": "planned", todo: "planned", upcoming: "planned",
 };
 
+// Negative-contraction stems. normStatus turns "hasn't" → "hasn-t", so a stem
+// token immediately followed by a "t" token marks negation.
+const NEG_STEMS = new Set([
+  "isn", "wasn", "hasn", "haven", "hadn", "didn", "doesn", "don", "aren", "weren",
+  "wouldn", "couldn", "shouldn", "won", "can",
+]);
+
 /** Normalise a status: lowercase, collapse any non-letter run to '-', trim edge hyphens. */
 function normStatus(raw: unknown): string {
   return str(raw).toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-+|-+$/g, "");
@@ -148,16 +155,17 @@ function resolveStatus<T extends string>(
   if (prefix) return prefix as T;
   if (aliases[s]) return aliases[s];
   const tokens = s.split("-");
-  // Negation: a "not / no / isn / won … <positive token>" status must never resolve
-  // to the positive token it contains (e.g. "not done"→done, "not yet started"→started,
-  // "not at risk"→at-risk). Map a negated "started" to not-started; any other negated
-  // status drops to the safe fallback rather than flipping to its positive meaning.
-  // Reliable negation markers only. "no" and bare "won" are excluded — both are
-  // ambiguous standalone words ("no, in progress"; "deal won, shipped") that would
-  // wrongly suppress a clearly-stated status. The contraction "won't" (→ "won-t"
-  // after normalisation) IS treated as negation.
+  // Negation: "not"/"cannot"/"never", or any negative contraction (a NEG_STEM token
+  // followed by a "t" token — normStatus turns "hasn't"→"hasn-t", "won't"→"won-t").
+  // Bare "no"/"won" are NOT negation (ambiguous: "no, in progress"; "deal won,
+  // shipped"). A negated status must never resolve to the positive token it contains
+  // ("not done"→done, "hasn't started"→in-progress): a negated "started" → not-started;
+  // anything else negated → the safe fallback.
   const negated =
-    tokens.includes("not") || tokens.includes("isn") || tokens.includes("wont") || /(?:^|-)won-t(?:-|$)/.test(s);
+    tokens.includes("not") ||
+    tokens.includes("cannot") ||
+    tokens.includes("never") ||
+    tokens.some((t, i) => NEG_STEMS.has(t) && tokens[i + 1] === "t");
   if (negated) {
     if (tokens.some((t) => t.startsWith("start"))) return aliases["not-started"] ?? fallback;
     return fallback;
