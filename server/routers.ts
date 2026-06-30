@@ -74,6 +74,7 @@ import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services
 import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
 import { DIMENSIONS, scoreDimensionCoverage, completenessGates } from "./services/digital-twin";
 import { nextDiscoveryTurn, generateAiStrategy } from "./agents/digital-twin-interview";
+import { extractFromImage, generateVisual } from "./agents/vision";
 import { upsertTwinDimension, getTwinSummary, saveCompleteness, isSessionInCompany } from "./services/digital-twin-store";
 import { extractStrategicItems } from "./agents/strategic-extract";
 import {
@@ -1494,6 +1495,35 @@ const digitalTwinRouter = router({
     }),
 });
 
+// ─── Vision Router (Phase 4 — multimodal in/out) ──────────────────────────────
+
+const visionRouter = router({
+  // Vision IN: extract structured content from an uploaded image via the multimodal model.
+  extract: protectedProcedure
+    .input(
+      z.object({
+        imageBase64: z.string().min(1).max(12_000_000), // ~8 MB binary
+        mimeType: z.string().max(64),
+        instruction: z.string().max(2_000).optional(),
+        companyId: z.number().optional(),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      if (input.companyId !== undefined) assertCompanyAccess(ctx.user, input.companyId);
+      return extractFromImage(
+        input.imageBase64,
+        input.mimeType,
+        input.instruction ?? "",
+        buildRouterCtx(ctx, { companyId: input.companyId }),
+      );
+    }),
+
+  // Vision OUT: generate a raster image (e.g. a diagram export) from a prompt.
+  generate: protectedProcedure
+    .input(z.object({ prompt: z.string().min(1).max(2_000) }))
+    .mutation(({ input }) => generateVisual(input.prompt)),
+});
+
 // ─── Strategic Management Router (Phase 5 — structured-output auto-write; from StrategyForge) ─
 
 const strategyManagementRouter = router({
@@ -1803,6 +1833,7 @@ export const appRouter = router({
   simulation: simulationRouter,
   currency: currencyRouter,
   digitalTwin: digitalTwinRouter,
+  vision: visionRouter,
   strategyManagement: strategyManagementRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
