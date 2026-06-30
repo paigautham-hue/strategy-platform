@@ -68,6 +68,7 @@ export function formatUsdMillions(usdAbsolute: number): string {
  * crores, USD in millions, anything else via Intl. Pure.
  */
 export function formatCurrency(amount: number, currencyCode: string): string {
+  if (!Number.isFinite(amount)) return "—";
   if (currencyCode === "INR") return formatInrCrores(amount);
   if (currencyCode === "USD") return formatUsdMillions(amount);
   return new Intl.NumberFormat("en-US", {
@@ -107,10 +108,11 @@ export function parseCurrencyInput(input: string, currencyCode: string): number 
   const parsed = parseFloat(cleaned);
   if (!Number.isFinite(parsed)) return null;
 
-  // Anchor the magnitude suffix to the END so a stray "m"/"cr" mid-string can't misscale by 1e6.
+  // Anchor the magnitude suffix to the END so a stray "m"/"cr" mid-string can't
+  // misscale, while accepting the common full-word/abbreviated forms.
   const lower = input.trim().toLowerCase();
-  if (currencyCode === "INR" && /cr\s*$/.test(lower)) return parsed * CRORE;
-  if (currencyCode === "USD" && /m\s*$/.test(lower)) return parsed * MILLION;
+  if (currencyCode === "INR" && /(?:cr|crores?)\s*$/.test(lower)) return parsed * CRORE;
+  if (currencyCode === "USD" && /(?:m|mn|mm|million)\s*$/.test(lower)) return parsed * MILLION;
   return parsed;
 }
 

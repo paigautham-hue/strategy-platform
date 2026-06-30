@@ -47,6 +47,18 @@ export default function Discovery({ activeCompanyId }: Props) {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  // Reset per-company local state when the active company changes, so drafts and
+  // the transcript from one company never leak into another (Save and Generate
+  // are company-scoped, so a stale draft would otherwise write under the wrong id).
+  useEffect(() => {
+    setDrafts({});
+    setMessages([]);
+    setCoverage(ZERO);
+    setGates({ overall: 0, previewAvailable: false, fullStrategyAvailable: false });
+    strategyMut.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCompanyId]);
+
   const dimLabel = useMemo<Record<string, string>>(() => dimensions ?? {}, [dimensions]);
 
   function send() {
@@ -201,36 +213,42 @@ export default function Discovery({ activeCompanyId }: Props) {
               <CardTitle className="font-heading text-base">Capture the Digital Twin</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {DIM_ORDER.map((d) => (
-                <div key={d} className="space-y-1">
-                  <label htmlFor={`dim-${d}`} className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
-                    {dimLabel[d] ?? d}
-                  </label>
-                  <Textarea
-                    id={`dim-${d}`}
-                    value={drafts[d] ?? (twinData as Record<string, string> | undefined)?.[d] ?? ""}
-                    onChange={(e) => setDrafts((p) => ({ ...p, [d]: e.target.value }))}
-                    placeholder={`Summary of ${dimLabel[d] ?? d}…`}
-                    className="bg-secondary/50 border-border/60 font-body text-sm min-h-[60px]"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5 text-xs"
-                    disabled={saveMut.isPending || !(drafts[d] ?? "").trim()}
-                    onClick={() =>
-                      saveMut.mutate({
-                        companyId: activeCompanyId,
-                        dimension: d,
-                        summary: (drafts[d] ?? "").trim(),
-                        confidence: coverage[d],
-                      })
-                    }
-                  >
-                    <Save className="h-3 w-3" /> Save
-                  </Button>
-                </div>
-              ))}
+              {DIM_ORDER.map((d) => {
+                // The value actually shown = unsaved draft over persisted summary.
+                // Save/disable gate on `shown`, so a loaded-but-unedited dimension
+                // can be re-saved and an empty string is never persisted.
+                const shown = drafts[d] ?? (twinData as Record<string, string> | undefined)?.[d] ?? "";
+                return (
+                  <div key={d} className="space-y-1">
+                    <label htmlFor={`dim-${d}`} className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+                      {dimLabel[d] ?? d}
+                    </label>
+                    <Textarea
+                      id={`dim-${d}`}
+                      value={shown}
+                      onChange={(e) => setDrafts((p) => ({ ...p, [d]: e.target.value }))}
+                      placeholder={`Summary of ${dimLabel[d] ?? d}…`}
+                      className="bg-secondary/50 border-border/60 font-body text-sm min-h-[60px]"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-xs"
+                      disabled={saveMut.isPending || !shown.trim()}
+                      onClick={() =>
+                        saveMut.mutate({
+                          companyId: activeCompanyId,
+                          dimension: d,
+                          summary: shown.trim(),
+                          confidence: coverage[d],
+                        })
+                      }
+                    >
+                      <Save className="h-3 w-3" /> Save
+                    </Button>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
 
