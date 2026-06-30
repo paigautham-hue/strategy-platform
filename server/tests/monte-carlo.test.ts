@@ -62,6 +62,11 @@ describe("monte-carlo — pure npv / irr", () => {
     expect(irr([])).toBeNull();
     expect(irr([0, 0])).toBeNull();
   });
+
+  it("npv guards a -100% discount rate instead of leaking Infinity", () => {
+    expect(Number.isNaN(npv([100, 200], -100))).toBe(true);
+    expect(Number.isFinite(npv([100, 200], 10))).toBe(true);
+  });
 });
 
 describe("monte-carlo — deterministic zero-volatility path", () => {

@@ -44,6 +44,14 @@ describe("digital-twin — graded coverage scoring", () => {
     expect(tech.technology).toBe(100);
   });
 
+  it("scores only user-authored content (the consultant's own questions don't count)", () => {
+    const cov = scoreDimensionCoverage([
+      { role: "assistant", content: "Tell me about your revenue, customers, value proposition and competitive positioning." },
+      { role: "user", content: "hi" },
+    ]);
+    expect(cov.businessModel).toBe(0);
+  });
+
   it("does not credit businessModel for operations-only 'production' text (facets stay non-overlapping)", () => {
     const ops = scoreDimensionCoverage([
       { role: "user", content: "Our production line and supply chain throughput improved; quality defects fell." },

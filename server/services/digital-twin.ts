@@ -89,15 +89,17 @@ export interface ConversationMessage {
 
 /** Concatenate message content into one lowercased haystack. Pure. */
 function conversationText(messages: ConversationMessage[]): string {
-  return messages.map((m) => String(m.content ?? "")).join("\n");
+  return messages.map((m) => String(m.content ?? "")).join("\n").toLowerCase();
 }
 
 /**
- * Score each dimension 0–100 by how many of its four facets are mentioned.
+ * Score each dimension 0–100 by how many of its four facets the USER mentioned.
+ * Only user-authored content counts — the consultant naming a dimension in a
+ * question must not inflate that dimension before the user has answered.
  * Pure and deterministic.
  */
 export function scoreDimensionCoverage(messages: ConversationMessage[]): DimensionCoverage {
-  const text = conversationText(messages);
+  const text = conversationText(messages.filter((m) => m.role === "user"));
   const coverage = {} as DimensionCoverage;
   for (const dim of DIMENSION_KEYS) {
     const facets = FACETS[dim];
