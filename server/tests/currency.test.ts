@@ -89,9 +89,12 @@ describe("currency — edge-case guards", () => {
     expect(parseCurrencyInput("1-2-3", "USD")).toBeNull();
     expect(parseCurrencyInput("1.2.3", "USD")).toBeNull();
     expect(parseCurrencyInput("", "USD")).toBeNull();
-    // a stray "m"/"cr" that is not a trailing suffix must NOT rescale
+    // a stray "m"/"cr" that is not a standalone unit token must NOT rescale
     expect(parseCurrencyInput("5 (amt)", "USD")).toBe(5);
     expect(parseCurrencyInput("12 across", "INR")).toBe(12);
+    expect(parseCurrencyInput("5 minimum", "USD")).toBe(5);
+    expect(parseCurrencyInput("10 sum", "USD")).toBe(10);
+    expect(parseCurrencyInput("3 term", "USD")).toBe(3);
     // genuine trailing suffixes still scale — abbreviations and full words
     expect(parseCurrencyInput("2M", "USD")).toBe(2_000_000);
     expect(parseCurrencyInput("5.68 Cr", "INR")).toBe(56_800_000);
