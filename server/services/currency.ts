@@ -120,7 +120,9 @@ export function parseCurrencyInput(input: string, currencyCode: string): number 
   // thousands grouping), and an optional trailing magnitude UNIT TOKEN. Anything
   // else — scientific notation ("2.5e6"), stray words ("5 minimum"), parentheticals,
   // multiple separators — is rejected as null rather than silently mis-parsed.
-  const body = input.trim().toLowerCase().replace(/^[\s$₹]*/, "");
+  // Strip a leading currency symbol, keeping an optional sign that may sit before
+  // OR after it ("-$5" and "$-5" both normalise to "-5").
+  const body = input.trim().toLowerCase().replace(/^[\s$₹]*(-?)[\s$₹]*/, "$1");
   const m = /^(-?[\d,]*\.?\d+)\s*([a-z]+)?$/.exec(body);
   if (!m) return null;
 

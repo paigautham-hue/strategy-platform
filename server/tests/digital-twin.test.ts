@@ -113,6 +113,17 @@ describe("digital-twin — strategy normalizer", () => {
     expect(s.risks).toEqual([]);
   });
 
+  it("drops untitled/empty opportunities, use cases and risks", () => {
+    const s = normalizeStrategy({
+      opportunities: [{}, { title: "Real" }],
+      useCases: [{ description: "no title" }],
+      risks: [{}, { risk: "Real risk" }],
+    });
+    expect(s.opportunities).toHaveLength(1);
+    expect(s.useCases).toHaveLength(0);
+    expect(s.risks).toHaveLength(1);
+  });
+
   it("clamps a negative score to zero", () => {
     expect(normalizeStrategy({ aiReadinessScore: -5 }).aiReadinessScore).toBe(0);
   });

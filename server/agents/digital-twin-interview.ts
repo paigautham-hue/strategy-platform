@@ -192,22 +192,28 @@ export function normalizeStrategy(raw: unknown): AiStrategy {
   return {
     aiReadinessScore: clampScore(o.aiReadinessScore),
     executiveSummary: asString(o.executiveSummary),
-    opportunities: asArray(o.opportunities).map((x) => ({
-      title: asString(x.title),
-      description: asString(x.description),
-      impact: asString(x.impact),
-      feasibility: asString(x.feasibility),
-    })),
-    useCases: asArray(o.useCases).map((x) => ({
-      title: asString(x.title),
-      description: asString(x.description),
-      roiPotential: asString(x.roiPotential),
-      timeline: asString(x.timeline),
-    })),
-    risks: asArray(o.risks).map((x) => ({
-      risk: asString(x.risk),
-      mitigation: asString(x.mitigation),
-    })),
+    opportunities: asArray(o.opportunities)
+      .map((x) => ({
+        title: asString(x.title),
+        description: asString(x.description),
+        impact: asString(x.impact),
+        feasibility: asString(x.feasibility),
+      }))
+      .filter((it) => it.title),
+    useCases: asArray(o.useCases)
+      .map((x) => ({
+        title: asString(x.title),
+        description: asString(x.description),
+        roiPotential: asString(x.roiPotential),
+        timeline: asString(x.timeline),
+      }))
+      .filter((it) => it.title),
+    risks: asArray(o.risks)
+      .map((x) => ({
+        risk: asString(x.risk),
+        mitigation: asString(x.mitigation),
+      }))
+      .filter((it) => it.risk),
   };
 }
 
