@@ -497,6 +497,141 @@ export const connectorLinks = mysqlTable(
 );
 
 // ─────────────────────────────────────────────
+// DIGITAL TWIN (Phase 1 — conversational intake; salvaged from Dynamo)
+// ─────────────────────────────────────────────
+
+export const twinDimensionEnum = [
+  "businessModel",
+  "financials",
+  "operations",
+  "organization",
+  "technology",
+] as const;
+export type TwinDimension = (typeof twinDimensionEnum)[number];
+
+/** The captured Digital Twin for a company — one row per (company, dimension). */
+export const digitalTwins = mysqlTable(
+  "digital_twin",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    projectId: int("projectId"),
+    dimension: mysqlEnum("dimension", twinDimensionEnum).notNull(),
+    /** Free-text captured summary for this dimension. */
+    summary: text("summary").notNull(),
+    /** Optional structured facts extracted for this dimension. */
+    structured: json("structured").$type<Record<string, unknown>>(),
+    /** 0–100 confidence in this dimension's capture. */
+    confidence: int("confidence").notNull().default(0),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [
+    unique("uq_twin_company_dimension").on(t.tenantId, t.companyId, t.dimension),
+    index("idx_twin_company").on(t.tenantId, t.companyId),
+  ]
+);
+
+/** Per-session (or per-company) discovery completeness — the funnel signal. */
+export const completenessTracking = mysqlTable(
+  "completeness_tracking",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    sessionId: int("sessionId"),
+    businessModel: int("businessModel").notNull().default(0),
+    financials: int("financials").notNull().default(0),
+    operations: int("operations").notNull().default(0),
+    organization: int("organization").notNull().default(0),
+    technology: int("technology").notNull().default(0),
+    overall: int("overall").notNull().default(0),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [
+    unique("uq_completeness_company_session").on(t.tenantId, t.companyId, t.sessionId),
+    index("idx_completeness_company").on(t.tenantId, t.companyId),
+  ]
+);
+
+// ─────────────────────────────────────────────
+// STRATEGIC MANAGEMENT (Phase 5 — structured-output auto-write; salvaged from StrategyForge)
+// ─────────────────────────────────────────────
+
+export const kpiCategoryEnum = ["operational", "market", "financial", "organizational"] as const;
+export type StrategyKpiCategory = (typeof kpiCategoryEnum)[number];
+
+export const kpiStatusEnum = ["on-track", "at-risk", "off-track", "unknown"] as const;
+export type StrategyKpiStatus = (typeof kpiStatusEnum)[number];
+
+export const milestoneStatusEnum = ["planned", "in-progress", "done", "missed"] as const;
+export type StrategyMilestoneStatus = (typeof milestoneStatusEnum)[number];
+
+/** A KPI generated/tracked for a strategy project. */
+export const strategyKpis = mysqlTable(
+  "strategy_kpi",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    projectId: int("projectId"),
+    label: varchar("label", { length: 255 }).notNull(),
+    target: float("target"),
+    current: float("current"),
+    unit: varchar("unit", { length: 32 }),
+    category: mysqlEnum("category", kpiCategoryEnum).notNull().default("operational"),
+    status: mysqlEnum("status", kpiStatusEnum).notNull().default("unknown"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [index("idx_kpi_company_project").on(t.tenantId, t.companyId, t.projectId)]
+);
+
+/** A milestone on a strategy project's roadmap. */
+export const strategyMilestones = mysqlTable(
+  "strategy_milestone",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    projectId: int("projectId"),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: text("description"),
+    quarter: varchar("quarter", { length: 16 }),
+    fiscalYear: varchar("fiscalYear", { length: 16 }),
+    status: mysqlEnum("status", milestoneStatusEnum).notNull().default("planned"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [index("idx_milestone_company_project").on(t.tenantId, t.companyId, t.projectId)]
+);
+
+/** A risk on a strategy project's register, with probability × impact scoring. */
+export const strategyRisks = mysqlTable(
+  "strategy_risk",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    projectId: int("projectId"),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: text("description"),
+    /** 0–100. */
+    probability: int("probability").notNull().default(0),
+    /** 0–100. */
+    impact: int("impact").notNull().default(0),
+    /** probability × impact ÷ 100, 0–100. */
+    riskScore: int("riskScore").notNull().default(0),
+    mitigation: text("mitigation"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => [index("idx_risk_company_project").on(t.tenantId, t.companyId, t.projectId)]
+);
+
+// ─────────────────────────────────────────────
 // EXPORTS
 // ─────────────────────────────────────────────
 
@@ -516,3 +651,8 @@ export type LlmCallLog = typeof llmCallLogs.$inferSelect;
 export type ExportJob = typeof exportJobs.$inferSelect;
 export type ConnectorCredential = typeof connectorCredentials.$inferSelect;
 export type ConnectorLink = typeof connectorLinks.$inferSelect;
+export type DigitalTwin = typeof digitalTwins.$inferSelect;
+export type CompletenessTracking = typeof completenessTracking.$inferSelect;
+export type StrategyKpi = typeof strategyKpis.$inferSelect;
+export type StrategyMilestone = typeof strategyMilestones.$inferSelect;
+export type StrategyRisk = typeof strategyRisks.$inferSelect;

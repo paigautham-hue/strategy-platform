@@ -69,7 +69,17 @@
 
 ## Feature Status Matrix
 
-Tracks the headline capabilities of the platform. Updated as features ship.
+Tracks the headline capabilities of the platform.
+
+**Status legend** (corrected 2026-06-29 against the actual code — the prior matrix
+badly under-reported, marking shipped+tested features as ☐):
+- ✅ = **code-shipped + unit-tested**. This is NOT the same as the phase
+  acceptance gate being met — gate status (which requires real usage / data /
+  deploy) lives in the **Phase Status** table above. Most ✅ rows below sit under
+  phases whose gate is not yet met.
+- 🟡 = partially shipped — core logic exists but a piece is gated on deploy,
+  accumulated data, an external integration, or GPU.
+- ☐ = not built.
 
 | Capability | Phase | Status | Notes |
 |---|---|---|---|
@@ -82,49 +92,53 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 | Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
 | Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
 | Universal ingest | 1 | 🟡 | text / markdown / html / URL / **PDF / DOCX** live; audio / video / image pending |
-| GraphRAG with dimensional auto-tagging | 1 | ☐ | Inferred at write time |
-| Voice intake (one-shot) | 1 | ☐ | Whisper + strict-JSON intent parser |
+| Conversational "Digital Twin" intake | 1 | ✅ | Dimension-steered interview + graded coverage + funnel gates + strategy synthesis + **persistence** (`digital_twin` / `completeness_tracking`). `server/services/digital-twin*.ts` + `server/agents/digital-twin-interview.ts` (salvaged Dynamo) |
+| GraphRAG with dimensional auto-tagging | 1 | ✅ | Dimensional tags at write time; entity-graph multi-hop (`server/services/entity-graph.ts`) |
+| Voice intake (one-shot) | 1 | ✅ | Browser STT → strict-JSON intent parse. Realtime voice is a separate (☐) row |
 | Portco onboarding wizard | 1 | ✅ | 4-step wizard: create → seed memory → ingest doc → done |
-| Decay / consolidation / dedup crons | 1 | ☐ | Memory hygiene from this phase |
-| User + global memory layers | 1 | ☐ | GP preferences + framework canon |
-| Diagnosis agent | 2 | ☐ | Reframes question before frameworks |
-| Chief Strategist orchestrator | 2 | ☐ | Hierarchical dispatch + budgets |
-| 8 research specialist agents | 2 | ☐ | Parallel within $5 budget |
-| Live deep-research view | 2 | ☐ | Agents working visualization |
-| Code interpreter (financial modeling) | 2 | ☐ | Sandboxed (OD11) |
-| Contradiction review UI | 2 | ☐ | Open contradictions → 4 resolution states |
-| **Share-and-Apply (Strategy Replication)** | 2 | ☐ | External artifact → portco application |
-| 8-framework library (system-selected) | 3 | ☐ | Porter, Ansoff, JTBD, Wardley, 3H, BCG, Blue Ocean, Disruption |
-| Option generator + MCDA + sensitivity | 3 | ☐ | Ensemble vote across 3 models |
-| Red-team / critic ensemble | 3 | ☐ | Claude + GPT-5 + Gemini diversity |
-| 4-arena simulation (customer / talent / capital / regulator) | 3 | ☐ | Extends OASIS dual-platform |
-| Cross-company war-game (GP only) | 3 | ☐ | Permissioned 3-layer |
-| TTS war-game playback | 3 | ☐ | ElevenLabs per persona |
+| Decay / consolidation / dedup crons | 1 | 🟡 | Decay + exact-dedup crons shipped; semantic CONSOLIDATION cron still pending |
+| User + global memory layers | 1 | ✅ | `server/services/memory-layers.ts` (GP preferences + framework canon) |
+| Diagnosis agent | 2 | ✅ | `server/agents/diagnosis.ts` — reframes question before frameworks |
+| Chief Strategist orchestrator | 2 | ✅ | `server/agents/research.ts` — hierarchical dispatch + budgets |
+| 8 research specialist agents | 2 | ✅ | Parallel mesh grounded in company memory |
+| Live deep-research view | 2 | ☐ | No streaming "agents working" surface yet |
+| Code interpreter (financial modeling) | 2 | ☐ | Sandboxed (OD11). See Monte Carlo row for a partial computational core |
+| Monte Carlo financial simulation | 2 | 🟡 | Pure seeded NPV/IRR/VaR/CVaR/Sharpe + sensitivity + scenarios (`server/services/monte-carlo.ts`, salvaged StrategyForge); partial fill of the code-interpreter gap |
+| Dual-currency (USD / INR-Crore) | 5 | 🟡 | Pure convert + crore/million format + parse (`server/services/currency.ts`, salvaged StrategyForge); live FX via an `fx_rate` MCP tool pending |
+| Contradiction review UI | 2 | ✅ | `server/services/contradictions.ts` + resolution states |
+| **Share-and-Apply (Strategy Replication)** | 2 | ✅ | `server/agents/apply-strategy.ts` — external artifact → portco application |
+| 8-framework library (system-selected) | 3 | ✅ | Porter, Ansoff, JTBD, Wardley, 3H, BCG, Blue Ocean, Disruption |
+| Option generator + MCDA + sensitivity | 3 | ✅ | `server/agents/options.ts` |
+| Red-team / critic ensemble | 3 | ✅ | `server/agents/red-team.ts` shipped (single-model today; multi-model diversity pending) |
+| 4-arena simulation (customer / talent / capital / regulator) | 3 | ✅ | `server/agents/war-game.ts` writes synthetic outcomes to the ledger |
+| Cross-company war-game (GP only) | 3 | ✅ | `server/agents/cross-co-war-game.ts` — permissioned 3-layer |
+| TTS war-game playback | 3 | ☐ | ElevenLabs per persona — no TTS code |
 | WebRTC realtime voice | 4 | ☐ | OpenAI Realtime / Gemini Live abstraction |
-| Brainstorm Mode (4 phases) | 4 | ☐ | Diverge → Probe → Sharpen → Lock |
+| Brainstorm Mode (4 phases) | 4 | ✅ | `server/agents/brainstorm.ts` — 5 silent extractors + recap |
 | Voice mini-player (persistent) | 4 | ☐ | Decoupled from full overlay (C14) |
-| Persona swap mid-session | 4 | ☐ | "Let me hear from the regulator" |
+| Persona swap mid-session | 4 | 🟡 | Advisory personas shipped (`server/agents/personas.ts`); live mid-session swap pending |
 | Vision-in (slides, whiteboards, charts) | 4 | ☐ | Vision model extracts to structured |
-| Image-out (Wardley, Porter, BCG, 3H) | 4 | ☐ | Imagen 4 / Flux (OD9) |
-| Memo dictation | 4 | ☐ | One-shot → 1-page memo |
-| Hot-path distillation | 4 | ☐ | ≥ 5× cost reduction on extraction/classification |
-| Strategy decomposer (Initiative → OKR → Task) | 5 | ☐ | With pre-mortem launch ritual |
-| Linear connector (bi-directional) | 5 | ☐ | First execution tool |
-| Notion connector | 5 | ☐ | Second |
-| Jira connector | 5 | ☐ | Third |
-| KPI sync (Stripe, GA4, Salesforce, Warehouse) | 5 | ☐ | Auto-map to OKR key results |
-| Drift detectors (Schedule / KPI / Thesis) | 5 | ☐ | With replan engine |
+| Image-out (Wardley, Porter, BCG, 3H) | 4 | 🟡 | Native CSS diagram specs shipped (`server/agents/diagram.ts`); raster export (Imagen/Flux, OD9) gated |
+| Memo dictation | 4 | ✅ | `server/agents/memo-dictation.ts` — monologue → 1-page memo |
+| Hot-path distillation | 4 | 🟡 | Distillation logic shipped (`server/services/distillation.ts`); ≥5× GPU path config-only |
+| Strategy decomposer (Initiative → OKR → Task) | 5 | ✅ | `server/agents/decomposer.ts` + pre-mortem |
+| Strategic-item auto-write (KPIs / milestones / risks) | 5 | ✅ | LLM JSON-schema → normalise (category map, risk scoring) → write to `strategy_kpi`/`strategy_milestone`/`strategy_risk` (`server/agents/strategic-extract.ts` + `server/services/strategy-management.ts`, salvaged StrategyForge) |
+| Linear connector (bi-directional) | 5 | ✅ | `server/connectors/linear.ts` (AES-256-GCM creds, push-initiative) |
+| Notion connector | 5 | ☐ | Registered as `available:false` stub |
+| Jira connector | 5 | ☐ | Registered as `available:false` stub |
+| KPI sync (Stripe, GA4, Salesforce, Warehouse) | 5 | ☐ | Internal KPI library exists (`kpi-library.ts`); external data connectors absent |
+| Drift detectors (Schedule / KPI / Thesis) | 5 | ✅ | `server/agents/drift.ts` + replan engine |
 | Operator-tier UX (Slack + Notion + Linear embed) | 5 | ☐ | 1-page memo default |
-| Calibration cron + scorecard | 6 | ☐ | Per-framework × dimension × model |
-| Pattern mining + Playbook engine | 6 | ☐ | Auto-draft after ≥ 3 evidence projects |
-| Causal-lite attribution | 6 | ☐ | Post-mortem with counterfactual |
-| Anti-hallucination memory audit | 6 | ☐ | Nightly sampling |
-| 9-axis Synergy Scout | 7 | ☐ | Capability, customer, supplier, channel, geo, talent, tech, capital, macro |
-| Pattern distillation (anonymized) | 7 | ☐ | Min N=3 portcos before cross-co publication |
-| Portfolio dashboard (GP only) | 7 | ☐ | Thesis health, synergy queue, calibration |
-| Voice briefing (daily / weekly) | 7 | ☐ | Podcast-style with chapter markers |
-| Performance + cost optimization | 8 | ☐ | P95 latencies + numeric cost SLO |
-| On-prem model lane | 8 | ☐ | vLLM with Llama 4 / DeepSeek / Qwen |
+| Calibration cron + scorecard | 6 | 🟡 | Scorecard math shipped (`server/services/calibration.ts`); resolver cron needs deploy + ≥20 closed real predictions (currently 0) |
+| Pattern mining + Playbook engine | 6 | ✅ | `server/agents/pattern-mining.ts` + `playbook.ts` (promotion gate) |
+| Causal-lite attribution | 6 | ✅ | `server/agents/attribution.ts` — DAG-conditioned |
+| Anti-hallucination memory audit | 6 | ✅ | `server/services/audit-constitution.ts` |
+| 9-axis Synergy Scout | 7 | ✅ | `server/agents/synergy-scout.ts` (GP-only, 3-layer) |
+| Pattern distillation (anonymized) | 7 | ✅ | `server/services/distillation.ts` (N≥3 publication gate) |
+| Portfolio dashboard (GP only) | 7 | ☐ | Needs ≥3 onboarded portcos + accumulated data |
+| Voice briefing (daily / weekly) | 7 | 🟡 | Text builder shipped (`server/agents/briefing.ts`); TTS audio pending |
+| Performance + cost optimization | 8 | 🟡 | Embedding cache + prompt compression shipped; P95 + cost SLO unmeasured (no deploy metrics) |
+| On-prem model lane | 8 | ☐ | vLLM lane is a config-only deferred slot |
 
 ---
 
@@ -173,6 +187,51 @@ Tracks the headline capabilities of the platform. Updated as features ship.
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-06-30 · Prototype consolidation COMPLETE — merged after a 31-pass ultra-audit
+- The salvage work (Monte Carlo + currency, MGPS fixture, doc reconciliation, Dynamo Digital Twin intake, persistence + structured-output auto-write, UI surfaces) is complete and merged to `main`.
+- **Ultra-audit hardening**: ran a 7-dimension adversarial multi-agent audit (tenancy, provider-abstraction, finance correctness, logic correctness, migration/schema, react/UX, cost/DoS) over the full salvage surface **31 times**, fixing every confirmed defect and re-auditing. **71 defects fixed** across the campaign (incl. an intra-tenant authorization gap, a company-grain data-integrity bug, a MySQL strict-mode varchar-overflow crash, NPV/percentile/currency edge cases, and exhaustive free-text status-resolution + a11y hardening). Test suite grew 500 → 557.
+- Net state of the salvaged modules: tsc clean · 557 tests / 0 fail · production build clean · additive migration `0003` applied by Manus on publish. A systemic company-access-guard gap in the PRE-EXISTING routers was flagged as a separate task (out of this PR's scope).
+
+### 2026-06-30 · Feature map + governance + in-app help; ultra-audit fixes
+- **`docs/PROJECT_MAP.md`** (new) — the navigable feature & file map: every surface → route → page → tRPC router → service/agent files → status, plus the cross-cutting systems. It is now the **mandatory first read**, wired into `CLAUDE.md`'s companion-docs table and its named-file shipping rule (a feature change must update PROJECT_MAP **and** the in-app help in the same commit). This is how the large codebase stays manageable.
+- **In-app help** (`client/src/lib/manual-content.ts`) — added Discovery (Digital Twin), Financial Simulation, and Strategic Tracker to the manual + three new FAQ entries, so the `/manual` surface reflects the new features.
+- **Ultra-audit (pass 1)** — a 7-dimension adversarial multi-agent audit (33 agents) over the whole salvage surface found 9 confirmed defects (1 Blocker, 2 Major, 5 Minor, 1 Nit); **all fixed** (see commit `09dbb1a`): the `saveCompleteness` NULL/0 upsert sentinel (Blocker), Monte Carlo percentile off-by-one, currency NaN/parse guards, form-label a11y, Discovery unsaved-draft merge, and tighter `simulation.sensitivity` caps. Re-audited to convergence. 542 tests pass; tsc + build clean.
+
+### 2026-06-30 · Prototype consolidation (4/n) — UI surfaces for the salvaged modules
+- **`client/src/pages/Simulation.tsx`** (`/simulation`, Simulation group) — Monte Carlo projection: inputs form, run 10k paths, stat cards (mean/median NPV with a USD equivalent via the FX rate), a percentile distribution bar chart (recharts), risk metrics (prob-of-loss, VaR95/99, expected shortfall, Sharpe), and a best/base/worst comparison. Dual-currency woven into the NPV display.
+- **`client/src/pages/Discovery.tsx`** (`/discovery`, Strategy Intake group) — the Digital Twin interview: a chat that calls `digitalTwin.nextTurn` with live per-dimension coverage meters + funnel-gate badges, a capture panel that persists each dimension (`saveDimension`), and AI-strategy generation from the assembled twin.
+- **`client/src/pages/StrategyManagement.tsx`** (`/strategy-management`, Execution group, operator-tier) — generate KPIs/milestones/risks from a strategy context (`strategyManagement.generate`) and browse them in tabs with category/status/score.
+- Wired routes in `App.tsx` and nav items in `PlatformLayout.tsx` (matching the existing CAIRN design system — card-glass, gradient-gold, font-heading). `/strategy-management` gated to operator+.
+- **Verification**: typecheck + production build clean; 539 server tests still pass. The salvaged modules are now usable end-to-end through the UI.
+
+### 2026-06-30 · Prototype consolidation (3/n) — persistence + structured-output auto-write (DB migration)
+- **Migration `drizzle/0003_light_grey_gargoyle.sql`** — **additive only** (5 `CREATE TABLE`, no `ALTER`/`DROP`; existing tables and data untouched). Manus applies it on the next publish (ADR-010). Schema is now 21 tables.
+- **Digital Twin persistence** (makes the salvaged engine stateful): `digital_twin` (one row per company × dimension, with structured facts + confidence) and `completeness_tracking` (the funnel signal). `server/services/digital-twin-store.ts` — `upsertTwinDimension`, `getTwinSummary`, `saveCompleteness` (tenant-scoped, C1; getDb-guarded). **tRPC** `digitalTwin.{saveDimension,twin,recordCompleteness}`.
+- **Structured-output auto-write** (salvaged from StrategyForge): `strategy_kpi` / `strategy_milestone` / `strategy_risk` tables. `server/agents/strategic-extract.ts` generates KPIs/milestones/risks via the router (C3, JSON-schema), and `server/services/strategy-management.ts` normalises them (category mapping efficiency→operational / competitive→market, probability×impact risk scoring) and writes validated rows. **tRPC** `strategyManagement.{generate,listKpis,listMilestones,listRisks}` (generate is operator-tier).
+- **Tests**: +8 unit tests (category mapping, risk scoring, item normalisers, completeness row). **539 pass / 16 skipped / 0 fail**; typecheck + production build clean.
+- **Migration safety**: ship code + migration together; the additive tables are read/written only by the new code in this same PR (honours the Meridian KB "never deploy a column before its code"). Set no new env vars.
+
+### 2026-06-29 · Prototype consolidation (2/n) — Dynamo "Digital Twin" conversational intake
+- The single most novel idea salvaged from Dynamo: a dimension-steered discovery **interview** as an intake modality complementing the form/ingest pipeline.
+- **`server/services/digital-twin.ts`** (pure) — five business dimensions; a **graded** per-dimension coverage scorer (4 facets each ⇒ 0/25/50/75/100; the donor's was effectively binary 0/20); the "Internal Note" steering builder that tells the model which dimension to move toward next; and monotonic funnel gates (preview ≥40, full strategy ≥70 — the donor's were inverted). Fully unit-tested.
+- **`server/agents/digital-twin-interview.ts`** — `nextDiscoveryTurn` (next consultant turn with the under-explored dimension steered into the system prompt) and `generateAiStrategy` (JSON-schema-constrained AI-transformation strategy: readiness score, exec summary, opportunities, use cases, risks). Both route through `server/ai/router.ts` (C3) — the donor hardwired a single Gemini proxy — with defensive normalizers and best-effort fallback.
+- **tRPC**: `digitalTwin.{dimensions,coverage,nextTurn,generateStrategy}`.
+- **Tests**: +10 unit tests (graded scoring, steering, gates, strategy normalizer). **531 pass / 16 skipped / 0 fail**; typecheck clean.
+- **Stateless by design** — the engine operates on the messages passed in; DB persistence (`digital_twin` + `completeness_tracking` tables) is the next slice (a Manus migration). **Not ported**: the donor's hardcoded roadmap/ROI, fake multi-model fallback, and cosmetic "web-search grounding".
+
+### 2026-06-29 · Doc reconciliation — correct the stack references + Feature Matrix
+- **Stack correction**: `CLAUDE.md` and `IMPLEMENTATION_PLAN.md` described a Python/FastAPI + Vue + Zep/pgvector stack that **was never built** — the real product is TypeScript (React 19 + Express + tRPC v11 + Drizzle on MySQL/TiDB, deployed on Manus). Added a prominent Stack Correction banner to `CLAUDE.md` with a doc→code path mapping, corrected the Project Facts table, and annotated the (Python) Subsystem Map as the original plan, not the built layout. The C1–C25 principles remain valid; only their language/paths were illustrative.
+- **Feature Status Matrix**: the prior matrix badly under-reported — ~20 shipped, unit-tested capabilities (diagnosis, research mesh, frameworks, options/MCDA, red-team, war-game, cross-co, share-and-apply, brainstorm, memo, decomposer, drift, pattern mining, playbooks, attribution, anti-hallucination audit, synergy, distillation, briefing, Linear connector, entity-graph, contradictions, memory layers) were marked ☐. Corrected each against the actual code, and added a legend: ✅ = code-shipped + unit-tested (NOT the same as the phase acceptance gate, which is tracked in Phase Status and mostly still unmet).
+
+### 2026-06-29 · Prototype consolidation (1/n) — Monte Carlo + dual-currency salvaged from StrategyForge
+- **Context**: an audit of the three sibling strategy repos (Cairn, StrategyForge, Dynamo) recommended folding the genuinely useful, self-contained modules of the two older prototypes into Cairn, then archiving them. This is the first salvage slice — the two zero-dependency wins.
+- **`server/services/monte-carlo.ts`** — probabilistic NPV / IRR / risk engine (mean/median/σ, P10–P90, probability-of-loss, VaR95/99, CVaR/expected-shortfall, Sharpe), plus single-variable sensitivity sweeps and best/base/worst scenario comparison. Salvaged from StrategyForge's `monteCarloSimulation.ts` and **hardened**: the RNG is now a seeded, pure mulberry32 generator (deterministic ⇒ unit-testable AND reproducible for prediction-ledger audit), and the donor's NaN/Infinity edge cases (Box-Muller `log(0)`, non-positive cap rate, zero-variance Sharpe) are guarded. Partially fills the Phase 2 "code-interpreter / financial-modelling" gap with a real computational core the reasoning agents can call.
+- **`server/services/currency.ts`** — pure USD ↔ INR-Crore conversion + crore/million formatting + suffix-aware parsing + percentage-change. The anchor customer (MGPS) reports in ₹ Crore. Made **pure**: the FX rate is injected (documented fallback when absent), not fetched — a live `fx_rate` MCP tool is the C3-compliant follow-up.
+- **tRPC**: `simulation.{run,sensitivity,scenarios}` and `currency.{dual,rate}` (protected). No schema change, no new dependency, no migration.
+- **Tests**: +21 unit tests (13 Monte Carlo incl. an exact hand-computed zero-volatility NPV of 600 and seed-determinism; 8 currency). **521 pass / 16 skipped / 0 fail**; typecheck clean.
+- **`references/mgps-golden-fixture.md`** — the real MGPS (anchor-customer) financial extraction + FY25-29 projections + segment breakdown, salvaged from StrategyForge as the canonical golden demo/seed fixture (de-duplicate against any existing MGPS row before seeding).
+- **Not ported (deliberately)**: StrategyForge's stubbed "5-layer document processing" (placeholder text — to be reimplemented with the `mammoth`/`pdfjs-dist` deps already present). Next salvage slices (each needs a schema migration + agent, so they are sequenced as their own PRs): the structured-output auto-write pattern (needs strategic-management tables) and Dynamo's conversational-interview ("Digital Twin") intake (needs `digital_twin` + `completeness_tracking` tables).
 
 ### 2026-05-22 · Phase 2 — Multi-hop entity graph / HippoRAG (Workstream 2.7)
 - **`server/retrieval/graph.ts`** — the pure graph core: `buildEntityGraph` (undirected adjacency, drops dangling edges), `multiHopReach` (BFS that tags each node with its hop distance), `shortestConnection` (the connecting edge-chain between two entities). Deterministic and fully tested.

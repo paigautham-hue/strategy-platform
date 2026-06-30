@@ -6,21 +6,42 @@
 
 ---
 
+## ⚠️ STACK CORRECTION — read before trusting any code snippet in this file
+
+This file was imported from the original (pre-build) plan, which assumed a
+**Python/FastAPI + Vue + Zep/Postgres** stack. **That stack was never built.** The
+actual, shipped, deployed product (Cairn) is **TypeScript end-to-end**. The
+Critical Patterns C1–C25 below remain valid as *principles*; their **Python code
+examples and `backend/app/...` file paths are illustrative pseudocode only** —
+map them to the real TypeScript locations:
+
+| Doc says (illustrative) | Real location |
+|---|---|
+| `backend/app/ai/router.py` | `server/ai/router.ts` (`complete` / `embed` / `structured`) |
+| `backend/app/ai/mcp_gateway.py` | `server/ai/mcp-gateway.ts` |
+| `backend/app/security/redactor.py` | `server/ai/redactor.ts` |
+| `backend/app/ai/budgets.py` | `server/ai/budget.ts` |
+| `backend/app/services/*.py` | `server/services/*.ts` (kebab-case, e.g. `kpi-library.ts`) |
+| `backend/app/agents/*.py` | `server/agents/*.ts` |
+| `backend/app/models/*.py` (Pydantic/SQLAlchemy) | `drizzle/schema.ts` (Drizzle) + `shared/types.ts` |
+| `frontend/src/**/*.vue` | `client/src/**/*.tsx` (React 19) |
+| Zep + Postgres + pgvector | MySQL/TiDB via Drizzle; app-side cosine/RRF/MMR retrieval |
+
 ## Project Facts
 
 | | |
 |---|---|
-| **Project name** | Strategy Platform (working name; final name TBD) |
-| **Built on** | MiroFish — multi-agent prediction engine (already in this repo) |
-| **Primary working directory** | `C:\Users\GPai\claude co work work folder\04_AI_Projects\02_Active_Apps\MiroFish` |
-| **Doc home** | `docs/strategy-platform/` |
-| **Backend** | Python, `uv` package manager, FastAPI-style (extending [backend/](../../backend/)) |
-| **Frontend** | Vue 3 + Vite (extending [frontend/](../../frontend/)) |
-| **Memory** | Zep Cloud + Postgres + pgvector |
-| **Simulation engine** | OASIS (vendored via MiroFish) |
-| **Hosting target** | Own VPC (AWS or GCP — Open Decision OD1) |
-| **Tenancy** | Single-tenant today; multi-tenant-ready schema from day one (P1) |
-| **Deployment** | Manual today; CI/CD when patterns stabilize |
+| **Project name** | Cairn (rebranded from "Strategy Platform" 2026-05-22) |
+| **Built on** | MiroFish — multi-agent prediction engine (patterns reused) |
+| **Primary working directory** | `C:\Users\GPai\claude co work work folder\My apps\strategy-platform` |
+| **Doc home** | `docs/` (this folder) |
+| **Backend** | **TypeScript** — Express 4 + tRPC v11, `tsx`/`esbuild`, pnpm |
+| **Frontend** | **React 19** + Vite + Tailwind 4 + shadcn/ui (not Vue) |
+| **Memory** | **MySQL/TiDB** via Drizzle ORM; embeddings in a JSON column, app-side cosine + RRF + MMR (not Zep/pgvector) |
+| **LLM access** | OpenAI embeddings + Manus "forge" completions, all via `server/ai/router.ts` |
+| **Hosting** | **Manus** (deployed live; ADR-010: Claude pushes code, Manus deploys + runs migrations on publish) |
+| **Tenancy** | Multi-company namespacing enforced on every row from day one (P1, C1) |
+| **Deployment** | Push to GitHub → Manus publishes. No separate CI/CD deploy. |
 
 ---
 
@@ -28,6 +49,7 @@
 
 | Doc | When to read |
 |---|---|
+| [PROJECT_MAP.md](./PROJECT_MAP.md) | **FIRST.** The feature & file map — every surface → route → page → router → service/agent files → status. Use it to locate code, and **update it in the same commit as any feature change.** |
 | [GUIDING_PRINCIPLES.md](./GUIDING_PRINCIPLES.md) | Before any architecture debate. Cite Pn / Hn in PRs. |
 | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | To find which phase a deliverable belongs to + acceptance gates. |
 | [MASTER.md](./MASTER.md) | To get current project state, recent changes, feature status. Updated on every major change. |
@@ -191,6 +213,7 @@ When a new feature ships in a PR, the **same PR** must update these named files:
 
 | Type of feature | Files to update in the same PR |
 |---|---|
+| **Any new or changed feature/surface (always)** | **`docs/PROJECT_MAP.md`** (add/edit the feature row — files, status, one-liner) **+ `client/src/lib/manual-content.ts`** (a manual entry and/or FAQ item, so the in-app `/manual` help stays current) |
 | New backend service or agent | `docs/strategy-platform/MASTER.md` (Recent Changes + Feature Status table) + `docs/strategy-platform/IMPLEMENTATION_PLAN.md` (mark workstream complete) |
 | New API endpoint | OpenAPI spec + `docs/strategy-platform/MASTER.md` API section |
 | New UI surface | `docs/strategy-platform/UX_DESIGN.md` (surface-by-surface section) + `docs/strategy-platform/MASTER.md` |
@@ -228,6 +251,12 @@ The user values: **accuracy over speed, zero-risk over fast, thorough over parti
 ---
 
 # SUBSYSTEM MAP
+
+> ⚠️ The tree below is the **original Python/Vue plan**, kept for its subsystem
+> *concepts and danger annotations* — NOT the built layout. See the Stack
+> Correction at the top of this file for the real TypeScript locations
+> (`server/ai/`, `server/services/`, `server/agents/`, `drizzle/schema.ts`,
+> `client/src/pages/*.tsx`).
 
 ```
 Strategy Platform (built on MiroFish)
