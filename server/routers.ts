@@ -53,8 +53,8 @@ import {
   checkVoiceRateLimit,
   acquireVoiceLock,
   releaseVoiceLock,
-  REALTIME_VOICES,
 } from "./_core/realtime";
+import { mintGeminiLiveSession } from "./_core/geminiRealtime";
 import { runFrameworks } from "./agents/frameworks";
 import { runOptionAnalysis } from "./agents/options";
 import { redTeamStrategy } from "./agents/red-team";
@@ -720,16 +720,20 @@ const researchRouter = router({
 });
 
 // ─── Realtime Voice Router (Phase 7) ──────────────────────────────────────────
-// Mints OpenAI Realtime ephemeral tokens (server-only key) and dispatches the
-// model's read-only lookup tool calls. C16 (corrected): WebSocket + PCM16
-// transport, ported from Meridian's iOS-proven engine.
+// Mints a realtime voice session (server-only keys) and dispatches the model's
+// read-only lookup tool calls. C16 (corrected): WebSocket + PCM16 transport.
+// Two providers behind one uniform client contract:
+//   - gemini (DEFAULT) — Gemini Live, the iOS-proven engine (Meridian's default)
+//   - openai (opt-in)  — OpenAI Realtime, "experimental on iOS" per Meridian
+// Each mint validates its own voice list, so the input stays provider-agnostic.
 
 const realtimeRouter = router({
   createSession: protectedProcedure
     .input(
       z.object({
         companyId: z.number(),
-        voice: z.enum(REALTIME_VOICES).optional(),
+        provider: z.enum(["gemini", "openai"]).default("gemini"),
+        voice: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -742,7 +746,34 @@ const realtimeRouter = router({
         description: (company as any)?.description,
       });
       try {
-        const minted = await mintRealtimeSession({ systemPrompt, voice: input.voice });
+        // Uniform client shape across providers. OpenAI tokens are always
+        // ephemeral; Gemini reports its own authMethod and ships a `setup`
+        // payload the client sends as its first WS frame.
+        let session: {
+          ephemeralToken: string;
+          authMethod: "ephemeral" | "raw";
+          model: string;
+          voice: string;
+          setup?: Record<string, any>;
+        };
+        if (input.provider === "openai") {
+          const minted = await mintRealtimeSession({ systemPrompt, voice: input.voice });
+          session = {
+            ephemeralToken: minted.ephemeralToken,
+            authMethod: "ephemeral",
+            model: minted.model,
+            voice: minted.voice,
+          };
+        } else {
+          const minted = await mintGeminiLiveSession({ systemPrompt, voice: input.voice });
+          session = {
+            ephemeralToken: minted.token,
+            authMethod: minted.authMethod,
+            model: minted.model,
+            voice: minted.voice,
+            setup: minted.setup,
+          };
+        }
         acquireVoiceLock(ctx.user.id);
         void emitUsage({
           tenantId: ctx.user.tenantId,
@@ -751,12 +782,15 @@ const realtimeRouter = router({
           role: ctx.user.role as "gp" | "operator" | "portco_team" | "admin",
           surface: "voice",
           action: "voice-session-start",
-          metadata: { model: minted.model, voice: minted.voice },
+          metadata: { provider: input.provider, model: session.model, voice: session.voice },
         });
         return {
-          ephemeralToken: minted.ephemeralToken,
-          model: minted.model,
-          voice: minted.voice,
+          provider: input.provider,
+          ephemeralToken: session.ephemeralToken,
+          authMethod: session.authMethod,
+          model: session.model,
+          voice: session.voice,
+          setup: session.setup,
           companyName: company?.name ?? "this company",
         };
       } catch (err) {
