@@ -56,6 +56,7 @@ import {
   Dices,
   ClipboardList,
   Eye,
+  LayoutDashboard,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -214,6 +215,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   {
     label: "Portfolio",
     items: [
+      { href: "/portfolio", label: "Portfolio Dashboard", icon: LayoutDashboard },
       { href: "/synergy", label: "Synergy Scout", icon: Combine },
       { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
       { href: "/briefing", label: "Briefing", icon: Newspaper },
@@ -239,7 +241,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   },
 ];
 
-const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation"];
+const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation", "/portfolio"];
 const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding", "/connectors", "/strategy-management"];
 const ADMIN_ONLY_ITEMS = ["/users"];
 

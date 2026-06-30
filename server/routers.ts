@@ -36,7 +36,8 @@ import { CONNECTOR_REGISTRY, isConnectorAvailable } from "./connectors";
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
 import { hybridSearchMemory } from "./services/memory-search";
 import { writeLayerMemory, queryLayerMemory } from "./services/memory-layers";
-import { recordPrediction, closePrediction, listPredictions, extractClaims } from "./services/predictions";
+import { recordPrediction, closePrediction, listPredictions, listOpenPredictions, resolvePrediction, extractClaims } from "./services/predictions";
+import { portfolioOverview } from "./services/portfolio";
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
@@ -443,6 +444,41 @@ const predictionRouter = router({
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
       return extractClaims(input.text, routerCtx);
     }),
+
+  // Open (unresolved) real predictions awaiting a real-world outcome.
+  listOpen: protectedProcedure
+    .input(z.object({ companyId: z.number(), overdueOnly: z.boolean().optional(), limit: z.number().min(1).max(200).optional() }))
+    .query(({ ctx, input }) => listOpenPredictions({ tenantId: ctx.user.tenantId, ...input })),
+
+  // Record the real-world outcome of a prediction → feeds the calibration record.
+  resolve: protectedProcedure
+    .input(
+      z.object({
+        predictionId: z.number(),
+        companyId: z.number(),
+        held: z.boolean(),
+        actualValue: z.string().min(1).max(2_000),
+        measuredAt: z.date().optional(),
+        source: z.string().max(255).optional(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      resolvePrediction({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        predictionId: input.predictionId,
+        held: input.held,
+        actualValue: input.actualValue,
+        measuredAt: input.measuredAt ?? new Date(),
+        source: input.source,
+      })
+    ),
+});
+
+// ─── Portfolio Router (Phase 7 — cross-company learning; GP-only) ─────────────
+
+const portfolioRouter = router({
+  overview: gpProcedure.query(({ ctx }) => portfolioOverview(ctx.user.tenantId)),
 });
 
 // ─── Cost / Analytics Router ──────────────────────────────────────────────────
@@ -1840,6 +1876,7 @@ export const appRouter = router({
   entityGraph: entityGraphRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
+  portfolio: portfolioRouter,
   cost: costRouter,
   audit: auditRouter,
   export: exportRouter,
