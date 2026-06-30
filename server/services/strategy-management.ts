@@ -120,7 +120,7 @@ const KPI_STATUS_ALIASES: Record<string, StrategyKpiStatus> = {
 };
 const MILESTONE_STATUS_ALIASES: Record<string, StrategyMilestoneStatus> = {
   complete: "done", completed: "done", finished: "done", shipped: "done", delivered: "done",
-  ongoing: "in-progress", "in-flight": "in-progress", started: "in-progress", active: "in-progress",
+  ongoing: "in-progress", "in-flight": "in-progress", inprogress: "in-progress", started: "in-progress", active: "in-progress",
   behind: "missed", delayed: "missed", late: "missed", slipped: "missed",
   "not-started": "planned", todo: "planned", upcoming: "planned",
 };
