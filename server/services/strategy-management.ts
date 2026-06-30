@@ -69,11 +69,22 @@ function strOrNull(v: unknown): string | null {
   const s = str(v);
   return s ? s : null;
 }
-function numOrNull(v: unknown): number | null {
+/** Coerce a number or a numeric string to a finite number; otherwise null. */
+function toNum(v: unknown): number | null {
+  if (typeof v === "string") {
+    const s = v.trim();
+    if (s === "") return null;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
+function numOrNull(v: unknown): number | null {
+  // The strategy schema is strict:false, so the LLM may emit "200" for a number.
+  return toNum(v);
+}
 function clamp0to100(v: unknown): number {
-  const n = typeof v === "number" && Number.isFinite(v) ? v : 0;
+  const n = toNum(v) ?? 0;
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 

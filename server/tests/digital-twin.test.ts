@@ -43,6 +43,14 @@ describe("digital-twin — graded coverage scoring", () => {
     ]);
     expect(tech.technology).toBe(100);
   });
+
+  it("does not credit businessModel for operations-only 'production' text (facets stay non-overlapping)", () => {
+    const ops = scoreDimensionCoverage([
+      { role: "user", content: "Our production line and supply chain throughput improved; quality defects fell." },
+    ]);
+    expect(ops.operations).toBeGreaterThanOrEqual(50);
+    expect(ops.businessModel).toBe(0);
+  });
 });
 
 describe("digital-twin — steering + funnel", () => {

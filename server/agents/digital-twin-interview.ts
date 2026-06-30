@@ -176,7 +176,9 @@ function asString(v: unknown, fallback = ""): string {
 }
 
 function clampScore(v: unknown): number {
-  const n = typeof v === "number" && Number.isFinite(v) ? v : 0;
+  // strict:false schema ⇒ the model may return the score as a numeric string.
+  const raw = typeof v === "string" ? Number(v.trim()) : v;
+  const n = typeof raw === "number" && Number.isFinite(raw) ? raw : 0;
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 

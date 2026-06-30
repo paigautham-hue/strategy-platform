@@ -49,7 +49,7 @@ const FACETS: Record<Dimension, RegExp[]> = {
   businessModel: [
     /revenue stream|pricing|monetiz|monetis|\bsell\b|selling|go.to.market|business model/i,
     /customer|client|segment|\bmarket|audience|buyer/i,
-    /value prop|product|service|offering/i,
+    /value prop|\bproducts?\b|service|offering/i, // \bproduct\b so operations' "production" doesn't credit businessModel
     /competit|positioning|differentiat|\bmoat\b/i,
   ],
   financials: [

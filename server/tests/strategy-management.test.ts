@@ -46,6 +46,13 @@ describe("strategy-management — risk scoring", () => {
       mitigation: "Onboard mills",
     });
   });
+
+  it("coerces numeric-string probability/impact (strict:false LLM output)", () => {
+    const r = normalizeRisk({ title: "Supplier", probability: "60", impact: "70" });
+    expect(r.probability).toBe(60);
+    expect(r.impact).toBe(70);
+    expect(r.riskScore).toBe(42);
+  });
 });
 
 describe("strategy-management — item normalisers", () => {
@@ -57,6 +64,11 @@ describe("strategy-management — item normalisers", () => {
     expect(k.unit).toBe("₹ Cr");
     expect(k.category).toBe("market"); // "growth" → market
     expect(k.status).toBe("unknown");
+  });
+
+  it("coerces a numeric-string KPI target", () => {
+    expect(normalizeKpi({ label: "X", target: "200" }).target).toBe(200);
+    expect(normalizeKpi({ label: "Y", target: "" }).target).toBeNull();
   });
 
   it("normalizes a milestone status (spaces/underscores tolerated)", () => {

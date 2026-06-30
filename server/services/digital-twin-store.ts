@@ -101,34 +101,17 @@ export async function saveCompleteness(input: SaveCompletenessInput): Promise<Co
   const db = await getDb();
   if (!db) return row;
 
-  // Sentinel 0 for the company-level (no-session) row. READ and WRITE must use
-  // the SAME value: writing NULL while the lookup filters `= 0` would never match
-  // (NULL = 0 is never true in SQL) AND MySQL treats every NULL as distinct in a
-  // UNIQUE index — so NULL would silently duplicate rows. 0 keeps the upsert and
-  // the uq_completeness_company_session constraint effective.
+  // Sentinel 0 for the company-level (no-session) row. Writing NULL would never
+  // match the unique key (MySQL treats each NULL as distinct) and would duplicate
+  // rows; 0 keeps uq_completeness_company_session effective.
   const sid = input.sessionId ?? 0;
 
-  const existing = await db
-    .select()
-    .from(completenessTracking)
-    .where(
-      and(
-        eq(completenessTracking.tenantId, input.tenantId),
-        eq(completenessTracking.companyId, input.companyId),
-        eq(completenessTracking.sessionId, sid),
-      ),
-    )
-    .limit(1);
-
-  if (existing.length) {
-    await db.update(completenessTracking).set(row).where(eq(completenessTracking.id, existing[0].id));
-  } else {
-    await db.insert(completenessTracking).values({
-      tenantId: input.tenantId,
-      companyId: input.companyId,
-      sessionId: sid,
-      ...row,
-    });
-  }
+  // Atomic upsert keyed on (tenantId, companyId, sessionId) — avoids the
+  // select-then-insert race where two concurrent turns both insert and the second
+  // violates the unique constraint. Mirrors upsertTwinDimension.
+  await db
+    .insert(completenessTracking)
+    .values({ tenantId: input.tenantId, companyId: input.companyId, sessionId: sid, ...row })
+    .onDuplicateKeyUpdate({ set: row });
   return row;
 }
