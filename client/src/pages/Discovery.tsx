@@ -67,8 +67,18 @@ export default function Discovery({ activeCompanyId }: Props) {
     );
   }
 
-  const twin = twinQuery.data ?? {};
-  const hasTwinContent = Object.values(twin).some((v) => v && String(v).trim());
+  const twinData = twinQuery.data;
+  // The twin actually used for generation merges unsaved textarea drafts over the
+  // persisted summaries, so "Generate" never silently ignores on-screen edits.
+  const merged = useMemo(() => {
+    const out: Partial<Record<Dimension, string>> = {};
+    for (const d of DIM_ORDER) {
+      const v = (drafts[d] ?? (twinData as Record<string, string> | undefined)?.[d] ?? "").trim();
+      if (v) out[d] = v;
+    }
+    return out;
+  }, [drafts, twinData]);
+  const hasTwinContent = Object.keys(merged).length > 0;
   const strategy = strategyMut.data;
 
   return (
@@ -188,11 +198,12 @@ export default function Discovery({ activeCompanyId }: Props) {
             <CardContent className="space-y-3">
               {DIM_ORDER.map((d) => (
                 <div key={d} className="space-y-1">
-                  <label className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+                  <label htmlFor={`dim-${d}`} className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
                     {dimLabel[d] ?? d}
                   </label>
                   <Textarea
-                    value={drafts[d] ?? (twin as Record<string, string>)[d] ?? ""}
+                    id={`dim-${d}`}
+                    value={drafts[d] ?? (twinData as Record<string, string> | undefined)?.[d] ?? ""}
                     onChange={(e) => setDrafts((p) => ({ ...p, [d]: e.target.value }))}
                     placeholder={`Summary of ${dimLabel[d] ?? d}…`}
                     className="bg-secondary/50 border-border/60 font-body text-sm min-h-[60px]"
@@ -225,7 +236,7 @@ export default function Discovery({ activeCompanyId }: Props) {
                 size="sm"
                 className="gradient-gold text-background gap-1.5 text-xs"
                 disabled={!hasTwinContent || strategyMut.isPending}
-                onClick={() => strategyMut.mutate({ twin, companyId: activeCompanyId })}
+                onClick={() => strategyMut.mutate({ twin: merged, companyId: activeCompanyId })}
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 {strategyMut.isPending ? "Generating…" : "Generate"}

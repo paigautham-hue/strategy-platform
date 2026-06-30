@@ -101,6 +101,13 @@ export async function saveCompleteness(input: SaveCompletenessInput): Promise<Co
   const db = await getDb();
   if (!db) return row;
 
+  // Sentinel 0 for the company-level (no-session) row. READ and WRITE must use
+  // the SAME value: writing NULL while the lookup filters `= 0` would never match
+  // (NULL = 0 is never true in SQL) AND MySQL treats every NULL as distinct in a
+  // UNIQUE index — so NULL would silently duplicate rows. 0 keeps the upsert and
+  // the uq_completeness_company_session constraint effective.
+  const sid = input.sessionId ?? 0;
+
   const existing = await db
     .select()
     .from(completenessTracking)
@@ -108,9 +115,7 @@ export async function saveCompleteness(input: SaveCompletenessInput): Promise<Co
       and(
         eq(completenessTracking.tenantId, input.tenantId),
         eq(completenessTracking.companyId, input.companyId),
-        input.sessionId === undefined
-          ? eq(completenessTracking.sessionId, 0)
-          : eq(completenessTracking.sessionId, input.sessionId),
+        eq(completenessTracking.sessionId, sid),
       ),
     )
     .limit(1);
@@ -121,7 +126,7 @@ export async function saveCompleteness(input: SaveCompletenessInput): Promise<Co
     await db.insert(completenessTracking).values({
       tenantId: input.tenantId,
       companyId: input.companyId,
-      sessionId: input.sessionId,
+      sessionId: sid,
       ...row,
     });
   }

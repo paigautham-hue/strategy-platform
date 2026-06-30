@@ -51,13 +51,15 @@ export function inrCroresToUsd(inrCrores: number, rate: number = FALLBACK_USD_IN
   return (inrCrores * CRORE) / rate;
 }
 
-/** Format an absolute INR amount as crores (e.g. "₹9.96 Cr"). Pure. */
+/** Format an absolute INR amount as crores (e.g. "₹9.96 Cr"). Non-finite → "—". Pure. */
 export function formatInrCrores(inrAbsolute: number): string {
+  if (!Number.isFinite(inrAbsolute)) return "—";
   return `₹${(inrAbsolute / CRORE).toFixed(2)} Cr`;
 }
 
-/** Format an absolute USD amount as millions (e.g. "$1.20M"). Pure. */
+/** Format an absolute USD amount as millions (e.g. "$1.20M"). Non-finite → "—". Pure. */
 export function formatUsdMillions(usdAbsolute: number): string {
+  if (!Number.isFinite(usdAbsolute)) return "—";
   return `$${(usdAbsolute / MILLION).toFixed(2)}M`;
 }
 
@@ -99,13 +101,16 @@ export function dualCurrencyDisplay(
  * (crore) and "M" (million) suffixes. Returns null on non-numeric input. Pure.
  */
 export function parseCurrencyInput(input: string, currencyCode: string): number | null {
-  const cleaned = input.replace(/[^0-9.-]/g, "");
+  const cleaned = input.replace(/[^0-9.\-]/g, "");
+  // Reject malformed input ("1-2-3", "1.2.3", "") rather than silently accepting a partial number.
+  if (!/^-?\d*\.?\d+$/.test(cleaned)) return null;
   const parsed = parseFloat(cleaned);
   if (!Number.isFinite(parsed)) return null;
 
-  const lower = input.toLowerCase();
-  if (currencyCode === "INR" && lower.includes("cr")) return parsed * CRORE;
-  if (currencyCode === "USD" && lower.includes("m")) return parsed * MILLION;
+  // Anchor the magnitude suffix to the END so a stray "m"/"cr" mid-string can't misscale by 1e6.
+  const lower = input.trim().toLowerCase();
+  if (currencyCode === "INR" && /cr\s*$/.test(lower)) return parsed * CRORE;
+  if (currencyCode === "USD" && /m\s*$/.test(lower)) return parsed * MILLION;
   return parsed;
 }
 
@@ -116,7 +121,9 @@ export interface PercentageChange {
 
 /** Percentage change between two values, with direction. Pure. */
 export function percentageChange(oldValue: number, newValue: number): PercentageChange {
-  if (oldValue === 0) return { percentage: 0, direction: "neutral" };
+  if (!Number.isFinite(oldValue) || !Number.isFinite(newValue) || oldValue === 0) {
+    return { percentage: 0, direction: "neutral" };
+  }
   const change = ((newValue - oldValue) / oldValue) * 100;
   const direction = change > 0 ? "up" : change < 0 ? "down" : "neutral";
   return { percentage: Math.round(Math.abs(change) * 100) / 100, direction };
