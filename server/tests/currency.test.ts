@@ -111,6 +111,9 @@ describe("currency — edge-case guards", () => {
     // valid forms scale correctly
     expect(parseCurrencyInput("1234", "USD")).toBe(1234);
     expect(parseCurrencyInput("2M", "USD")).toBe(2_000_000);
+    // negatives with a leading currency symbol parse
+    expect(parseCurrencyInput("-$5", "USD")).toBe(-5);
+    expect(parseCurrencyInput("-₹2 Cr", "INR")).toBe(-20_000_000);
     expect(parseCurrencyInput("$2.5M", "USD")).toBe(2_500_000);
     expect(parseCurrencyInput("5.68 Cr", "INR")).toBe(56_800_000);
     expect(parseCurrencyInput("₹5.68 Cr", "INR")).toBe(56_800_000);
