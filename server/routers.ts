@@ -1326,10 +1326,11 @@ const simulationRouter = router({
         range: z.object({
           min: z.number(),
           max: z.number(),
-          // Bounded so steps × numSimulations stays a small synchronous workload.
           steps: z.number().int().min(1).max(50),
         }),
-        numSimulations: z.number().int().min(1).max(5_000).optional(),
+        // (steps+1) × numSimulations × years ≈ 51 × 1k × 20 ≈ 1M path-years, in line
+        // with simulation.run's ~1M worst case (this endpoint fans out across steps).
+        numSimulations: z.number().int().min(1).max(1_000).optional(),
         seed: z.number().int().optional(),
       })
     )
