@@ -55,6 +55,7 @@ import {
   Compass,
   Dices,
   ClipboardList,
+  Eye,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -155,6 +156,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { href: "/memory", label: "Memory", icon: Brain },
       { href: "/connections", label: "Connections", icon: Share2 },
       { href: "/ingest", label: "Ingest", icon: FileInput },
+      { href: "/vision", label: "Vision Studio", icon: Eye },
       { href: "/voice-intake", label: "Voice Intake", icon: Mic },
     ],
   },
