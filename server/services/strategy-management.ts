@@ -116,21 +116,39 @@ const MILESTONE_STATUS_ALIASES: Record<string, StrategyMilestoneStatus> = {
   "not-started": "planned", todo: "planned", upcoming: "planned",
 };
 
-/** Normalise a status string (collapse separators, strip trailing punctuation) and resolve synonyms. */
+/**
+ * Normalise a status string: trim, collapse separators to '-', then strip stray
+ * leading/trailing hyphens and trailing non-alpha. (Trim BEFORE collapsing, or a
+ * trailing space becomes a trailing '-' that the strip can't remove — e.g. "done "
+ * → "done-" → mismapped to the default.)
+ */
 function normStatus(raw: unknown): string {
-  return str(raw).toLowerCase().replace(/[\s_]+/g, "-").replace(/[^a-z-]+$/, "");
+  return str(raw)
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-z-]+$/, "")
+    .replace(/^-+|-+$/g, "");
 }
 
 function mapKpiStatus(raw: unknown): StrategyKpiStatus {
   const s = normStatus(raw);
-  if ((kpiStatusEnum as readonly string[]).includes(s)) return s as StrategyKpiStatus;
-  return KPI_STATUS_ALIASES[s] ?? "unknown";
+  const head = s.split("-")[0]; // first token, so "behind schedule" / "good progress" still resolve
+  const enumSet = kpiStatusEnum as readonly string[];
+  if (enumSet.includes(s)) return s as StrategyKpiStatus;
+  if (KPI_STATUS_ALIASES[s]) return KPI_STATUS_ALIASES[s];
+  if (enumSet.includes(head)) return head as StrategyKpiStatus;
+  return KPI_STATUS_ALIASES[head] ?? "unknown";
 }
 
 function mapMilestoneStatus(raw: unknown): StrategyMilestoneStatus {
   const s = normStatus(raw);
-  if ((milestoneStatusEnum as readonly string[]).includes(s)) return s as StrategyMilestoneStatus;
-  return MILESTONE_STATUS_ALIASES[s] ?? "planned";
+  const head = s.split("-")[0]; // so "done in Q2" / "completed 2025" still map to done
+  const enumSet = milestoneStatusEnum as readonly string[];
+  if (enumSet.includes(s)) return s as StrategyMilestoneStatus;
+  if (MILESTONE_STATUS_ALIASES[s]) return MILESTONE_STATUS_ALIASES[s];
+  if (enumSet.includes(head)) return head as StrategyMilestoneStatus;
+  return MILESTONE_STATUS_ALIASES[head] ?? "planned";
 }
 
 /** probability × impact ÷ 100, each clamped to 0–100. Pure. */

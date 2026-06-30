@@ -85,6 +85,14 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeKpi({ label: "x", status: "red" }).status).toBe("off-track");
   });
 
+  it("handles trailing whitespace and multi-word status phrasings", () => {
+    expect(normalizeMilestone({ title: "x", status: "done " }).status).toBe("done"); // trailing space
+    expect(normalizeKpi({ label: "x", status: "on-track " }).status).toBe("on-track");
+    expect(normalizeMilestone({ title: "x", status: "done in Q2" }).status).toBe("done");
+    expect(normalizeMilestone({ title: "x", status: "completed 2025" }).status).toBe("done");
+    expect(normalizeKpi({ label: "x", status: "behind schedule" }).status).toBe("off-track");
+  });
+
   it("drops untitled rows and bounds the set", () => {
     const items = normalizeStrategicItems({
       kpis: [{ label: "A" }, { label: "" }, { notALabel: 1 }],

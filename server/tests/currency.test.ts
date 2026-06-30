@@ -44,6 +44,11 @@ describe("currency — formatting", () => {
     expect(formatCurrency(3_000_000, "USD")).toBe("$3.00M");
   });
 
+  it("places the minus sign before the currency symbol for negatives", () => {
+    expect(formatInrCrores(-5_000_000)).toBe("-₹0.50 Cr");
+    expect(formatUsdMillions(-1_200_000)).toBe("-$1.20M");
+  });
+
   it("builds a dual display from a USD amount", () => {
     const d = dualCurrencyDisplay(1_000_000, 80);
     expect(d.usd).toBe("$1.00M");
