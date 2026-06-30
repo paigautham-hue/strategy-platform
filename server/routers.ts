@@ -121,6 +121,19 @@ function assertCompanyAccess(
   }
 }
 
+/**
+ * assertCompanyAccess + confirm the company actually exists in the caller's tenant —
+ * so a write never creates rows stamped with a foreign/non-existent companyId.
+ */
+async function assertCompanyAccessible(
+  ctx: { user: { tenantId: string; role: string; assignedCompanyIds?: number[] | null } },
+  companyId: number,
+) {
+  assertCompanyAccess(ctx.user, companyId);
+  const company = await getCompany(ctx.user.tenantId, companyId);
+  if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found" });
+}
+
 /** Require GP or admin role */
 const gpProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "gp" && ctx.user.role !== "admin") {
@@ -1442,7 +1455,7 @@ const digitalTwinRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+      await assertCompanyAccessible(ctx, input.companyId);
       await upsertTwinDimension({ tenantId: ctx.user.tenantId, ...input });
       return { ok: true };
     }),
@@ -1450,8 +1463,8 @@ const digitalTwinRouter = router({
   // Read the assembled Digital Twin (dimension → summary) for a company.
   twin: protectedProcedure
     .input(z.object({ companyId: z.number() }))
-    .query(({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
       return getTwinSummary(ctx.user.tenantId, input.companyId);
     }),
 
@@ -1465,7 +1478,7 @@ const digitalTwinRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+      await assertCompanyAccessible(ctx, input.companyId);
       if (
         input.sessionId !== undefined &&
         !(await isSessionInCompany(ctx.user.tenantId, input.companyId, input.sessionId))
@@ -1494,7 +1507,7 @@ const strategyManagementRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+      await assertCompanyAccessible(ctx, input.companyId);
       if (
         input.projectId !== undefined &&
         !(await isProjectInCompany(ctx.user.tenantId, input.companyId, input.projectId))
@@ -1514,22 +1527,22 @@ const strategyManagementRouter = router({
 
   listKpis: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
-    .query(({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
       return listStrategyKpis({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
     }),
 
   listMilestones: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
-    .query(({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
       return listStrategyMilestones({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
     }),
 
   listRisks: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
-    .query(({ ctx, input }) => {
-      assertCompanyAccess(ctx.user, input.companyId);
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
       return listStrategyRisks({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
     }),
 });
