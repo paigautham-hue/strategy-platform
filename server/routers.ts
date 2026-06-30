@@ -1411,11 +1411,11 @@ const digitalTwinRouter = router({
     .input(
       z.object({
         twin: z.object({
-          businessModel: z.string().optional(),
-          financials: z.string().optional(),
-          operations: z.string().optional(),
-          organization: z.string().optional(),
-          technology: z.string().optional(),
+          businessModel: z.string().max(10_000).optional(),
+          financials: z.string().max(10_000).optional(),
+          operations: z.string().max(10_000).optional(),
+          organization: z.string().max(10_000).optional(),
+          technology: z.string().max(10_000).optional(),
         }),
         companyName: z.string().optional(),
         companyId: z.number().optional(),

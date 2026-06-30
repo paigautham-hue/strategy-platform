@@ -54,13 +54,15 @@ export function inrCroresToUsd(inrCrores: number, rate: number = FALLBACK_USD_IN
 /** Format an absolute INR amount as crores (e.g. "₹9.96 Cr"). Non-finite → "—". Pure. */
 export function formatInrCrores(inrAbsolute: number): string {
   if (!Number.isFinite(inrAbsolute)) return "—";
-  return `₹${(inrAbsolute / CRORE).toFixed(2)} Cr`;
+  const v = inrAbsolute / CRORE;
+  return `${v < 0 ? "-" : ""}₹${Math.abs(v).toFixed(2)} Cr`;
 }
 
 /** Format an absolute USD amount as millions (e.g. "$1.20M"). Non-finite → "—". Pure. */
 export function formatUsdMillions(usdAbsolute: number): string {
   if (!Number.isFinite(usdAbsolute)) return "—";
-  return `$${(usdAbsolute / MILLION).toFixed(2)}M`;
+  const v = usdAbsolute / MILLION;
+  return `${v < 0 ? "-" : ""}$${Math.abs(v).toFixed(2)}M`;
 }
 
 /**
