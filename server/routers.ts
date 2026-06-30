@@ -36,7 +36,8 @@ import { CONNECTOR_REGISTRY, isConnectorAvailable } from "./connectors";
 import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
 import { hybridSearchMemory } from "./services/memory-search";
 import { writeLayerMemory, queryLayerMemory } from "./services/memory-layers";
-import { recordPrediction, closePrediction, listPredictions, extractClaims } from "./services/predictions";
+import { recordPrediction, closePrediction, listPredictions, listOpenPredictions, resolvePrediction, extractClaims } from "./services/predictions";
+import { portfolioOverview } from "./services/portfolio";
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
@@ -46,6 +47,14 @@ import { extractText } from "./ingest/extract-text";
 import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
+import {
+  mintRealtimeSession,
+  buildVoiceSystemPrompt,
+  checkVoiceRateLimit,
+  acquireVoiceLock,
+  releaseVoiceLock,
+  REALTIME_VOICES,
+} from "./_core/realtime";
 import { runFrameworks } from "./agents/frameworks";
 import { runOptionAnalysis } from "./agents/options";
 import { redTeamStrategy } from "./agents/red-team";
@@ -74,6 +83,7 @@ import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services
 import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
 import { DIMENSIONS, scoreDimensionCoverage, completenessGates } from "./services/digital-twin";
 import { nextDiscoveryTurn, generateAiStrategy } from "./agents/digital-twin-interview";
+import { extractFromImage, generateVisual } from "./agents/vision";
 import { upsertTwinDimension, getTwinSummary, saveCompleteness, isSessionInCompany } from "./services/digital-twin-store";
 import { extractStrategicItems } from "./agents/strategic-extract";
 import {
@@ -442,6 +452,41 @@ const predictionRouter = router({
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
       return extractClaims(input.text, routerCtx);
     }),
+
+  // Open (unresolved) real predictions awaiting a real-world outcome.
+  listOpen: protectedProcedure
+    .input(z.object({ companyId: z.number(), overdueOnly: z.boolean().optional(), limit: z.number().min(1).max(200).optional() }))
+    .query(({ ctx, input }) => listOpenPredictions({ tenantId: ctx.user.tenantId, ...input })),
+
+  // Record the real-world outcome of a prediction → feeds the calibration record.
+  resolve: protectedProcedure
+    .input(
+      z.object({
+        predictionId: z.number(),
+        companyId: z.number(),
+        held: z.boolean(),
+        actualValue: z.string().min(1).max(2_000),
+        measuredAt: z.date().optional(),
+        source: z.string().max(255).optional(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      resolvePrediction({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        predictionId: input.predictionId,
+        held: input.held,
+        actualValue: input.actualValue,
+        measuredAt: input.measuredAt ?? new Date(),
+        source: input.source,
+      })
+    ),
+});
+
+// ─── Portfolio Router (Phase 7 — cross-company learning; GP-only) ─────────────
+
+const portfolioRouter = router({
+  overview: gpProcedure.query(({ ctx }) => portfolioOverview(ctx.user.tenantId)),
 });
 
 // ─── Cost / Analytics Router ──────────────────────────────────────────────────
@@ -671,6 +716,133 @@ const researchRouter = router({
         routerCtx,
       );
       return { diagnosis, brief };
+    }),
+});
+
+// ─── Realtime Voice Router (Phase 7) ──────────────────────────────────────────
+// Mints OpenAI Realtime ephemeral tokens (server-only key) and dispatches the
+// model's read-only lookup tool calls. C16 (corrected): WebSocket + PCM16
+// transport, ported from Meridian's iOS-proven engine.
+
+const realtimeRouter = router({
+  createSession: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        voice: z.enum(REALTIME_VOICES).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      checkVoiceRateLimit(ctx.user.id);
+      const company = await getCompany(ctx.user.tenantId, input.companyId);
+      const systemPrompt = buildVoiceSystemPrompt({
+        name: company?.name,
+        industry: (company as any)?.industry,
+        description: (company as any)?.description,
+      });
+      try {
+        const minted = await mintRealtimeSession({ systemPrompt, voice: input.voice });
+        acquireVoiceLock(ctx.user.id);
+        void emitUsage({
+          tenantId: ctx.user.tenantId,
+          companyId: input.companyId,
+          userId: ctx.user.id,
+          role: ctx.user.role as "gp" | "operator" | "portco_team" | "admin",
+          surface: "voice",
+          action: "voice-session-start",
+          metadata: { model: minted.model, voice: minted.voice },
+        });
+        return {
+          ephemeralToken: minted.ephemeralToken,
+          model: minted.model,
+          voice: minted.voice,
+          companyName: company?.name ?? "this company",
+        };
+      } catch (err) {
+        releaseVoiceLock(ctx.user.id);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: err instanceof Error ? err.message : "Failed to start voice session",
+        });
+      }
+    }),
+
+  endSession: protectedProcedure.mutation(async ({ ctx }) => {
+    releaseVoiceLock(ctx.user.id);
+    return { ok: true };
+  }),
+
+  // Read-only tool dispatch for the realtime model. Every branch is a SELECT —
+  // no writes (C13). Results are JSON-stringified back to OpenAI by the client.
+  executeTool: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        name: z.string(),
+        args: z.record(z.string(), z.any()).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      const args = input.args ?? {};
+      switch (input.name) {
+        case "lookup_company": {
+          const company = await getCompany(ctx.user.tenantId, input.companyId);
+          if (!company) return { error: "Company not found." };
+          return {
+            name: company.name,
+            industry: (company as any).industry ?? null,
+            description: (company as any).description ?? null,
+          };
+        }
+        case "lookup_memory": {
+          const query = typeof args.query === "string" ? args.query.trim() : "";
+          if (!query) return { error: "No query provided." };
+          const items = await hybridSearchMemory({
+            tenantId: ctx.user.tenantId,
+            companyId: input.companyId,
+            query,
+            limit: 6,
+            ctx: buildRouterCtx(ctx, { companyId: input.companyId }),
+          });
+          return {
+            results: items.map((m: any) => ({
+              content: m.content,
+              layer: m.layer ?? m.kind ?? null,
+              validAt: m.validAt ?? null,
+            })),
+          };
+        }
+        case "lookup_predictions": {
+          const overdueOnly = args.overdueOnly === true;
+          const [open, records] = await Promise.all([
+            listOpenPredictions({
+              tenantId: ctx.user.tenantId,
+              companyId: input.companyId,
+              overdueOnly,
+              limit: 15,
+            }),
+            getCalibrationRecords({ tenantId: ctx.user.tenantId, companyId: input.companyId }),
+          ]);
+          const scorecard = computeScorecard(records);
+          return {
+            openCount: open.length,
+            predictions: open.map((p: any) => ({
+              claim: p.claim ?? null,
+              confidence: p.confidence ?? null,
+              targetDate: p.targetDate ?? null,
+            })),
+            calibration: {
+              brierScore: scorecard.real.brier,
+              hitRate: scorecard.real.hitRate,
+              resolvedCount: scorecard.real.count,
+            },
+          };
+        }
+        default:
+          return { error: `Unknown tool: ${input.name}` };
+      }
     }),
 });
 
@@ -1494,6 +1666,35 @@ const digitalTwinRouter = router({
     }),
 });
 
+// ─── Vision Router (Phase 4 — multimodal in/out) ──────────────────────────────
+
+const visionRouter = router({
+  // Vision IN: extract structured content from an uploaded image via the multimodal model.
+  extract: protectedProcedure
+    .input(
+      z.object({
+        imageBase64: z.string().min(1).max(12_000_000), // ~8 MB binary
+        mimeType: z.string().max(64),
+        instruction: z.string().max(2_000).optional(),
+        companyId: z.number().optional(),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      if (input.companyId !== undefined) assertCompanyAccess(ctx.user, input.companyId);
+      return extractFromImage(
+        input.imageBase64,
+        input.mimeType,
+        input.instruction ?? "",
+        buildRouterCtx(ctx, { companyId: input.companyId }),
+      );
+    }),
+
+  // Vision OUT: generate a raster image (e.g. a diagram export) from a prompt.
+  generate: protectedProcedure
+    .input(z.object({ prompt: z.string().min(1).max(2_000) }))
+    .mutation(({ input }) => generateVisual(input.prompt)),
+});
+
 // ─── Strategic Management Router (Phase 5 — structured-output auto-write; from StrategyForge) ─
 
 const strategyManagementRouter = router({
@@ -1782,6 +1983,7 @@ export const appRouter = router({
   voice: voiceRouter,
   diagnosis: diagnosisRouter,
   research: researchRouter,
+  realtime: realtimeRouter,
   frameworks: frameworksRouter,
   options: optionsRouter,
   redTeam: redTeamRouter,
@@ -1803,12 +2005,14 @@ export const appRouter = router({
   simulation: simulationRouter,
   currency: currencyRouter,
   digitalTwin: digitalTwinRouter,
+  vision: visionRouter,
   strategyManagement: strategyManagementRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
   entityGraph: entityGraphRouter,
   contradiction: contradictionRouter,
   prediction: predictionRouter,
+  portfolio: portfolioRouter,
   cost: costRouter,
   audit: auditRouter,
   export: exportRouter,

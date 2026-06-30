@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
+import { useVoiceCall } from "@/contexts/VoiceCallContext";
 import { getLoginUrl } from "@/const";
 import {
   Building2,
@@ -55,6 +56,10 @@ import {
   Compass,
   Dices,
   ClipboardList,
+  Eye,
+  LayoutDashboard,
+  RadioTower,
+  Radio,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -126,6 +131,38 @@ function CompanySwitcher({ activeCompanyId, onSwitch }: CompanySwitcherProps) {
   );
 }
 
+// ─── Voice launch ─────────────────────────────────────────────────────────────
+// Starts (or re-opens) a realtime voice call grounded in the active company.
+// The call itself lives in VoiceCallProvider (C14), so this button only kicks
+// it off — navigating away keeps it alive via the mini-player.
+
+function VoiceLaunchButton({ activeCompanyId }: { activeCompanyId: number | null }) {
+  const { data: companies } = trpc.company.list.useQuery();
+  const { isCallActive, startCall, openOverlay } = useVoiceCall();
+  const active = companies?.find((c) => c.id === activeCompanyId);
+
+  const onClick = () => {
+    if (isCallActive) {
+      openOverlay();
+      return;
+    }
+    if (activeCompanyId == null || !active) return;
+    void startCall(activeCompanyId, active.name);
+  };
+
+  return (
+    <Button
+      size="sm"
+      onClick={onClick}
+      disabled={!isCallActive && activeCompanyId == null}
+      className="w-full mt-2 gap-2 gradient-gold text-background font-sans h-8"
+    >
+      <Radio className="h-3.5 w-3.5" />
+      {isCallActive ? "Open voice call" : "Talk to Cairn"}
+    </Button>
+  );
+}
+
 // ─── Navigation groups ────────────────────────────────────────────────────────
 // Grouped to match the platform's own conceptual structure (see the in-app
 // manual) — a flat list of ~38 destinations is impossible to scan.
@@ -155,6 +192,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
       { href: "/memory", label: "Memory", icon: Brain },
       { href: "/connections", label: "Connections", icon: Share2 },
       { href: "/ingest", label: "Ingest", icon: FileInput },
+      { href: "/vision", label: "Vision Studio", icon: Eye },
       { href: "/voice-intake", label: "Voice Intake", icon: Mic },
     ],
   },
@@ -173,6 +211,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
     items: [
       { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
       { href: "/research", label: "Research", icon: Radar },
+      { href: "/live-research", label: "Live Research", icon: RadioTower },
       { href: "/contradictions", label: "Contradictions", icon: GitFork },
       { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
       { href: "/diagrams", label: "Diagrams", icon: PieChart },
@@ -212,6 +251,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   {
     label: "Portfolio",
     items: [
+      { href: "/portfolio", label: "Portfolio Dashboard", icon: LayoutDashboard },
       { href: "/synergy", label: "Synergy Scout", icon: Combine },
       { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
       { href: "/briefing", label: "Briefing", icon: Newspaper },
@@ -237,7 +277,7 @@ const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   },
 ];
 
-const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation"];
+const GP_ONLY_ITEMS = ["/export", "/cost", "/cross-war-game", "/synergy", "/distillation", "/portfolio"];
 const OPERATOR_ITEMS = ["/audit", "/usage", "/onboarding", "/connectors", "/strategy-management"];
 const ADMIN_ONLY_ITEMS = ["/users"];
 
@@ -297,6 +337,7 @@ export function PlatformLayout({
             activeCompanyId={activeCompanyId}
             onSwitch={onCompanySwitch}
           />
+          <VoiceLaunchButton activeCompanyId={activeCompanyId} />
         </div>
 
         {/* Nav */}
