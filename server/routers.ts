@@ -29,7 +29,7 @@ import {
   recordConnectorLink,
   listConnectorLinks,
 } from "./db";
-import { filterAccessibleCompanies } from "./services/access";
+import { filterAccessibleCompanies, canAccessCompany } from "./services/access";
 import { encryptSecret, decryptSecret } from "./connectors/crypto";
 import { testLinearConnection, listLinearTeams, createLinearIssue } from "./connectors/linear";
 import { CONNECTOR_REGISTRY, isConnectorAvailable } from "./connectors";
@@ -70,6 +70,20 @@ import { runSynergyScout } from "./agents/synergy-scout";
 import { distillPattern } from "./services/distillation";
 import { buildBriefing } from "./agents/briefing";
 import { listKpis, computeKpi } from "./services/kpi-library";
+import { runMonteCarlo, runSensitivity, runScenarioComparison } from "./services/monte-carlo";
+import { dualCurrencyDisplay, FALLBACK_USD_INR } from "./services/currency";
+import { DIMENSIONS, scoreDimensionCoverage, completenessGates } from "./services/digital-twin";
+import { nextDiscoveryTurn, generateAiStrategy } from "./agents/digital-twin-interview";
+import { upsertTwinDimension, getTwinSummary, saveCompleteness, isSessionInCompany } from "./services/digital-twin-store";
+import { extractStrategicItems } from "./agents/strategic-extract";
+import {
+  writeStrategicItems,
+  isProjectInCompany,
+  listKpis as listStrategyKpis,
+  listMilestones as listStrategyMilestones,
+  listRisks as listStrategyRisks,
+} from "./services/strategy-management";
+import { twinDimensionEnum, type UserRole } from "../drizzle/schema";
 import { generateDiagram } from "./agents/diagram";
 import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
@@ -91,6 +105,33 @@ function buildRouterCtx(
     sessionId: extra?.sessionId,
     userId: ctx.user?.id,
   };
+}
+
+/**
+ * C1 company isolation at the router boundary: throw FORBIDDEN if the caller's
+ * role/assignment doesn't permit this companyId. gp/admin (and unscoped operators)
+ * pass; a scoped operator/portco_team may only touch their assigned companies.
+ */
+function assertCompanyAccess(
+  user: { role: string; assignedCompanyIds?: number[] | null },
+  companyId: number,
+) {
+  if (!canAccessCompany(user.role as UserRole, user.assignedCompanyIds ?? null, companyId)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "No access to this company" });
+  }
+}
+
+/**
+ * assertCompanyAccess + confirm the company actually exists in the caller's tenant —
+ * so a write never creates rows stamped with a foreign/non-existent companyId.
+ */
+async function assertCompanyAccessible(
+  ctx: { user: { tenantId: string; role: string; assignedCompanyIds?: number[] | null } },
+  companyId: number,
+) {
+  assertCompanyAccess(ctx.user, companyId);
+  const company = await getCompany(ctx.user.tenantId, companyId);
+  if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found" });
 }
 
 /** Require GP or admin role */
@@ -1251,6 +1292,261 @@ const kpiRouter = router({
     .mutation(({ input }) => computeKpi(input.id, input.inputs)),
 });
 
+// ─── Simulation Router (Phase 2 — financial modelling; salvaged from StrategyForge) ─
+
+const monteCarloInputSchema = z.object({
+  baseRevenue: z.number(),
+  growthRates: z.array(z.number()).min(1).max(20),
+  ebitdaMargin: z.number(),
+  taxRate: z.number(),
+  discountRate: z.number().gt(-100), // below -100% makes NPV non-finite
+  terminalGrowthRate: z.number(),
+  revenueVolatility: z.number().min(0),
+  marginVolatility: z.number().min(0),
+  growthVolatility: z.number().min(0),
+});
+
+const simulationRouter = router({
+  // Probabilistic NPV / IRR / risk distribution over a multi-year projection.
+  run: protectedProcedure
+    .input(
+      z.object({
+        input: monteCarloInputSchema,
+        // ≤ 20k × 20yr ≈ 400k synchronous path-years — bounded so a single request
+        // can't monopolise the event loop; 20k paths give stable percentiles.
+        numSimulations: z.number().int().min(1).max(20_000).optional(),
+        seed: z.number().int().optional(),
+      })
+    )
+    .mutation(({ input }) =>
+      runMonteCarlo(input.input, { numSimulations: input.numSimulations, seed: input.seed })
+    ),
+
+  // Sweep one input variable across a range; mean NPV at each step.
+  sensitivity: protectedProcedure
+    .input(
+      z.object({
+        input: monteCarloInputSchema,
+        variable: z.enum([
+          "baseRevenue",
+          "ebitdaMargin",
+          "taxRate",
+          "discountRate",
+          "terminalGrowthRate",
+          "revenueVolatility",
+          "marginVolatility",
+          "growthVolatility",
+        ]),
+        range: z.object({
+          min: z.number(),
+          max: z.number(),
+          steps: z.number().int().min(1).max(25),
+        }),
+        // (steps+1) × numSimulations × years ≈ 26 × 1k × 20 ≈ 520k path-years,
+        // in line with simulation.run (~400k) — this endpoint fans out across steps.
+        numSimulations: z.number().int().min(1).max(1_000).optional(),
+        seed: z.number().int().optional(),
+      })
+    )
+    .mutation(({ input }) =>
+      runSensitivity(input.input, input.variable, input.range, {
+        numSimulations: input.numSimulations,
+        seed: input.seed,
+      })
+    ),
+
+  // Best / base / worst comparison.
+  scenarios: protectedProcedure
+    .input(
+      z.object({
+        input: monteCarloInputSchema,
+        // Lower than `run` because this fans out to THREE Monte Carlos:
+        // 3 × 8k × 20 ≈ 480k path-years, in line with simulation.run (~400k).
+        numSimulations: z.number().int().min(1).max(8_000).optional(),
+        seed: z.number().int().optional(),
+      })
+    )
+    .mutation(({ input }) =>
+      runScenarioComparison(input.input, {
+        numSimulations: input.numSimulations,
+        seed: input.seed,
+      })
+    ),
+});
+
+// ─── Currency Router (Phase 5 — dual USD/INR-Crore; salvaged from StrategyForge) ─
+
+const currencyRouter = router({
+  // Dual USD + INR-Crore display. `rate` is optional; absent ⇒ documented fallback.
+  dual: protectedProcedure
+    .input(z.object({ usdAmount: z.number(), rate: z.number().positive().optional() }))
+    .query(({ input }) => dualCurrencyDisplay(input.usdAmount, input.rate ?? FALLBACK_USD_INR)),
+
+  // The rate currently in effect. Honest: a documented fallback, not a live quote.
+  rate: protectedProcedure.query(() => ({
+    rate: FALLBACK_USD_INR,
+    source: "fallback" as const,
+    note: "Live FX pending an fx_rate MCP tool (C3). This is a documented fallback, not a live quote.",
+  })),
+});
+
+// ─── Digital Twin Router (Phase 1 — conversational intake; salvaged from Dynamo) ─
+
+const conversationMessageSchema = z.object({ role: z.string().max(32), content: z.string().max(10_000) });
+// Bounds the pure (un-budgeted) scoreDimensionCoverage work — consistent with the
+// other array caps in this file (memory.query 100, ingest maxChunks 100, etc.).
+const conversationArray = z.array(conversationMessageSchema).max(200);
+
+const digitalTwinRouter = router({
+  // The five business dimensions the discovery covers.
+  dimensions: protectedProcedure.query(() => DIMENSIONS),
+
+  // Pure, graded per-dimension coverage + funnel gates for a conversation.
+  coverage: protectedProcedure
+    .input(z.object({ messages: conversationArray }))
+    .query(({ input }) => {
+      const coverage = scoreDimensionCoverage(input.messages);
+      return { coverage, gates: completenessGates(coverage) };
+    }),
+
+  // Next consultant turn, with the under-explored dimension steered into the prompt.
+  nextTurn: protectedProcedure
+    .input(
+      z.object({
+        history: conversationArray.default([]),
+        userMessage: z.string().min(1).max(10_000),
+        companyId: z.number().optional(),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      if (input.companyId !== undefined) assertCompanyAccess(ctx.user, input.companyId);
+      return nextDiscoveryTurn(input.history, input.userMessage, buildRouterCtx(ctx, { companyId: input.companyId }));
+    }),
+
+  // Generate an AI-transformation strategy from the assembled Digital Twin.
+  generateStrategy: protectedProcedure
+    .input(
+      z.object({
+        twin: z.object({
+          businessModel: z.string().max(10_000).optional(),
+          financials: z.string().max(10_000).optional(),
+          operations: z.string().max(10_000).optional(),
+          organization: z.string().max(10_000).optional(),
+          technology: z.string().max(10_000).optional(),
+        }),
+        companyName: z.string().optional(),
+        companyId: z.number().optional(),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      if (input.companyId !== undefined) assertCompanyAccess(ctx.user, input.companyId);
+      return generateAiStrategy(input.twin, buildRouterCtx(ctx, { companyId: input.companyId }), input.companyName);
+    }),
+
+  // Persist one captured dimension of a company's Digital Twin (upsert).
+  saveDimension: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        dimension: z.enum(twinDimensionEnum),
+        summary: z.string().min(1).max(10_000),
+        structured: z.record(z.string(), z.unknown()).optional(),
+        confidence: z.number().min(0).max(100).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      await upsertTwinDimension({ tenantId: ctx.user.tenantId, ...input });
+      return { ok: true };
+    }),
+
+  // Read the assembled Digital Twin (dimension → summary) for a company.
+  twin: protectedProcedure
+    .input(z.object({ companyId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      return getTwinSummary(ctx.user.tenantId, input.companyId);
+    }),
+
+  // Compute coverage from a conversation and persist the completeness signal.
+  recordCompleteness: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        sessionId: z.number().optional(),
+        messages: conversationArray,
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      if (
+        input.sessionId !== undefined &&
+        !(await isSessionInCompany(ctx.user.tenantId, input.companyId, input.sessionId))
+      ) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Session not found in this company" });
+      }
+      return saveCompleteness({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        sessionId: input.sessionId,
+        coverage: scoreDimensionCoverage(input.messages),
+      });
+    }),
+});
+
+// ─── Strategic Management Router (Phase 5 — structured-output auto-write; from StrategyForge) ─
+
+const strategyManagementRouter = router({
+  // Generate KPIs / milestones / risks from a strategy context and write them.
+  generate: operatorProcedure
+    .input(
+      z.object({
+        context: z.string().min(1).max(20_000),
+        companyId: z.number(),
+        projectId: z.number().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      if (
+        input.projectId !== undefined &&
+        !(await isProjectInCompany(ctx.user.tenantId, input.companyId, input.projectId))
+      ) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found in this company" });
+      }
+      const items = await extractStrategicItems(
+        input.context,
+        buildRouterCtx(ctx, { companyId: input.companyId, projectId: input.projectId }),
+      );
+      const written = await writeStrategicItems(
+        { tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId },
+        items,
+      );
+      return { written, items };
+    }),
+
+  listKpis: protectedProcedure
+    .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      return listStrategyKpis({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
+    }),
+
+  listMilestones: protectedProcedure
+    .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      return listStrategyMilestones({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
+    }),
+
+  listRisks: protectedProcedure
+    .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      return listStrategyRisks({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
+    }),
+});
+
 // ─── Connector Router (Phase 5, Workstream 5.2) ───────────────────────────────
 
 const connectorTypeSchema = z.enum(["linear", "notion", "jira"]);
@@ -1504,6 +1800,10 @@ export const appRouter = router({
   distillation: distillationRouter,
   briefing: briefingRouter,
   kpi: kpiRouter,
+  simulation: simulationRouter,
+  currency: currencyRouter,
+  digitalTwin: digitalTwinRouter,
+  strategyManagement: strategyManagementRouter,
   connector: connectorRouter,
   diagram: diagramRouter,
   entityGraph: entityGraphRouter,
