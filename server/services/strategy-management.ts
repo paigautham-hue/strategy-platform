@@ -162,6 +162,11 @@ function resolveStatus<T extends string>(
     if (enumSet.includes(tok)) return tok as T;
     if (aliases[tok]) return aliases[tok];
   }
+  // A multi-token enum value ("in-progress") embedded mid-phrase ("work in progress")
+  // can't be rebuilt from single tokens — match it as a substring.
+  for (const e of enumSet) {
+    if (e.includes("-") && s.includes(e)) return e as T;
+  }
   return fallback;
 }
 
