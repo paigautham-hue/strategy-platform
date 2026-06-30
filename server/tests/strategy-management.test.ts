@@ -76,6 +76,15 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeMilestone({ title: "x", status: "bogus" }).status).toBe("planned");
   });
 
+  it("resolves common status synonyms, not just exact tokens", () => {
+    expect(normalizeMilestone({ title: "x", status: "completed" }).status).toBe("done");
+    expect(normalizeMilestone({ title: "x", status: "ongoing" }).status).toBe("in-progress");
+    expect(normalizeMilestone({ title: "x", status: "delayed" }).status).toBe("missed");
+    expect(normalizeKpi({ label: "x", status: "green" }).status).toBe("on-track");
+    expect(normalizeKpi({ label: "x", status: "off-track!" }).status).toBe("off-track");
+    expect(normalizeKpi({ label: "x", status: "red" }).status).toBe("off-track");
+  });
+
   it("drops untitled rows and bounds the set", () => {
     const items = normalizeStrategicItems({
       kpis: [{ label: "A" }, { label: "" }, { notALabel: 1 }],

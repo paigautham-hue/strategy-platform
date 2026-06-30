@@ -102,14 +102,34 @@ export function mapKpiCategory(raw: unknown): StrategyKpiCategory {
   return "operational";
 }
 
+// Common LLM phrasings → canonical enum (the schema is strict:false, so free text is expected).
+const KPI_STATUS_ALIASES: Record<string, StrategyKpiStatus> = {
+  ontarget: "on-track", "on-target": "on-track", green: "on-track", healthy: "on-track", good: "on-track",
+  amber: "at-risk", yellow: "at-risk", warning: "at-risk", risk: "at-risk",
+  red: "off-track", behind: "off-track", failing: "off-track",
+};
+const MILESTONE_STATUS_ALIASES: Record<string, StrategyMilestoneStatus> = {
+  complete: "done", completed: "done", finished: "done", shipped: "done", delivered: "done",
+  ongoing: "in-progress", "in-flight": "in-progress", started: "in-progress", active: "in-progress",
+  behind: "missed", delayed: "missed", late: "missed", slipped: "missed",
+  "not-started": "planned", todo: "planned", upcoming: "planned",
+};
+
+/** Normalise a status string (collapse separators, strip trailing punctuation) and resolve synonyms. */
+function normStatus(raw: unknown): string {
+  return str(raw).toLowerCase().replace(/[\s_]+/g, "-").replace(/[^a-z-]+$/, "");
+}
+
 function mapKpiStatus(raw: unknown): StrategyKpiStatus {
-  const s = str(raw).toLowerCase().replace(/[\s_]+/g, "-");
-  return (kpiStatusEnum as readonly string[]).includes(s) ? (s as StrategyKpiStatus) : "unknown";
+  const s = normStatus(raw);
+  if ((kpiStatusEnum as readonly string[]).includes(s)) return s as StrategyKpiStatus;
+  return KPI_STATUS_ALIASES[s] ?? "unknown";
 }
 
 function mapMilestoneStatus(raw: unknown): StrategyMilestoneStatus {
-  const s = str(raw).toLowerCase().replace(/[\s_]+/g, "-");
-  return (milestoneStatusEnum as readonly string[]).includes(s) ? (s as StrategyMilestoneStatus) : "planned";
+  const s = normStatus(raw);
+  if ((milestoneStatusEnum as readonly string[]).includes(s)) return s as StrategyMilestoneStatus;
+  return MILESTONE_STATUS_ALIASES[s] ?? "planned";
 }
 
 /** probability × impact ÷ 100, each clamped to 0–100. Pure. */
@@ -157,12 +177,14 @@ export function normalizeRisk(raw: unknown): NormalizedRisk {
 /** Normalise a raw LLM payload into validated strategic items. Drops untitled rows. Pure. */
 export function normalizeStrategicItems(raw: unknown): NormalizedStrategicItems {
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+  // Slice AFTER the label/title filter so valid rows past index N aren't dropped in
+  // favour of earlier objects that fail validation.
   const arr = (v: unknown): Record<string, unknown>[] =>
-    Array.isArray(v) ? (v.filter((x) => x && typeof x === "object") as Record<string, unknown>[]).slice(0, MAX_ITEMS) : [];
+    Array.isArray(v) ? (v.filter((x) => x && typeof x === "object") as Record<string, unknown>[]) : [];
   return {
-    kpis: arr(o.kpis).map(normalizeKpi).filter((k) => k.label),
-    milestones: arr(o.milestones).map(normalizeMilestone).filter((m) => m.title),
-    risks: arr(o.risks).map(normalizeRisk).filter((r) => r.title),
+    kpis: arr(o.kpis).map(normalizeKpi).filter((k) => k.label).slice(0, MAX_ITEMS),
+    milestones: arr(o.milestones).map(normalizeMilestone).filter((m) => m.title).slice(0, MAX_ITEMS),
+    risks: arr(o.risks).map(normalizeRisk).filter((r) => r.title).slice(0, MAX_ITEMS),
   };
 }
 
