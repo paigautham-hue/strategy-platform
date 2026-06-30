@@ -117,10 +117,15 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-/** Linear-index percentile of an already-ascending-sorted array. */
+/**
+ * Nearest-rank percentile of an already-ascending-sorted array. The nearest-rank
+ * value sits at 0-indexed position ceil(n*p) - 1 (using floor(n*p) would bias
+ * every percentile one rank too high — and make the lower-tail VaR less
+ * conservative, which is the wrong direction for a risk number).
+ */
 function percentile(sortedAsc: number[], p: number): number {
   if (sortedAsc.length === 0) return NaN;
-  const idx = Math.min(sortedAsc.length - 1, Math.max(0, Math.floor(sortedAsc.length * p)));
+  const idx = Math.min(sortedAsc.length - 1, Math.max(0, Math.ceil(sortedAsc.length * p) - 1));
   return sortedAsc[idx];
 }
 

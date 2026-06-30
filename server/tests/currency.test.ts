@@ -71,3 +71,29 @@ describe("currency — parsing + change", () => {
     expect(percentageChange(0, 50)).toEqual({ percentage: 0, direction: "neutral" });
   });
 });
+
+describe("currency — edge-case guards", () => {
+  it("never renders NaN/Infinity into a formatted string", () => {
+    expect(formatInrCrores(Number.NaN)).toBe("—");
+    expect(formatUsdMillions(Number.POSITIVE_INFINITY)).toBe("—");
+    expect(formatCurrency(Number.NaN, "INR")).toBe("—");
+    expect(formatCurrency(Number.POSITIVE_INFINITY, "USD")).toBe("—");
+  });
+
+  it("percentageChange stays neutral on non-finite input", () => {
+    expect(percentageChange(100, Number.NaN)).toEqual({ percentage: 0, direction: "neutral" });
+    expect(percentageChange(Number.NaN, 5)).toEqual({ percentage: 0, direction: "neutral" });
+  });
+
+  it("parseCurrencyInput rejects malformed numbers and only honours an end suffix", () => {
+    expect(parseCurrencyInput("1-2-3", "USD")).toBeNull();
+    expect(parseCurrencyInput("1.2.3", "USD")).toBeNull();
+    expect(parseCurrencyInput("", "USD")).toBeNull();
+    // a stray "m"/"cr" that is not a trailing suffix must NOT rescale
+    expect(parseCurrencyInput("5 (amt)", "USD")).toBe(5);
+    expect(parseCurrencyInput("12 across", "INR")).toBe(12);
+    // genuine trailing suffixes still scale
+    expect(parseCurrencyInput("2M", "USD")).toBe(2_000_000);
+    expect(parseCurrencyInput("5.68 Cr", "INR")).toBe(56_800_000);
+  });
+});

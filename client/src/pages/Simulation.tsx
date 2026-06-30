@@ -130,10 +130,11 @@ export default function Simulation() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+            <label htmlFor="growth-rates" className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
               Per-year growth rates (%, comma-separated — sets the horizon)
             </label>
             <Input
+              id="growth-rates"
               value={growth}
               onChange={(e) => setGrowth(e.target.value)}
               placeholder="18, 17, 20, 18"
@@ -147,10 +148,11 @@ export default function Simulation() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {FIELDS.map((f) => (
               <div key={f.id} className="space-y-1">
-                <label className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+                <label htmlFor={`sim-${f.id}`} className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
                   {f.label}
                 </label>
                 <Input
+                  id={`sim-${f.id}`}
                   type="number"
                   value={form[f.id]}
                   onChange={(e) => setForm((p) => ({ ...p, [f.id]: e.target.value }))}
@@ -159,10 +161,11 @@ export default function Simulation() {
               </div>
             ))}
             <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
+              <label htmlFor="sim-seed" className="text-[11px] text-muted-foreground font-sans uppercase tracking-wider">
                 Seed
               </label>
               <Input
+                id="sim-seed"
                 type="number"
                 value={seed}
                 onChange={(e) => setSeed(e.target.value)}

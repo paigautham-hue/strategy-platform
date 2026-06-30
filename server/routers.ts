@@ -1310,9 +1310,10 @@ const simulationRouter = router({
         range: z.object({
           min: z.number(),
           max: z.number(),
-          steps: z.number().int().min(1).max(100),
+          // Bounded so steps × numSimulations stays a small synchronous workload.
+          steps: z.number().int().min(1).max(50),
         }),
-        numSimulations: z.number().int().min(1).max(20_000).optional(),
+        numSimulations: z.number().int().min(1).max(5_000).optional(),
         seed: z.number().int().optional(),
       })
     )
