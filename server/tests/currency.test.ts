@@ -85,6 +85,13 @@ describe("currency — edge-case guards", () => {
     expect(percentageChange(Number.NaN, 5)).toEqual({ percentage: 0, direction: "neutral" });
   });
 
+  it("returns the sentinel for a malformed currency code instead of throwing", () => {
+    expect(formatCurrency(100, "")).toBe("—");
+    expect(formatCurrency(100, "BADCODE")).toBe("—");
+    expect(formatCurrency(100, "US")).toBe("—");
+    expect(formatCurrency(100, "EUR")).toContain("100"); // a valid code still formats
+  });
+
   it("strictly parses [symbol] number [unit] and rejects everything else", () => {
     // valid forms scale correctly
     expect(parseCurrencyInput("1234", "USD")).toBe(1234);

@@ -71,12 +71,18 @@ export function formatCurrency(amount: number, currencyCode: string): string {
   if (!Number.isFinite(amount)) return "—";
   if (currencyCode === "INR") return formatInrCrores(amount);
   if (currencyCode === "USD") return formatUsdMillions(amount);
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  // Intl throws a RangeError on a malformed (non-ISO-4217) currency code — degrade
+  // to the sentinel rather than crashing a financial surface on a bad/free-text code.
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return "—";
+  }
 }
 
 /**

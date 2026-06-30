@@ -29,7 +29,7 @@ import {
   recordConnectorLink,
   listConnectorLinks,
 } from "./db";
-import { filterAccessibleCompanies } from "./services/access";
+import { filterAccessibleCompanies, canAccessCompany } from "./services/access";
 import { encryptSecret, decryptSecret } from "./connectors/crypto";
 import { testLinearConnection, listLinearTeams, createLinearIssue } from "./connectors/linear";
 import { CONNECTOR_REGISTRY, isConnectorAvailable } from "./connectors";
@@ -82,7 +82,7 @@ import {
   listMilestones as listStrategyMilestones,
   listRisks as listStrategyRisks,
 } from "./services/strategy-management";
-import { twinDimensionEnum } from "../drizzle/schema";
+import { twinDimensionEnum, type UserRole } from "../drizzle/schema";
 import { generateDiagram } from "./agents/diagram";
 import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
@@ -104,6 +104,20 @@ function buildRouterCtx(
     sessionId: extra?.sessionId,
     userId: ctx.user?.id,
   };
+}
+
+/**
+ * C1 company isolation at the router boundary: throw FORBIDDEN if the caller's
+ * role/assignment doesn't permit this companyId. gp/admin (and unscoped operators)
+ * pass; a scoped operator/portco_team may only touch their assigned companies.
+ */
+function assertCompanyAccess(
+  user: { role: string; assignedCompanyIds?: number[] | null },
+  companyId: number,
+) {
+  if (!canAccessCompany(user.role as UserRole, user.assignedCompanyIds ?? null, companyId)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "No access to this company" });
+  }
 }
 
 /** Require GP or admin role */
@@ -1421,6 +1435,7 @@ const digitalTwinRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
       await upsertTwinDimension({ tenantId: ctx.user.tenantId, ...input });
       return { ok: true };
     }),
@@ -1428,7 +1443,10 @@ const digitalTwinRouter = router({
   // Read the assembled Digital Twin (dimension → summary) for a company.
   twin: protectedProcedure
     .input(z.object({ companyId: z.number() }))
-    .query(({ ctx, input }) => getTwinSummary(ctx.user.tenantId, input.companyId)),
+    .query(({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
+      return getTwinSummary(ctx.user.tenantId, input.companyId);
+    }),
 
   // Compute coverage from a conversation and persist the completeness signal.
   recordCompleteness: protectedProcedure
@@ -1439,14 +1457,15 @@ const digitalTwinRouter = router({
         messages: conversationArray,
       })
     )
-    .mutation(({ ctx, input }) =>
-      saveCompleteness({
+    .mutation(({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
+      return saveCompleteness({
         tenantId: ctx.user.tenantId,
         companyId: input.companyId,
         sessionId: input.sessionId,
         coverage: scoreDimensionCoverage(input.messages),
-      })
-    ),
+      });
+    }),
 });
 
 // ─── Strategic Management Router (Phase 5 — structured-output auto-write; from StrategyForge) ─
@@ -1462,6 +1481,7 @@ const strategyManagementRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
       const items = await extractStrategicItems(
         input.context,
         buildRouterCtx(ctx, { companyId: input.companyId, projectId: input.projectId }),
@@ -1475,21 +1495,24 @@ const strategyManagementRouter = router({
 
   listKpis: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
-    .query(({ ctx, input }) =>
-      listStrategyKpis({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId })
-    ),
+    .query(({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
+      return listStrategyKpis({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
+    }),
 
   listMilestones: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
-    .query(({ ctx, input }) =>
-      listStrategyMilestones({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId })
-    ),
+    .query(({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
+      return listStrategyMilestones({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
+    }),
 
   listRisks: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional() }))
-    .query(({ ctx, input }) =>
-      listStrategyRisks({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId })
-    ),
+    .query(({ ctx, input }) => {
+      assertCompanyAccess(ctx.user, input.companyId);
+      return listStrategyRisks({ tenantId: ctx.user.tenantId, companyId: input.companyId, projectId: input.projectId });
+    }),
 });
 
 // ─── Connector Router (Phase 5, Workstream 5.2) ───────────────────────────────
