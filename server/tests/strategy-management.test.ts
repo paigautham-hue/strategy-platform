@@ -105,6 +105,8 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeMilestone({ title: "x", status: "work in progress" }).status).toBe("in-progress");
     expect(normalizeMilestone({ title: "x", status: "on schedule, in progress" }).status).toBe("in-progress");
     expect(normalizeMilestone({ title: "x", status: "no, in progress" }).status).toBe("in-progress"); // bare "no" isn't negation
+    expect(normalizeMilestone({ title: "x", status: "deal won, shipped" }).status).toBe("done"); // bare "won" isn't negation
+    expect(normalizeMilestone({ title: "x", status: "won't start yet" }).status).toBe("planned"); // contraction IS negation
   });
 
   it("caps bounded strings to their column widths (MySQL strict-mode safety)", () => {

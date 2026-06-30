@@ -1299,8 +1299,9 @@ const simulationRouter = router({
     .input(
       z.object({
         input: monteCarloInputSchema,
-        // Bounded to keep the synchronous CPU loop in line with the sibling caps.
-        numSimulations: z.number().int().min(1).max(50_000).optional(),
+        // ≤ 20k × 20yr ≈ 400k synchronous path-years — bounded so a single request
+        // can't monopolise the event loop; 20k paths give stable percentiles.
+        numSimulations: z.number().int().min(1).max(20_000).optional(),
         seed: z.number().int().optional(),
       })
     )
@@ -1326,10 +1327,10 @@ const simulationRouter = router({
         range: z.object({
           min: z.number(),
           max: z.number(),
-          steps: z.number().int().min(1).max(50),
+          steps: z.number().int().min(1).max(25),
         }),
-        // (steps+1) × numSimulations × years ≈ 51 × 1k × 20 ≈ 1M path-years, in line
-        // with simulation.run's ~1M worst case (this endpoint fans out across steps).
+        // (steps+1) × numSimulations × years ≈ 26 × 1k × 20 ≈ 520k path-years,
+        // in line with simulation.run (~400k) — this endpoint fans out across steps.
         numSimulations: z.number().int().min(1).max(1_000).optional(),
         seed: z.number().int().optional(),
       })
@@ -1346,9 +1347,9 @@ const simulationRouter = router({
     .input(
       z.object({
         input: monteCarloInputSchema,
-        // Lower than `run` because this fans out to THREE Monte Carlos, keeping the
-        // worst-case synchronous workload in line with simulation.run.
-        numSimulations: z.number().int().min(1).max(16_000).optional(),
+        // Lower than `run` because this fans out to THREE Monte Carlos:
+        // 3 × 8k × 20 ≈ 480k path-years, in line with simulation.run (~400k).
+        numSimulations: z.number().int().min(1).max(8_000).optional(),
         seed: z.number().int().optional(),
       })
     )
