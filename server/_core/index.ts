@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { dailyBackupHandler, nightlyTelemetryHandler, calibrationSnapshotHandler } from "../cron/handlers";
+import { researchStreamHandler } from "./researchStream";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -41,6 +42,8 @@ async function startServer() {
   app.post("/api/scheduled/daily-backup", dailyBackupHandler);
   app.post("/api/scheduled/nightly-telemetry", nightlyTelemetryHandler);
   app.post("/api/scheduled/calibration-snapshot", calibrationSnapshotHandler);
+  // Live research SSE stream (before the Vite/static fallthrough)
+  app.get("/api/research/stream", researchStreamHandler);
 
   // tRPC API
   app.use(

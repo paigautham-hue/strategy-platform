@@ -250,6 +250,75 @@ export async function runResearchMesh(
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// STREAMING — for the live "agents working" view
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ResearchStreamEvent =
+  | { type: "start"; question: string; specialists: { id: string; label: string; lens: string }[] }
+  | { type: "memory"; count: number }
+  | { type: "specialist"; result: SpecialistFindings }
+  | { type: "synthesizing" }
+  | { type: "complete"; brief: ResearchBrief };
+
+/**
+ * Run the research mesh, emitting an event as each specialist completes (and at
+ * the memory / synthesis stages) — the same work as runResearchMesh, surfaced
+ * incrementally so the UI can show the agents working in real time. Returns the
+ * full brief at the end.
+ */
+export async function streamResearchMesh(
+  question: string,
+  questionType: QuestionType,
+  companyId: number,
+  ctx: RouterContext,
+  onEvent: (e: ResearchStreamEvent) => void,
+): Promise<ResearchBrief> {
+  const specialists = specialistsForQuestionType(questionType);
+  onEvent({
+    type: "start",
+    question,
+    specialists: specialists.map((s) => ({ id: s.id, label: s.label, lens: s.lens })),
+  });
+
+  let memoryContext = "";
+  try {
+    const memories = await hybridSearchMemory({
+      tenantId: ctx.tenantId,
+      companyId,
+      query: question,
+      limit: 15,
+      ctx: { ...ctx, companyId },
+    });
+    memoryContext = memories.map((m, i) => `${i + 1}. ${m.canonicalForm}`).join("\n");
+    onEvent({ type: "memory", count: memories.length });
+  } catch {
+    memoryContext = "";
+    onEvent({ type: "memory", count: 0 });
+  }
+
+  // Dispatch in parallel; emit each result the moment it resolves.
+  const specialistResults = await Promise.all(
+    specialists.map((s) =>
+      runResearchAgent(s, question, memoryContext, ctx).then((r) => {
+        onEvent({ type: "specialist", result: r });
+        return r;
+      }),
+    ),
+  );
+
+  onEvent({ type: "synthesizing" });
+  const synthesis = await synthesizeFindings(question, specialistResults, ctx);
+  const brief: ResearchBrief = {
+    question,
+    specialists: specialistResults,
+    synthesis: synthesis.synthesis,
+    keyTakeaways: synthesis.keyTakeaways,
+  };
+  onEvent({ type: "complete", brief });
+  return brief;
+}
+
 /** Combine specialist findings into a synthesis. Best-effort. */
 async function synthesizeFindings(
   question: string,
