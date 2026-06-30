@@ -105,9 +105,9 @@ export function mapKpiCategory(raw: unknown): StrategyKpiCategory {
 
 // Common LLM phrasings → canonical enum (the schema is strict:false, so free text is expected).
 const KPI_STATUS_ALIASES: Record<string, StrategyKpiStatus> = {
-  ontarget: "on-track", "on-target": "on-track", green: "on-track", healthy: "on-track", good: "on-track",
-  amber: "at-risk", yellow: "at-risk", warning: "at-risk", risk: "at-risk",
-  red: "off-track", behind: "off-track", failing: "off-track",
+  ontarget: "on-track", "on-target": "on-track", ontrack: "on-track", green: "on-track", healthy: "on-track", good: "on-track",
+  amber: "at-risk", yellow: "at-risk", warning: "at-risk", risk: "at-risk", atrisk: "at-risk",
+  red: "off-track", behind: "off-track", failing: "off-track", offtrack: "off-track",
 };
 const MILESTONE_STATUS_ALIASES: Record<string, StrategyMilestoneStatus> = {
   complete: "done", completed: "done", finished: "done", shipped: "done", delivered: "done",
@@ -116,39 +116,41 @@ const MILESTONE_STATUS_ALIASES: Record<string, StrategyMilestoneStatus> = {
   "not-started": "planned", todo: "planned", upcoming: "planned",
 };
 
-/**
- * Normalise a status string: trim, collapse separators to '-', then strip stray
- * leading/trailing hyphens and trailing non-alpha. (Trim BEFORE collapsing, or a
- * trailing space becomes a trailing '-' that the strip can't remove — e.g. "done "
- * → "done-" → mismapped to the default.)
- */
+/** Normalise a status: lowercase, collapse any non-letter run to '-', trim edge hyphens. */
 function normStatus(raw: unknown): string {
-  return str(raw)
-    .toLowerCase()
-    .trim()
-    .replace(/[\s_]+/g, "-")
-    .replace(/[^a-z-]+$/, "")
-    .replace(/^-+|-+$/g, "");
+  return str(raw).toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Resolve a normalised status against an enum + alias map, in order: exact enum,
+ * enum as a PREFIX ("on-track-for-q2" → "on-track"), exact alias, then each token
+ * against the enum/alias (so "behind schedule" / "high risk" / "in progress, on
+ * schedule" still classify). Falls back to `fallback`.
+ */
+function resolveStatus<T extends string>(
+  s: string,
+  enumSet: readonly string[],
+  aliases: Record<string, T>,
+  fallback: T,
+): T {
+  if (!s) return fallback;
+  if (enumSet.includes(s)) return s as T;
+  const prefix = enumSet.find((e) => s === e || s.startsWith(`${e}-`));
+  if (prefix) return prefix as T;
+  if (aliases[s]) return aliases[s];
+  for (const tok of s.split("-")) {
+    if (enumSet.includes(tok)) return tok as T;
+    if (aliases[tok]) return aliases[tok];
+  }
+  return fallback;
 }
 
 function mapKpiStatus(raw: unknown): StrategyKpiStatus {
-  const s = normStatus(raw);
-  const head = s.split("-")[0]; // first token, so "behind schedule" / "good progress" still resolve
-  const enumSet = kpiStatusEnum as readonly string[];
-  if (enumSet.includes(s)) return s as StrategyKpiStatus;
-  if (KPI_STATUS_ALIASES[s]) return KPI_STATUS_ALIASES[s];
-  if (enumSet.includes(head)) return head as StrategyKpiStatus;
-  return KPI_STATUS_ALIASES[head] ?? "unknown";
+  return resolveStatus(normStatus(raw), kpiStatusEnum, KPI_STATUS_ALIASES, "unknown");
 }
 
 function mapMilestoneStatus(raw: unknown): StrategyMilestoneStatus {
-  const s = normStatus(raw);
-  const head = s.split("-")[0]; // so "done in Q2" / "completed 2025" still map to done
-  const enumSet = milestoneStatusEnum as readonly string[];
-  if (enumSet.includes(s)) return s as StrategyMilestoneStatus;
-  if (MILESTONE_STATUS_ALIASES[s]) return MILESTONE_STATUS_ALIASES[s];
-  if (enumSet.includes(head)) return head as StrategyMilestoneStatus;
-  return MILESTONE_STATUS_ALIASES[head] ?? "planned";
+  return resolveStatus(normStatus(raw), milestoneStatusEnum, MILESTONE_STATUS_ALIASES, "planned");
 }
 
 /** probability × impact ÷ 100, each clamped to 0–100. Pure. */

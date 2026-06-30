@@ -91,6 +91,10 @@ describe("strategy-management — item normalisers", () => {
     expect(normalizeMilestone({ title: "x", status: "done in Q2" }).status).toBe("done");
     expect(normalizeMilestone({ title: "x", status: "completed 2025" }).status).toBe("done");
     expect(normalizeKpi({ label: "x", status: "behind schedule" }).status).toBe("off-track");
+    // enum-prefix + non-leading-token resolution
+    expect(normalizeKpi({ label: "x", status: "on track for Q2" }).status).toBe("on-track");
+    expect(normalizeMilestone({ title: "x", status: "in progress, on schedule" }).status).toBe("in-progress");
+    expect(normalizeKpi({ label: "x", status: "high risk" }).status).toBe("at-risk");
   });
 
   it("drops untitled rows and bounds the set", () => {
