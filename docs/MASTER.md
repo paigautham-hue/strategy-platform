@@ -92,7 +92,7 @@ badly under-reported, marking shipped+tested features as ☐):
 | Per-portco encrypted export | 0 | ✅ | XOR-SHA256 archive; stored in Manus S3; signed download URL |
 | Audit log + usage instrumentation | 0 | ✅ | Append-only audit_log; usage_event on every UI action |
 | Universal ingest | 1 | 🟡 | text / markdown / html / URL / **PDF / DOCX** live; audio / video / image pending |
-| Conversational "Digital Twin" intake | 1 | 🟡 | Dimension-steered interview + graded coverage + funnel gates + strategy synthesis (`server/services/digital-twin.ts` + `server/agents/digital-twin-interview.ts`, salvaged Dynamo). Stateless engine; `digital_twin`/`completeness_tracking` persistence is the next migration |
+| Conversational "Digital Twin" intake | 1 | ✅ | Dimension-steered interview + graded coverage + funnel gates + strategy synthesis + **persistence** (`digital_twin` / `completeness_tracking`). `server/services/digital-twin*.ts` + `server/agents/digital-twin-interview.ts` (salvaged Dynamo) |
 | GraphRAG with dimensional auto-tagging | 1 | ✅ | Dimensional tags at write time; entity-graph multi-hop (`server/services/entity-graph.ts`) |
 | Voice intake (one-shot) | 1 | ✅ | Browser STT → strict-JSON intent parse. Realtime voice is a separate (☐) row |
 | Portco onboarding wizard | 1 | ✅ | 4-step wizard: create → seed memory → ingest doc → done |
@@ -122,6 +122,7 @@ badly under-reported, marking shipped+tested features as ☐):
 | Memo dictation | 4 | ✅ | `server/agents/memo-dictation.ts` — monologue → 1-page memo |
 | Hot-path distillation | 4 | 🟡 | Distillation logic shipped (`server/services/distillation.ts`); ≥5× GPU path config-only |
 | Strategy decomposer (Initiative → OKR → Task) | 5 | ✅ | `server/agents/decomposer.ts` + pre-mortem |
+| Strategic-item auto-write (KPIs / milestones / risks) | 5 | ✅ | LLM JSON-schema → normalise (category map, risk scoring) → write to `strategy_kpi`/`strategy_milestone`/`strategy_risk` (`server/agents/strategic-extract.ts` + `server/services/strategy-management.ts`, salvaged StrategyForge) |
 | Linear connector (bi-directional) | 5 | ✅ | `server/connectors/linear.ts` (AES-256-GCM creds, push-initiative) |
 | Notion connector | 5 | ☐ | Registered as `available:false` stub |
 | Jira connector | 5 | ☐ | Registered as `available:false` stub |
@@ -186,6 +187,13 @@ badly under-reported, marking shipped+tested features as ☐):
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-06-30 · Prototype consolidation (3/n) — persistence + structured-output auto-write (DB migration)
+- **Migration `drizzle/0003_light_grey_gargoyle.sql`** — **additive only** (5 `CREATE TABLE`, no `ALTER`/`DROP`; existing tables and data untouched). Manus applies it on the next publish (ADR-010). Schema is now 21 tables.
+- **Digital Twin persistence** (makes the salvaged engine stateful): `digital_twin` (one row per company × dimension, with structured facts + confidence) and `completeness_tracking` (the funnel signal). `server/services/digital-twin-store.ts` — `upsertTwinDimension`, `getTwinSummary`, `saveCompleteness` (tenant-scoped, C1; getDb-guarded). **tRPC** `digitalTwin.{saveDimension,twin,recordCompleteness}`.
+- **Structured-output auto-write** (salvaged from StrategyForge): `strategy_kpi` / `strategy_milestone` / `strategy_risk` tables. `server/agents/strategic-extract.ts` generates KPIs/milestones/risks via the router (C3, JSON-schema), and `server/services/strategy-management.ts` normalises them (category mapping efficiency→operational / competitive→market, probability×impact risk scoring) and writes validated rows. **tRPC** `strategyManagement.{generate,listKpis,listMilestones,listRisks}` (generate is operator-tier).
+- **Tests**: +8 unit tests (category mapping, risk scoring, item normalisers, completeness row). **539 pass / 16 skipped / 0 fail**; typecheck + production build clean.
+- **Migration safety**: ship code + migration together; the additive tables are read/written only by the new code in this same PR (honours the Meridian KB "never deploy a column before its code"). Set no new env vars.
 
 ### 2026-06-29 · Prototype consolidation (2/n) — Dynamo "Digital Twin" conversational intake
 - The single most novel idea salvaged from Dynamo: a dimension-steered discovery **interview** as an intake modality complementing the form/ingest pipeline.
