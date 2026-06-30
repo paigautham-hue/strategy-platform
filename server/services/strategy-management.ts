@@ -138,7 +138,13 @@ function resolveStatus<T extends string>(
   const prefix = enumSet.find((e) => s === e || s.startsWith(`${e}-`));
   if (prefix) return prefix as T;
   if (aliases[s]) return aliases[s];
-  for (const tok of s.split("-")) {
+  const tokens = s.split("-");
+  // A negated "not ... start(ed)" must resolve BEFORE the bare "started" token
+  // alias wins (e.g. "not yet started" must be planned, not in-progress).
+  if (aliases["not-started"] && tokens.includes("not") && tokens.some((t) => t.startsWith("start"))) {
+    return aliases["not-started"];
+  }
+  for (const tok of tokens) {
     if (enumSet.includes(tok)) return tok as T;
     if (aliases[tok]) return aliases[tok];
   }
