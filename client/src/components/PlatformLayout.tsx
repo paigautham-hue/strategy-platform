@@ -173,86 +173,88 @@ interface NavItem {
   href: string;
   label: string;
   icon: typeof BarChart3;
+  /** One-line plain-language explanation, shown as a hover tooltip. */
+  desc: string;
 }
 
 const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   {
     label: null,
     items: [
-      { href: "/", label: "Overview", icon: BarChart3 },
-      { href: "/history", label: "History", icon: HistoryIcon },
+      { href: "/", label: "Overview", icon: BarChart3, desc: "Dashboard for the active company — ask a question, see health at a glance" },
+      { href: "/history", label: "History", icon: HistoryIcon, desc: "Every saved analysis run — revisit, filter, and export as a document" },
     ],
   },
   {
     label: "Companies & Knowledge",
     items: [
-      { href: "/companies", label: "Companies", icon: Building2 },
-      { href: "/onboarding", label: "Onboard Company", icon: Rocket },
-      { href: "/projects", label: "Projects", icon: FolderOpen },
-      { href: "/memory", label: "Memory", icon: Brain },
-      { href: "/connections", label: "Connections", icon: Share2 },
-      { href: "/ingest", label: "Ingest", icon: FileInput },
-      { href: "/vision", label: "Vision Studio", icon: Eye },
+      { href: "/companies", label: "Companies", icon: Building2, desc: "List and create your portfolio companies" },
+      { href: "/onboarding", label: "Onboard Company", icon: Rocket, desc: "Wizard: create a company and seed its initial context" },
+      { href: "/projects", label: "Projects", icon: FolderOpen, desc: "Strategy projects within the active company" },
+      { href: "/memory", label: "Memory", icon: Brain, desc: "Everything the platform knows about this company — searchable, with confidence and history" },
+      { href: "/connections", label: "Connections", icon: Share2, desc: "The entity graph — how people, products, and markets link together" },
+      { href: "/ingest", label: "Ingest", icon: FileInput, desc: "Feed in documents, decks, or URLs — key facts are extracted into memory" },
+      { href: "/vision", label: "Vision Studio", icon: Eye, desc: "Extract text from slides/whiteboards, or generate images from a prompt" },
     ],
   },
   {
     label: "Ask & Analyze",
     items: [
-      { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
-      { href: "/research", label: "Research", icon: Radar },
-      { href: "/live-research", label: "Live Research", icon: RadioTower },
-      { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
-      { href: "/options", label: "Options", icon: ListChecks },
-      { href: "/red-team", label: "Red Team", icon: Swords },
-      { href: "/contradictions", label: "Contradictions", icon: GitFork },
-      { href: "/diagrams", label: "Diagrams", icon: PieChart },
-      { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
-      { href: "/memo", label: "Memo Dictation", icon: FileText },
-      { href: "/voice-intake", label: "Voice Intake", icon: Mic },
-      { href: "/discovery", label: "Discovery (Digital Twin)", icon: Compass },
-      { href: "/personas", label: "Advisory Personas", icon: Users },
-      { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
+      { href: "/diagnose", label: "Diagnose", icon: Stethoscope, desc: "Start here — is this the right question? Reframes and classifies it first" },
+      { href: "/research", label: "Research", icon: Radar, desc: "Specialist research agents investigate a diagnosed question in parallel" },
+      { href: "/live-research", label: "Live Research", icon: RadioTower, desc: "The same research mesh, streamed live as each specialist reports" },
+      { href: "/frameworks", label: "Frameworks", icon: Grid3x3, desc: "Porter, JTBD, Ansoff & more — auto-selected to fit the question type" },
+      { href: "/options", label: "Options", icon: ListChecks, desc: "Generate strategic options and score them on 8 weighted criteria" },
+      { href: "/red-team", label: "Red Team", icon: Swords, desc: "Five hostile personas attack your strategy before the market does" },
+      { href: "/contradictions", label: "Contradictions", icon: GitFork, desc: "Where the company's own facts and claims conflict with each other" },
+      { href: "/diagrams", label: "Diagrams", icon: PieChart, desc: "Generate Porter / SWOT / Three-Horizons visuals from company memory" },
+      { href: "/brainstorm", label: "Brainstorm", icon: Sparkles, desc: "A guided 4-phase brainstorm — ideas are captured silently as you talk" },
+      { href: "/memo", label: "Memo Dictation", icon: FileText, desc: "Dictate a monologue; get back a structured 1-page memo" },
+      { href: "/voice-intake", label: "Voice Intake", icon: Mic, desc: "Speak a strategic question — it becomes a project draft" },
+      { href: "/discovery", label: "Discovery (Digital Twin)", icon: Compass, desc: "A structured interview that builds a working model of the business" },
+      { href: "/personas", label: "Advisory Personas", icon: Users, desc: "Ask a question to a virtual board — investor, operator, customer views" },
+      { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope, desc: "Import an external strategy document and apply it to a company" },
     ],
   },
   {
     label: "Simulate & Stress-Test",
     items: [
-      { href: "/war-game", label: "War-Game", icon: Crosshair },
-      { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
-      { href: "/simulation", label: "Financial Simulation", icon: Dices },
-      { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
+      { href: "/war-game", label: "War-Game", icon: Crosshair, desc: "Play your strategy against customers, competitors, regulators & investors over multiple rounds" },
+      { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network, desc: "One scenario played across several portfolio companies at once (GP only)" },
+      { href: "/simulation", label: "Financial Simulation", icon: Dices, desc: "Monte Carlo NPV/IRR — 10,000 paths, risk metrics, best/base/worst" },
+      { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert, desc: "Assume the initiative failed — work backwards to what killed it" },
     ],
   },
   {
     label: "Execute & Learn",
     items: [
-      { href: "/decompose", label: "Decompose", icon: Workflow },
-      { href: "/strategy-management", label: "Strategic Tracker", icon: ClipboardList },
-      { href: "/drift", label: "Drift Detection", icon: Gauge },
-      { href: "/kpi-library", label: "KPI Library", icon: Calculator },
-      { href: "/predictions", label: "Predictions", icon: TrendingUp },
-      { href: "/calibration", label: "Calibration", icon: Scale },
-      { href: "/attribution", label: "Attribution", icon: Microscope },
-      { href: "/playbooks", label: "Playbooks", icon: BookOpen },
-      { href: "/patterns", label: "Pattern Mining", icon: Boxes },
-      { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
+      { href: "/decompose", label: "Decompose", icon: Workflow, desc: "Turn a strategy thesis into initiatives → OKRs → tasks" },
+      { href: "/strategy-management", label: "Strategic Tracker", icon: ClipboardList, desc: "Track the KPIs, milestones, and risks of a strategy in flight" },
+      { href: "/drift", label: "Drift Detection", icon: Gauge, desc: "Is execution drifting from the strategy? Detect it and propose a replan" },
+      { href: "/kpi-library", label: "KPI Library", icon: Calculator, desc: "15 standard KPIs with definitions and formulas" },
+      { href: "/predictions", label: "Predictions", icon: TrendingUp, desc: "The ledger of every claim the platform made — record and resolve outcomes" },
+      { href: "/calibration", label: "Calibration", icon: Scale, desc: "How accurate has the platform been? Honest scoring of past predictions" },
+      { href: "/attribution", label: "Attribution", icon: Microscope, desc: "What actually caused an outcome — causal analysis with confounders" },
+      { href: "/playbooks", label: "Playbooks", icon: BookOpen, desc: "Winning moves promoted into reusable playbooks — only after outcomes prove them" },
+      { href: "/patterns", label: "Pattern Mining", icon: Boxes, desc: "Recurring patterns mined from past projects" },
+      { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck, desc: "Anti-hallucination audit — checks claims against their sources" },
     ],
   },
   {
     label: "Portfolio & Operations",
     items: [
-      { href: "/portfolio", label: "Portfolio Dashboard", icon: LayoutDashboard },
-      { href: "/briefing", label: "Briefing", icon: Newspaper },
-      { href: "/synergy", label: "Synergy Scout", icon: Combine },
-      { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
-      { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
-      { href: "/audit", label: "Audit Log", icon: Shield },
-      { href: "/usage", label: "Usage Events", icon: Activity },
-      { href: "/export", label: "Export", icon: Download },
-      { href: "/connectors", label: "Connectors", icon: Plug },
-      { href: "/mcp", label: "MCP Tools", icon: Cpu },
-      { href: "/manual", label: "User Manual", icon: BookText },
-      { href: "/users", label: "User Management", icon: UserCog },
+      { href: "/portfolio", label: "Portfolio Dashboard", icon: LayoutDashboard, desc: "Cross-company health, calibration, and open predictions (GP only)" },
+      { href: "/briefing", label: "Briefing", icon: Newspaper, desc: "A daily or weekly 1-page briefing built from recent signals" },
+      { href: "/synergy", label: "Synergy Scout", icon: Combine, desc: "Scan the portfolio for synergies across 9 axes (GP only)" },
+      { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical, desc: "Anonymized cross-company patterns — only when 3+ companies show them (GP only)" },
+      { href: "/cost", label: "Cost Dashboard", icon: DollarSign, desc: "AI spend per user, per model, per day" },
+      { href: "/audit", label: "Audit Log", icon: Shield, desc: "Who read what, when — every confidential access is recorded" },
+      { href: "/usage", label: "Usage Events", icon: Activity, desc: "Which features are actually being used" },
+      { href: "/export", label: "Export", icon: Download, desc: "Encrypted per-company data export (GP only)" },
+      { href: "/connectors", label: "Connectors", icon: Plug, desc: "Connect execution tools — Linear live; Notion/Jira coming" },
+      { href: "/mcp", label: "MCP Tools", icon: Cpu, desc: "The platform's research tools — web search, SEC filings, memory lookup" },
+      { href: "/manual", label: "User Manual", icon: BookText, desc: "The full guide to every feature, plus FAQ" },
+      { href: "/users", label: "User Management", icon: UserCog, desc: "Manage users and roles (admin only)" },
     ],
   },
 ];
@@ -358,6 +360,7 @@ export function PlatformLayout({
                   return (
                     <Link key={item.href} href={item.href}>
                       <a
+                        title={item.desc}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
                           "flex items-center gap-3 px-3 py-1.5 rounded-md text-sm mb-0.5 transition-colors duration-150 relative",

@@ -1,5 +1,7 @@
 import { ENV } from "./env";
 import { invokeAnthropic } from "./anthropic";
+import { invokeGoogle } from "./google";
+import { invokeOpenAiChat } from "./openaiChat";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -356,22 +358,46 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 /**
  * Provider dispatcher — the ONE completion entry point for the router (C3).
  *
- * provider === "anthropic" → invokeAnthropic, degrading to the forge on a
- * missing key or ANY failure (network, 4xx/5xx, overload, refusal) so a paid
- * provider outage can never break the app. The forge fallback uses
- * model: undefined (forge auto); the returned response.model tells the router
- * what actually ran, so degraded calls are visible in llm_call_log.
+ * Routes "anthropic" / "google" / "openai" to their direct provider modules,
+ * degrading to the forge on a missing key or ANY failure (network, 4xx/5xx,
+ * overload, refusal) so a paid-provider outage can never break the app. The
+ * forge fallback uses model: undefined (forge auto); the returned
+ * response.model tells the router what actually ran, so degraded calls are
+ * visible in llm_call_log. "manus_builtin" (and anything unknown) goes
+ * straight to the forge.
  */
+const DIRECT_PROVIDERS: Record<
+  string,
+  { hasKey: () => boolean; keyName: string; invoke: (p: InvokeParams) => Promise<InvokeResult> }
+> = {
+  anthropic: {
+    hasKey: () => Boolean(ENV.anthropicApiKey),
+    keyName: "ANTHROPIC_API_KEY",
+    invoke: invokeAnthropic,
+  },
+  google: {
+    hasKey: () => Boolean(ENV.geminiApiKey),
+    keyName: "GOOGLE_GEMINI_API_KEY",
+    invoke: invokeGoogle,
+  },
+  openai: {
+    hasKey: () => Boolean(ENV.openAiApiKey),
+    keyName: "OPENAI_API_KEY",
+    invoke: invokeOpenAiChat,
+  },
+};
+
 export async function invokeCompletion(params: InvokeParams): Promise<InvokeResult> {
-  if (params.provider === "anthropic") {
-    if (!ENV.anthropicApiKey) {
-      console.warn("[llm] ANTHROPIC_API_KEY missing — degrading to forge");
+  const direct = params.provider ? DIRECT_PROVIDERS[params.provider] : undefined;
+  if (direct) {
+    if (!direct.hasKey()) {
+      console.warn(`[llm] ${direct.keyName} missing — degrading to forge`);
       return invokeLLM({ ...params, model: undefined });
     }
     try {
-      return await invokeAnthropic(params);
+      return await direct.invoke(params);
     } catch (err) {
-      console.warn("[llm] Anthropic call failed — degrading to forge:", err);
+      console.warn(`[llm] ${params.provider} call failed — degrading to forge:`, err);
       return invokeLLM({ ...params, model: undefined });
     }
   }

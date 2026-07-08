@@ -574,12 +574,13 @@ export const MANUAL_SECTIONS: ManualSection[] = [
 export const FAQ_ITEMS: FaqItem[] = [
   {
     q: "Which AI models does Cairn use?",
-    a: "The right model for the right job. Complex planning and synthesis (diagnosis, research " +
-      "synthesis, red-team, war-games, decomposition, options) run on Claude Fable 5; fast " +
-      "extraction and structured output run on Claude Haiku; high-volume specialist fan-out and " +
-      "creative brainstorming run on the platform's built-in models. Assignments live in a config " +
-      "file, and if a provider is unavailable the call degrades gracefully to the built-in model — " +
-      "the app never breaks.",
+    a: "The right model for the right job, across three vendors. Complex planning and synthesis " +
+      "(diagnosis, research synthesis, red-team, war-games, decomposition, options) run on Claude " +
+      "Fable 5; fast extraction and structured output run on Claude Haiku; high-volume specialist " +
+      "fan-out and creative brainstorming run on Google Gemini; OpenAI powers embeddings and the " +
+      "opt-in realtime voice. Assignments live in one config file, and if any provider is " +
+      "unavailable the call degrades gracefully to the platform's built-in model — the app never " +
+      "breaks.",
   },
   {
     q: "Are my results saved if I navigate away?",

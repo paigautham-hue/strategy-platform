@@ -29,8 +29,8 @@ completion_providers:
     description: "Structured JSON output (prediction ledger, memory normalization)"
 
   creative:
-    provider: manus_builtin
-    model: auto
+    provider: google
+    model: gemini-2.5-flash        # Direct Gemini (falls back to forge on failure)
     max_tokens: 8192
     temperature: 0.7
     description: "Brainstorm mode, option generation (Phase 4)"
@@ -43,8 +43,8 @@ completion_providers:
     description: "Complex planning & synthesis: diagnosis, research synthesis, red-team, war-game adjudication, decomposition"
 
   worker:
-    provider: manus_builtin
-    model: auto                    # Bulk fan-out stays on the cheap forge path
+    provider: google
+    model: gemini-2.5-flash        # Direct Gemini for cheap bulk fan-out (falls back to forge)
     max_tokens: 4096
     temperature: 0.3
     description: "High-volume specialist fan-out (research specialists, frameworks)"

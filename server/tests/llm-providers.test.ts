@@ -263,6 +263,110 @@ describe("invokeCompletion fallback", () => {
   });
 });
 
+// ─── 3b. Google / OpenAI payload builders ─────────────────────────────────────
+
+describe("buildGooglePayload", () => {
+  it("hoists system messages into systemInstruction and maps roles", async () => {
+    const { buildGooglePayload } = await import("../_core/google");
+    const payload = buildGooglePayload({
+      messages: [
+        { role: "system", content: "You are an analyst." },
+        { role: "user", content: "Analyse." },
+        { role: "assistant", content: "OK." },
+      ],
+      model: "gemini-2.5-flash",
+      temperature: 0.3,
+      maxTokens: 4096,
+    });
+    const sys = payload.systemInstruction as { parts: Array<{ text: string }> };
+    expect(sys.parts[0].text).toContain("You are an analyst.");
+    const contents = payload.contents as Array<{ role: string }>;
+    expect(contents.map((c) => c.role)).toEqual(["user", "model"]);
+    const cfg = payload.generationConfig as Record<string, unknown>;
+    expect(cfg.temperature).toBe(0.3);
+    expect(cfg.maxOutputTokens).toBe(4096);
+  });
+
+  it("sets responseMimeType + schema instruction for json_schema", async () => {
+    const { buildGooglePayload } = await import("../_core/google");
+    const payload = buildGooglePayload({
+      messages: [{ role: "user", content: "go" }],
+      response_format: {
+        type: "json_schema",
+        json_schema: { name: "x", schema: { type: "object" } },
+      },
+    });
+    const cfg = payload.generationConfig as Record<string, unknown>;
+    expect(cfg.responseMimeType).toBe("application/json");
+    const sys = payload.systemInstruction as { parts: Array<{ text: string }> };
+    expect(sys.parts[0].text).toContain("ONLY a single JSON object");
+  });
+});
+
+describe("buildOpenAiPayload", () => {
+  it("forwards params and uses json_object + instruction for schemas", async () => {
+    const { buildOpenAiPayload } = await import("../_core/openaiChat");
+    const payload = buildOpenAiPayload({
+      messages: [
+        { role: "system", content: "sys" },
+        { role: "user", content: "go" },
+      ],
+      model: "gpt-4o-mini",
+      temperature: 0.1,
+      maxTokens: 2048,
+      response_format: {
+        type: "json_schema",
+        json_schema: { name: "x", schema: { type: "object" } },
+      },
+    });
+    expect(payload.model).toBe("gpt-4o-mini");
+    expect(payload.temperature).toBe(0.1);
+    expect(payload.max_tokens).toBe(2048);
+    expect(payload.response_format).toEqual({ type: "json_object" });
+    const messages = payload.messages as Array<{ role: string; content: string }>;
+    expect(messages[0].role).toBe("system");
+    expect(messages[0].content).toContain("ONLY a single JSON object");
+  });
+});
+
+describe("invokeCompletion google fallback", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.stubEnv("BUILT_IN_FORGE_API_KEY", "forge-test-key");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("degrades to forge when the Google key is missing", async () => {
+    vi.stubEnv("GOOGLE_GEMINI_API_KEY", "");
+    vi.stubEnv("GOOGLE_API_KEY", "");
+    vi.stubEnv("GEMINI_API_KEY", "");
+    const forgeResponse = {
+      id: "f",
+      created: 0,
+      model: "gemini-2.5-flash",
+      choices: [{ index: 0, message: { role: "assistant", content: "ok" }, finish_reason: "stop" }],
+    };
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      expect(String(url)).toContain("forge.manus.im");
+      return new Response(JSON.stringify(forgeResponse), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { invokeCompletion } = await import("../_core/llm");
+    const result = await invokeCompletion({
+      provider: "google",
+      model: "gemini-2.5-flash",
+      messages: [{ role: "user", content: "hi" }],
+    });
+    expect(result.model).toBe("gemini-2.5-flash");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
 // ─── 4. Per-model pricing ─────────────────────────────────────────────────────
 
 describe("estimateCost per-model pricing", () => {
@@ -304,10 +408,10 @@ describe("models.yaml task tiers", () => {
     expect(getCompletionConfig("structured").model).toBe("claude-haiku-4-5");
   });
 
-  it("worker stays on the forge", () => {
-    const cfg = getCompletionConfig("worker");
-    expect(cfg.provider).toBe("manus_builtin");
-    expect(cfg.model).toBe("auto");
+  it("worker and creative route to direct Gemini", () => {
+    expect(getCompletionConfig("worker").provider).toBe("google");
+    expect(getCompletionConfig("worker").model).toBe("gemini-2.5-flash");
+    expect(getCompletionConfig("creative").provider).toBe("google");
   });
 
   it("planner budget envelope is large enough for Fable pricing", () => {

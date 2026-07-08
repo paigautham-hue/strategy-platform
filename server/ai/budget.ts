@@ -106,6 +106,7 @@ const PRICING_PER_MTOK: Record<string, { input: number; output: number }> = {
   "claude-fable-5": { input: 10.0, output: 50.0 },
   "claude-haiku-4-5": { input: 1.0, output: 5.0 },
   "gemini-2.5-flash": { input: 0.30, output: 2.50 },
+  "gpt-4o-mini": { input: 0.15, output: 0.60 },
   "text-embedding-3-small": { input: 0.02, output: 0 },
   "text-embedding-3-large": { input: 0.13, output: 0 },
   default: { input: 5.0, output: 15.0 },
