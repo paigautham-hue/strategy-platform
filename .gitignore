@@ -7,6 +7,9 @@ dist/
 build/
 *.dist
 
+# Local working outputs (session artifacts, not source)
+outputs/
+
 # Environment variables & secrets
 .project-config.json
 .env
