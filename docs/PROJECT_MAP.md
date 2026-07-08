@@ -67,14 +67,14 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 | History | `/history` | HistoryPage | `analysisRuns` | services/analysis-runs.ts | ✅ | Every saved reasoning run (all kinds) — filter, revisit, print/PDF export. Per-surface "Past runs" panels via components/AnalysisHistory.tsx |
 | Companies | `/companies` | Companies | `company` | services/access.ts | ✅ | List/create portcos |
 | Onboard Company | `/onboarding` | Onboarding | `company`,`ingest` | services/ingest-pipeline.ts | ✅ | Wizard: create → seed memory → ingest (operator+) |
-| Projects | `/projects` | Projects | `project` | — | ✅ | Strategy projects within a company |
+| Projects | `/projects` | Projects | `project`, `session` | — | ✅ | Strategy projects within a company; click a project for detail (sessions + quick actions) |
 
 ### Knowledge & memory
 | Feature | Route | Page | Router | Server files | Status | Notes |
 |---|---|---|---|---|---|---|
 | Memory | `/memory` | Memory | `memory` | services/memory.ts, memory-search.ts, memory-layers.ts, retrieval/* | ✅ | Bi-temporal claim store + hybrid retrieval |
 | Connections | `/connections` | EntityGraph | `entityGraph` | services/entity-graph.ts, retrieval/graph.ts | ✅ | Multi-hop entity graph (HippoRAG) |
-| Ingest | `/ingest` | Ingest | `ingest` | services/ingest-pipeline.ts, ingest/*, extraction/* | 🟡 | text/md/html/url/PDF/DOCX live; audio/video/image pending |
+| Ingest | `/ingest` | Ingest | `ingest` | services/ingest-pipeline.ts, ingest/*, extraction/*; client lib/file-extract.ts | 🟡 | text/md/html/url + drag-&-drop PDF/Word/PowerPoint/Excel/CSV (client-side extraction); audio/video/image pending |
 | Voice Intake | `/voice-intake` | VoiceIntake | `voice` | services/voice-intent.ts, _core/voiceTranscription.ts | ✅ | One-shot STT → intent parse |
 | 🆕 Vision Studio | `/vision` | Vision | `vision` | agents/vision.ts; _core/imageGeneration.ts | ✅ | Vision-in (extract from slide/whiteboard/chart image, multimodal via S3 URL) + image-out (generateImage) |
 

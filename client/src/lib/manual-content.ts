@@ -583,6 +583,12 @@ export const FAQ_ITEMS: FaqItem[] = [
       "breaks.",
   },
   {
+    q: "What file types can I ingest?",
+    a: "Drag and drop (or click to browse) PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx/.xls/.csv), " +
+      "Markdown, and plain text — up to 20 MB. Text is extracted in your browser, then key claims are " +
+      "pulled into the company's memory. You can also paste text directly or ingest a web URL.",
+  },
+  {
     q: "Are my results saved if I navigate away?",
     a: "Yes. Every reasoning run is saved automatically and listed on the History page and in the " +
       "'Past runs' panel on each surface. Any saved run can be exported as a print-ready document.",

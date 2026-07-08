@@ -35,12 +35,10 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
   const [sourceUrl, setSourceUrl] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  async function onFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-picking the same file
-    if (!file) return;
+  async function loadFile(file: File) {
     setFileLoading(true);
     try {
       const result = await extractTextFromFile(file);
@@ -53,6 +51,23 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
     } finally {
       setFileLoading(false);
     }
+  }
+
+  async function onFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (file) await loadFile(file);
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragActive(false);
+    const files = Array.from(e.dataTransfer.files ?? []);
+    if (files.length === 0) return;
+    if (files.length > 1) {
+      toast.info("One document at a time — loading the first file; drop the others after ingesting.");
+    }
+    void loadFile(files[0]);
   }
 
   const ingestMut = trpc.ingest.document.useMutation({
@@ -137,27 +152,41 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
             )}
           </div>
 
-          {/* File upload — extracts PDF / DOCX / text in-browser into the content box */}
-          <div className="flex items-center gap-3">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ACCEPTED_FILE_TYPES}
-              onChange={onFilePicked}
-              className="hidden"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="font-sans gap-2"
-              disabled={fileLoading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload className="h-4 w-4" />
-              {fileLoading ? "Reading file…" : "Upload PDF / DOCX / text"}
-            </Button>
+          {/* File drop zone — extracts PDF / Word / PowerPoint / Excel / text in-browser */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_FILE_TYPES}
+            onChange={onFilePicked}
+            className="hidden"
+          />
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={onDrop}
+            className={`rounded-lg border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
+              dragActive
+                ? "border-gold bg-gold/5"
+                : "border-border/60 bg-secondary/30 hover:border-gold/40"
+            }`}
+          >
+            <Upload className={`h-6 w-6 mx-auto mb-2 ${dragActive ? "text-gold" : "text-muted-foreground"}`} />
+            <p className="text-sm font-sans text-foreground">
+              {fileLoading
+                ? "Reading file…"
+                : dragActive
+                  ? "Drop it here"
+                  : "Drag & drop a file here, or click to browse"}
+            </p>
+            <p className="text-xs text-muted-foreground font-sans mt-1">
+              PDF · Word · PowerPoint · Excel/CSV · Markdown · Text (max 20 MB)
+            </p>
             {fileName && (
-              <Badge variant="secondary" className="text-[10px]">loaded: {fileName}</Badge>
+              <Badge variant="secondary" className="text-[10px] mt-2">loaded: {fileName}</Badge>
             )}
           </div>
 
