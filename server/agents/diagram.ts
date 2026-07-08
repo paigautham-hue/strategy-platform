@@ -297,6 +297,7 @@ export async function generateDiagram(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         { role: "system", content: SYSTEM[diagramType] },
         { role: "user", content: user },

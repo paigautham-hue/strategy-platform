@@ -60,6 +60,7 @@ import {
   LayoutDashboard,
   RadioTower,
   Radio,
+  History as HistoryIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -164,8 +165,9 @@ function VoiceLaunchButton({ activeCompanyId }: { activeCompanyId: number | null
 }
 
 // ─── Navigation groups ────────────────────────────────────────────────────────
-// Grouped to match the platform's own conceptual structure (see the in-app
-// manual) — a flat list of ~38 destinations is impossible to scan.
+// Grouped by what the user is trying to DO (ask, simulate, execute, …), not by
+// the platform's internal architecture. Groups are collapsible; only the group
+// containing the current page starts open, so ~45 destinations stay scannable.
 
 interface NavItem {
   href: string;
@@ -176,101 +178,79 @@ interface NavItem {
 const NAV_GROUPS: { label: string | null; items: NavItem[] }[] = [
   {
     label: null,
-    items: [{ href: "/", label: "Overview", icon: BarChart3 }],
+    items: [
+      { href: "/", label: "Overview", icon: BarChart3 },
+      { href: "/history", label: "History", icon: HistoryIcon },
+    ],
   },
   {
-    label: "Companies",
+    label: "Companies & Knowledge",
     items: [
       { href: "/companies", label: "Companies", icon: Building2 },
       { href: "/onboarding", label: "Onboard Company", icon: Rocket },
       { href: "/projects", label: "Projects", icon: FolderOpen },
-    ],
-  },
-  {
-    label: "Knowledge",
-    items: [
       { href: "/memory", label: "Memory", icon: Brain },
       { href: "/connections", label: "Connections", icon: Share2 },
       { href: "/ingest", label: "Ingest", icon: FileInput },
       { href: "/vision", label: "Vision Studio", icon: Eye },
-      { href: "/voice-intake", label: "Voice Intake", icon: Mic },
     ],
   },
   {
-    label: "Strategy Intake",
+    label: "Ask & Analyze",
     items: [
-      { href: "/discovery", label: "Discovery (Digital Twin)", icon: Compass },
+      { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
+      { href: "/research", label: "Research", icon: Radar },
+      { href: "/live-research", label: "Live Research", icon: RadioTower },
+      { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
+      { href: "/options", label: "Options", icon: ListChecks },
+      { href: "/red-team", label: "Red Team", icon: Swords },
+      { href: "/contradictions", label: "Contradictions", icon: GitFork },
+      { href: "/diagrams", label: "Diagrams", icon: PieChart },
       { href: "/brainstorm", label: "Brainstorm", icon: Sparkles },
       { href: "/memo", label: "Memo Dictation", icon: FileText },
+      { href: "/voice-intake", label: "Voice Intake", icon: Mic },
+      { href: "/discovery", label: "Discovery (Digital Twin)", icon: Compass },
       { href: "/personas", label: "Advisory Personas", icon: Users },
       { href: "/strategy-artifacts", label: "Strategy Artifacts", icon: Telescope },
     ],
   },
   {
-    label: "Reasoning",
-    items: [
-      { href: "/diagnose", label: "Diagnose", icon: Stethoscope },
-      { href: "/research", label: "Research", icon: Radar },
-      { href: "/live-research", label: "Live Research", icon: RadioTower },
-      { href: "/contradictions", label: "Contradictions", icon: GitFork },
-      { href: "/frameworks", label: "Frameworks", icon: Grid3x3 },
-      { href: "/diagrams", label: "Diagrams", icon: PieChart },
-      { href: "/options", label: "Options", icon: ListChecks },
-      { href: "/red-team", label: "Red Team", icon: Swords },
-    ],
-  },
-  {
-    label: "Simulation",
+    label: "Simulate & Stress-Test",
     items: [
       { href: "/war-game", label: "War-Game", icon: Crosshair },
       { href: "/cross-war-game", label: "Cross-Co War-Game", icon: Network },
       { href: "/simulation", label: "Financial Simulation", icon: Dices },
+      { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
     ],
   },
   {
-    label: "Execution",
+    label: "Execute & Learn",
     items: [
       { href: "/decompose", label: "Decompose", icon: Workflow },
-      { href: "/pre-mortem", label: "Pre-Mortem", icon: ShieldAlert },
+      { href: "/strategy-management", label: "Strategic Tracker", icon: ClipboardList },
       { href: "/drift", label: "Drift Detection", icon: Gauge },
       { href: "/kpi-library", label: "KPI Library", icon: Calculator },
-      { href: "/strategy-management", label: "Strategic Tracker", icon: ClipboardList },
-    ],
-  },
-  {
-    label: "Learning Loop",
-    items: [
       { href: "/predictions", label: "Predictions", icon: TrendingUp },
       { href: "/calibration", label: "Calibration", icon: Scale },
       { href: "/attribution", label: "Attribution", icon: Microscope },
-      { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
       { href: "/playbooks", label: "Playbooks", icon: BookOpen },
       { href: "/patterns", label: "Pattern Mining", icon: Boxes },
+      { href: "/compliance", label: "Constitutional Audit", icon: ShieldCheck },
     ],
   },
   {
-    label: "Portfolio",
+    label: "Portfolio & Operations",
     items: [
       { href: "/portfolio", label: "Portfolio Dashboard", icon: LayoutDashboard },
+      { href: "/briefing", label: "Briefing", icon: Newspaper },
       { href: "/synergy", label: "Synergy Scout", icon: Combine },
       { href: "/distillation", label: "Pattern Distillation", icon: FlaskConical },
-      { href: "/briefing", label: "Briefing", icon: Newspaper },
-    ],
-  },
-  {
-    label: "Operations",
-    items: [
       { href: "/cost", label: "Cost Dashboard", icon: DollarSign },
       { href: "/audit", label: "Audit Log", icon: Shield },
       { href: "/usage", label: "Usage Events", icon: Activity },
       { href: "/export", label: "Export", icon: Download },
       { href: "/connectors", label: "Connectors", icon: Plug },
       { href: "/mcp", label: "MCP Tools", icon: Cpu },
-    ],
-  },
-  {
-    label: "Help & Admin",
-    items: [
       { href: "/manual", label: "User Manual", icon: BookText },
       { href: "/users", label: "User Management", icon: UserCog },
     ],
@@ -297,6 +277,19 @@ export function PlatformLayout({
   const [location] = useLocation();
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Collapsible nav groups: closed by default, except the group holding the
+  // current page. A manual toggle overrides until the next toggle.
+  const [toggledGroups, setToggledGroups] = useState<Record<string, boolean>>({});
+  const isGroupOpen = (group: { label: string | null; items: NavItem[] }) => {
+    if (group.label === null) return true;
+    return (
+      toggledGroups[group.label] ?? group.items.some((item) => item.href === location)
+    );
+  };
+  const toggleGroup = (group: { label: string | null; items: NavItem[] }) => {
+    if (group.label === null) return;
+    setToggledGroups((prev) => ({ ...prev, [group.label as string]: !isGroupOpen(group) }));
+  };
 
   const canAccess = (href: string) => {
     if (!user) return false;
@@ -345,14 +338,21 @@ export function PlatformLayout({
           {NAV_GROUPS.map((group, gi) => {
             const items = group.items.filter((item) => canAccess(item.href));
             if (items.length === 0) return null;
+            const open = isGroupOpen(group);
             return (
               <div key={gi} className={cn(gi > 0 && "mt-3")}>
                 {group.label && (
-                  <p className="px-3 pb-1 pt-1 text-[10px] font-sans font-medium uppercase tracking-wider text-muted-foreground/50">
-                    {group.label}
-                  </p>
+                  <button
+                    onClick={() => toggleGroup(group)}
+                    className="w-full flex items-center justify-between px-3 pb-1 pt-1 text-[10px] font-sans font-medium uppercase tracking-wider text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  >
+                    <span>{group.label}</span>
+                    <ChevronDown
+                      className={cn("h-3 w-3 transition-transform", !open && "-rotate-90")}
+                    />
+                  </button>
                 )}
-                {items.map((item) => {
+                {open && items.map((item) => {
                   const Icon = item.icon;
                   const isActive = location === item.href;
                   return (

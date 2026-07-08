@@ -11,11 +11,14 @@ import yaml from "js-yaml";
 
 // ─── YAML shape ───────────────────────────────────────────────────────────────
 
-interface CompletionProviderConfig {
+export type TaskName = "default" | "extraction" | "structured" | "creative" | "planner" | "worker";
+
+export interface CompletionProviderConfig {
   provider: string;
   model: string;
   max_tokens: number;
-  temperature: number;
+  /** Optional — omitted for models that reject sampling params (e.g. claude-fable-5). */
+  temperature?: number;
   description: string;
 }
 
@@ -64,6 +67,9 @@ function loadConfig(): ModelsYaml {
         structured: { provider: "manus_builtin", model: "auto", max_tokens: 2048, temperature: 0.0, description: "fallback" },
         extraction: { provider: "manus_builtin", model: "auto", max_tokens: 2048, temperature: 0.1, description: "fallback" },
         creative: { provider: "manus_builtin", model: "auto", max_tokens: 8192, temperature: 0.7, description: "fallback" },
+        // A broken models.yaml must never route to a paid provider by accident.
+        planner: { provider: "manus_builtin", model: "auto", max_tokens: 8192, temperature: 0.3, description: "fallback" },
+        worker: { provider: "manus_builtin", model: "auto", max_tokens: 4096, temperature: 0.3, description: "fallback" },
       },
       embedding_providers: {
         active: "openai-3-small",
@@ -74,6 +80,7 @@ function loadConfig(): ModelsYaml {
         embedding: { max_input_tokens: 2000, max_output_tokens: 0, soft_cap_usd: 0.01, estimated_cost_usd: 0.002 },
         structured: { max_input_tokens: 4000, max_output_tokens: 2000, soft_cap_usd: 0.08, estimated_cost_usd: 0.04 },
         extraction: { max_input_tokens: 4000, max_output_tokens: 1000, soft_cap_usd: 0.05, estimated_cost_usd: 0.02 },
+        planner: { max_input_tokens: 16000, max_output_tokens: 8000, soft_cap_usd: 0.75, estimated_cost_usd: 0.40 },
       },
     };
   }
@@ -82,7 +89,7 @@ function loadConfig(): ModelsYaml {
 // ─── Public accessors ─────────────────────────────────────────────────────────
 
 /** Get the completion provider config for a given task type. */
-export function getCompletionConfig(task: "default" | "extraction" | "structured" | "creative" = "default"): CompletionProviderConfig {
+export function getCompletionConfig(task: TaskName = "default"): CompletionProviderConfig {
   const cfg = loadConfig();
   return cfg.completion_providers[task] ?? cfg.completion_providers["default"];
 }
@@ -99,7 +106,7 @@ export function getActiveEmbeddingConfig(): { key: string; config: EmbeddingProv
 }
 
 /** Get budget defaults for a given task type. */
-export function getBudgetDefaults(task: "completion" | "embedding" | "structured" | "extraction" = "completion") {
+export function getBudgetDefaults(task: "completion" | "embedding" | "structured" | "extraction" | "planner" = "completion") {
   const cfg = loadConfig();
   return cfg.budget_defaults[task] ?? cfg.budget_defaults["completion"];
 }

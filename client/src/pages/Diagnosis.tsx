@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Stethoscope, Sparkles, HelpCircle, Compass } from "lucide-react";
 import { toast } from "sonner";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface DiagnosisProps {
   activeCompanyId: number | null;
@@ -159,6 +160,8 @@ export default function Diagnosis({ activeCompanyId }: DiagnosisProps) {
           </CardContent>
         </Card>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="diagnosis" />
     </div>
   );
 }

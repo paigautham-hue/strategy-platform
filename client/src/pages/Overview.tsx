@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import {
   Brain,
   TrendingUp,
@@ -83,6 +87,96 @@ function StatCard({
   return content;
 }
 
+// ─── Ask Cairn — the question-first entry point ───────────────────────────────
+// Type a strategic question, get it diagnosed, and follow the suggested next
+// step — no sidebar spelunking needed for the core loop.
+
+const NEXT_STEPS = [
+  { href: "/research", label: "Research it", icon: Radar, desc: "Dispatch the specialist research mesh" },
+  { href: "/frameworks", label: "Apply frameworks", icon: ListChecks, desc: "Run the diagnosis-selected frameworks" },
+  { href: "/options", label: "Generate options", icon: Workflow, desc: "Generate and score strategic options" },
+];
+
+function AskCairn({ companyId }: { companyId: number }) {
+  const [question, setQuestion] = useState("");
+  const diagnoseMut = trpc.diagnosis.diagnose.useMutation({
+    onError: (e) => toast.error(e.message),
+  });
+  const d = diagnoseMut.data;
+
+  return (
+    <Card className="card-glass border-gold/30">
+      <CardHeader className="pb-3">
+        <CardTitle className="font-heading text-base flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-gold" /> Ask Cairn
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Textarea
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder='Ask any strategic question — e.g. "Should we expand into the German mid-market?"'
+          className="bg-secondary/50 border-border/60 min-h-[70px] font-body"
+          rows={2}
+        />
+        <Button
+          className="w-full gradient-gold text-background font-sans gap-2"
+          disabled={!question.trim() || diagnoseMut.isPending}
+          onClick={() => diagnoseMut.mutate({ companyId, question: question.trim() })}
+        >
+          <Stethoscope className="h-4 w-4" />
+          {diagnoseMut.isPending ? "Diagnosing…" : "Diagnose the question"}
+        </Button>
+
+        {d && (
+          <div className="space-y-3 pt-1">
+            <div className="p-3 rounded-md bg-secondary/40 border border-border/40 space-y-1">
+              <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
+                The real question
+              </p>
+              <p className="text-sm text-foreground font-body leading-relaxed">
+                {d.reframedQuestion}
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <Badge className="text-[10px] bg-gold/10 text-gold border-gold/20">
+                  {d.questionType}
+                </Badge>
+                <Badge variant="outline" className="text-[10px]">
+                  confidence: {d.confidence}
+                </Badge>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider mb-1.5">
+                Next step
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {NEXT_STEPS.map((step) => {
+                  const Icon = step.icon;
+                  return (
+                    <Link key={step.href} href={step.href}>
+                      <a className="flex items-start gap-2.5 p-3 rounded-md bg-secondary/40 border border-border/40 hover:border-gold/30 transition-colors group">
+                        <Icon className="h-4 w-4 text-gold shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-sans text-foreground group-hover:text-gold transition-colors">
+                            {step.label}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground font-body">{step.desc}</p>
+                        </div>
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-gold transition-colors shrink-0 ml-auto mt-1" />
+                      </a>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Overview({ activeCompanyId }: OverviewProps) {
   const { user } = useAuth();
   const { data: companies, isLoading: loadingCo } = trpc.company.list.useQuery();
@@ -158,6 +252,9 @@ export default function Overview({ activeCompanyId }: OverviewProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Ask Cairn — question-first entry to the reasoning loop */}
+      {activeCompanyId && <AskCairn companyId={activeCompanyId} />}
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

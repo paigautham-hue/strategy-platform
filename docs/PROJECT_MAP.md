@@ -63,7 +63,8 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 ### Companies & workspace
 | Feature | Route | Page | Router | Server files | Status | Notes |
 |---|---|---|---|---|---|---|
-| Overview | `/` | Overview | (company, cost, memory) | — | ✅ | At-a-glance health for the active company + platform |
+| Overview | `/` | Overview | (company, cost, memory, diagnosis) | — | ✅ | At-a-glance health + **Ask Cairn** question-first entry (diagnose → suggested next step) |
+| History | `/history` | HistoryPage | `analysisRuns` | services/analysis-runs.ts | ✅ | Every saved reasoning run (all kinds) — filter, revisit, print/PDF export. Per-surface "Past runs" panels via components/AnalysisHistory.tsx |
 | Companies | `/companies` | Companies | `company` | services/access.ts | ✅ | List/create portcos |
 | Onboard Company | `/onboarding` | Onboarding | `company`,`ingest` | services/ingest-pipeline.ts | ✅ | Wizard: create → seed memory → ingest (operator+) |
 | Projects | `/projects` | Projects | `project` | — | ✅ | Strategy projects within a company |
@@ -150,7 +151,9 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 
 | System | Files | Notes |
 |---|---|---|
-| LLM router (choke-point) | `server/ai/router.ts` + budget.ts, redactor.ts, models-config.ts, models.yaml | The ONLY place LLM/embedding calls happen (C3). Redaction (C5) + budget (C7) + cost log + AJV structured validation. |
+| LLM router (choke-point) | `server/ai/router.ts` + budget.ts, redactor.ts, models-config.ts, models.yaml | The ONLY place LLM/embedding calls happen (C3). Redaction (C5) + per-call AND per-user/day budget (C7) + per-model cost log + AJV structured validation. |
+| Multi-provider model routing | `server/_core/llm.ts` (`invokeCompletion` dispatcher), `server/_core/anthropic.ts`, `server/ai/models.yaml` | Right model for right job: `planner` tier → Claude Fable 5 (diagnosis, research synthesis, red-team, war-game, decompose, options, pre-mortem); `extraction`/`structured` → Claude Haiku 4.5; `worker`/`creative` → forge auto. Task→tier is a one-line `task:` label per agent call site; missing `ANTHROPIC_API_KEY` or any provider failure degrades to forge (never breaks). Actual model logged in `llm_call_log`. |
+| Analysis-run history | `server/services/analysis-runs.ts`, drizzle `analysis_run`, `client/src/components/AnalysisHistory.tsx` | Every reasoning result persisted (best-effort) + listable per company + print/PDF export. |
 | MCP gateway | `server/ai/mcp-gateway.ts` | The ONLY place tools are dispatched (C3). |
 | Memory engine | `server/services/memory*.ts`, `retrieval/{cosine,rrf,mmr,graph}.ts` | Bi-temporal, dimensional, hybrid retrieval (C19–C24). |
 | Prediction ledger | `server/services/predictions.ts`, drizzle `prediction`/`outcome` | Every shipped claim recorded (C2); real vs synthetic strata (C25). |

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Radar, Sparkles, Users, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface ResearchProps {
   activeCompanyId: number | null;
@@ -167,6 +168,8 @@ export default function Research({ activeCompanyId }: ResearchProps) {
           </div>
         </>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="research" />
     </div>
   );
 }

@@ -135,6 +135,7 @@ export async function buildBriefing(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         {
           role: "system",

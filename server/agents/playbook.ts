@@ -275,6 +275,7 @@ export async function draftPlaybook(
 ): Promise<Playbook> {
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         { role: "system", content: SYSTEM_INSTRUCTION },
         {

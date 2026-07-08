@@ -29,6 +29,13 @@
       "when": 1782793168307,
       "tag": "0003_light_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1783504827204,
+      "tag": "0004_secret_chat",
+      "breakpoints": true
     }
   ]
 }

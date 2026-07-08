@@ -220,6 +220,7 @@ export async function extractBrainstormCaptures(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "creative",
       messages: [
         {
           role: "system",
@@ -271,6 +272,7 @@ export async function generateRecap(
 ): Promise<BrainstormRecap> {
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "creative",
       messages: [
         {
           role: "system",

@@ -97,15 +97,41 @@ export function checkBudget(
 }
 
 /**
- * Estimate cost from token counts.
- * Uses conservative pricing for the Manus built-in LLM.
- * Update these rates when actual pricing is known.
+ * Per-model pricing in USD per 1M tokens. Resolved by longest-prefix match so
+ * dated snapshots (claude-haiku-4-5-20251001) and provider-prefixed labels
+ * still hit the right row. "default" preserves the original conservative
+ * GPT-4o-class rate for unknown models and legacy call sites.
  */
-export function estimateCost(inputTokens: number, outputTokens: number): number {
-  // Conservative estimates (GPT-4o class pricing)
-  const INPUT_RATE = 0.000005;  // $5 per 1M input tokens
-  const OUTPUT_RATE = 0.000015; // $15 per 1M output tokens
-  return inputTokens * INPUT_RATE + outputTokens * OUTPUT_RATE;
+const PRICING_PER_MTOK: Record<string, { input: number; output: number }> = {
+  "claude-fable-5": { input: 10.0, output: 50.0 },
+  "claude-haiku-4-5": { input: 1.0, output: 5.0 },
+  "gemini-2.5-flash": { input: 0.30, output: 2.50 },
+  "text-embedding-3-small": { input: 0.02, output: 0 },
+  "text-embedding-3-large": { input: 0.13, output: 0 },
+  default: { input: 5.0, output: 15.0 },
+};
+
+function resolvePricing(model?: string): { input: number; output: number } {
+  if (model) {
+    let bestKey = "";
+    for (const key of Object.keys(PRICING_PER_MTOK)) {
+      if (key !== "default" && model.includes(key) && key.length > bestKey.length) {
+        bestKey = key;
+      }
+    }
+    if (bestKey) return PRICING_PER_MTOK[bestKey];
+  }
+  return PRICING_PER_MTOK["default"];
+}
+
+/**
+ * Estimate cost from token counts. When a model is provided, uses its actual
+ * pricing; otherwise falls back to the conservative default rate (previous
+ * behavior — existing call sites without a model argument are unaffected).
+ */
+export function estimateCost(inputTokens: number, outputTokens: number, model?: string): number {
+  const rate = resolvePricing(model);
+  return (inputTokens * rate.input + outputTokens * rate.output) / 1_000_000;
 }
 
 /**

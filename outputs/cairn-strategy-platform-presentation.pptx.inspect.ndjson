@@ -1,0 +1,584 @@
+{"kind":"deck","id":"pr/dgnfz7","name":"Deck"}
+{"kind":"layout","layoutId":"ae163ffc-3ada-4635-9dfc-534be8abd340","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"7cccbd9f-d270-49e3-ae57-e58e96a47f0d","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/0gf51k","slide":1,"title":"CAIRN","textShapes":5}
+{"kind":"shape","id":"sh/xs72x4na","slide":1,"bbox":[0,0,700,720]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":1,"text":"CAIRN","textPreview":"CAIRN","textChars":5,"textLines":1,"bbox":[54,60,500,80]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":1,"text":"The strategy intelligence operating system","textPreview":"The strategy intelligence operating system","textChars":42,"textLines":1,"bbox":[58,152,560,72]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":1,"text":"Private multi-company AI strategy platform where intake, reasoning, simulation, execution, memory, prediction, and calibration compound over time.","textPreview":"Private multi-company AI strategy platform where intake, reasoning, simulation, execution, memory, prediction, and calibration compound o...","textChars":146,"textLines":1,"bbox":[58,254,540,120]}
+{"kind":"shape","id":"sh/1gvy90je","slide":1,"bbox":[58,414,440,1]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":1,"text":"Built from local repo study - docs, routes, schema, agents, services, tests, and built UI bundle.","textPreview":"Built from local repo study - docs, routes, schema, agents, services, tests, and built UI bundle.","textChars":97,"textLines":1,"bbox":[58,444,520,60]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":1,"text":"June 30, 2026","textPreview":"June 30, 2026","textChars":13,"textLines":1,"bbox":[58,650,220,24]}
+{"kind":"image","id":"im/vixczed8","slide":1,"name":"","geometry":"roundRect","alt":"Cairn branded login screen","bbox":[700,0,580,720]}
+{"kind":"notes","id":"nt/0gf51k","slide":1,"text":""}
+{"kind":"slide","id":"sl/tlotyg","slide":2,"title":"EXECUTIVE TAKE","textShapes":13}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":2,"text":"EXECUTIVE TAKE","textPreview":"EXECUTIVE TAKE","textChars":14,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":2,"text":"What the app is","textPreview":"What the app is","textChars":15,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/psfil0rq","slide":2,"bbox":[42,132,1196,1]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":2,"text":"Cairn is not a chat wrapper. It is a governed strategy brain for an investor and portfolio companies: every claim is scoped, every model call is routed, every strategic assertion can become a prediction, and every outcome can feed calibration.","textPreview":"Cairn is not a chat wrapper. It is a governed strategy brain for an investor and portfolio companies: every claim is scoped, every model ...","textChars":243,"textLines":1,"bbox":[42,166,1110,86]}
+{"kind":"shape","id":"sh/7adsji5s","slide":2,"bbox":[42,298,270,250]}
+{"kind":"textbox","id":"sh/wval87ed","slide":2,"text":"50+","textPreview":"50+","textChars":3,"textLines":1,"bbox":[66,322,222,64]}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":2,"text":"React page surfaces across company workspace, knowledge, intake, reasoning, simulation, execution, learning, portfolio, operations, help and admin.","textPreview":"React page surfaces across company workspace, knowledge, intake, reasoning, simulation, execution, learning, portfolio, operations, help ...","textChars":147,"textLines":1,"bbox":[66,400,222,138]}
+{"kind":"shape","id":"sh/eloj2t83","slide":2,"bbox":[351,298,270,250]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":2,"text":"40+","textPreview":"40+","textChars":3,"textLines":1,"bbox":[375,322,222,64]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":2,"text":"tRPC router groups exposing a broad typed API surface from memory and MCP tools to connectors and simulations.","textPreview":"tRPC router groups exposing a broad typed API surface from memory and MCP tools to connectors and simulations.","textChars":110,"textLines":1,"bbox":[375,400,222,138]}
+{"kind":"shape","id":"sh/qxs72x4n","slide":2,"bbox":[660,298,270,250]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":2,"text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[684,322,222,64]}
+{"kind":"textbox","id":"sh/83itgfml","slide":2,"text":"Drizzle/MySQL tables covering tenants, companies, sessions, memory, predictions, audit, export, connectors, digital twin and strategy tracking.","textPreview":"Drizzle/MySQL tables covering tenants, companies, sessions, memory, predictions, audit, export, connectors, digital twin and strategy tra...","textChars":143,"textLines":1,"bbox":[684,400,222,138]}
+{"kind":"shape","id":"sh/fu18jqh0","slide":2,"bbox":[969,298,270,250]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":2,"text":"557","textPreview":"557","textChars":3,"textLines":1,"bbox":[993,322,222,64]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":2,"text":"Tests reported in the recent consolidation notes after a 31-pass ultra-audit campaign and production build verification.","textPreview":"Tests reported in the recent consolidation notes after a 31-pass ultra-audit campaign and production build verification.","textChars":120,"textLines":1,"bbox":[993,400,222,138]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":2,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/tlotyg","slide":2,"text":""}
+{"kind":"slide","id":"sl/bq1su7","slide":3,"title":"PRODUCT MAP","textShapes":22}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":3,"text":"PRODUCT MAP","textPreview":"PRODUCT MAP","textChars":11,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":3,"text":"A full strategy operating surface","textPreview":"A full strategy operating surface","textChars":33,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/32lszqtc","slide":3,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/szqtcj6t","slide":3,"bbox":[42,166,360,125]}
+{"kind":"shape","id":"sh/lkjm1cfa","slide":3,"bbox":[42,166,8,125]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":3,"text":"Companies","textPreview":"Companies","textChars":9,"textLines":1,"bbox":[62,182,328,28]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":3,"text":"Portfolio companies\nOnboarding\nProjects","textPreview":"Portfolio companies | Onboarding | Projects","textChars":39,"textLines":3,"bbox":[62,221,328,61]}
+{"kind":"shape","id":"sh/w3m94fu1","slide":3,"bbox":[447,166,360,125]}
+{"kind":"shape","id":"sh/loj2t83i","slide":3,"bbox":[447,166,8,125]}
+{"kind":"textbox","id":"sh/9knih4by","slide":3,"text":"Knowledge","textPreview":"Knowledge","textChars":9,"textLines":1,"bbox":[467,182,328,28]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":3,"text":"Memory\nConnections\nIngest\nVoice intake","textPreview":"Memory | Connections | Ingest | Voice intake","textChars":38,"textLines":4,"bbox":[467,221,328,61]}
+{"kind":"shape","id":"sh/re1w7mp0","slide":3,"bbox":[852,166,360,125]}
+{"kind":"shape","id":"sh/2t83itgf","slide":3,"bbox":[852,166,8,125]}
+{"kind":"textbox","id":"sh/9w3m94fu","slide":3,"text":"Strategy intake","textPreview":"Strategy intake","textChars":15,"textLines":1,"bbox":[872,182,328,28]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":3,"text":"Digital Twin\nBrainstorm\nMemo\nPersonas\nArtifacts","textPreview":"Digital Twin | Brainstorm | Memo | Personas | Artifacts","textChars":47,"textLines":5,"bbox":[872,221,328,61]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":3,"bbox":[42,320,360,125]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":3,"bbox":[42,320,8,125]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":3,"text":"Reasoning","textPreview":"Reasoning","textChars":9,"textLines":1,"bbox":[62,336,328,28]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":3,"text":"Diagnosis\nResearch\nFrameworks\nOptions\nRed team\nContradictions","textPreview":"Diagnosis | Research | Frameworks | Options | Red team | Contradictions","textChars":61,"textLines":6,"bbox":[62,375,328,61]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":3,"bbox":[447,320,360,125]}
+{"kind":"shape","id":"sh/l0rqd4vm","slide":3,"bbox":[447,320,8,125]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":3,"text":"Simulation","textPreview":"Simulation","textChars":10,"textLines":1,"bbox":[467,336,328,28]}
+{"kind":"textbox","id":"sh/7u54zido","slide":3,"text":"War-game\nCross-company shock\nMonte Carlo\nDual currency","textPreview":"War-game | Cross-company shock | Monte Carlo | Dual currency","textChars":54,"textLines":4,"bbox":[467,375,328,61]}
+{"kind":"shape","id":"sh/wra5gbq1","slide":3,"bbox":[852,320,360,125]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":3,"bbox":[852,320,8,125]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":3,"text":"Execution","textPreview":"Execution","textChars":9,"textLines":1,"bbox":[872,336,328,28]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":3,"text":"Decompose\nPre-mortem\nDrift\nKPI library\nStrategic tracker\nLinear","textPreview":"Decompose | Pre-mortem | Drift | KPI library | Strategic tracker | Linear","textChars":63,"textLines":6,"bbox":[872,375,328,61]}
+{"kind":"shape","id":"sh/wval87ed","slide":3,"bbox":[42,474,360,125]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":3,"bbox":[42,474,8,125]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":3,"text":"Learning","textPreview":"Learning","textChars":8,"textLines":1,"bbox":[62,490,328,28]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":3,"text":"Predictions\nCalibration\nAttribution\nAudit\nPlaybooks\nPatterns","textPreview":"Predictions | Calibration | Attribution | Audit | Playbooks | Patterns","textChars":60,"textLines":6,"bbox":[62,529,328,61]}
+{"kind":"shape","id":"sh/tsvu9kni","slide":3,"bbox":[447,474,360,125]}
+{"kind":"shape","id":"sh/47y1kre1","slide":3,"bbox":[447,474,8,125]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":3,"text":"Portfolio","textPreview":"Portfolio","textChars":9,"textLines":1,"bbox":[467,490,328,28]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":3,"text":"Synergy scout\nDistillation\nBriefing","textPreview":"Synergy scout | Distillation | Briefing","textChars":35,"textLines":3,"bbox":[467,529,328,61]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":3,"bbox":[852,474,360,125]}
+{"kind":"shape","id":"sh/4vmtwra5","slide":3,"bbox":[852,474,8,125]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":3,"text":"Operations","textPreview":"Operations","textChars":10,"textLines":1,"bbox":[872,490,328,28]}
+{"kind":"textbox","id":"sh/mhk3q5o7","slide":3,"text":"Cost\nAudit log\nUsage\nExport\nMCP\nUsers","textPreview":"Cost | Audit log | Usage | Export | MCP | Users","textChars":37,"textLines":6,"bbox":[872,529,328,61]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":3,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/bq1su7","slide":3,"text":""}
+{"kind":"slide","id":"sl/tkxd6k","slide":4,"title":"HOW STRATEGY WORK MOVES THROUGH CAIRN","textShapes":21}
+{"kind":"textbox","id":"sh/orytsvu9","slide":4,"text":"HOW STRATEGY WORK MOVES THROUGH CAIRN","textPreview":"HOW STRATEGY WORK MOVES THROUGH CAIRN","textChars":37,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/z61032ls","slide":4,"text":"The user loop","textPreview":"The user loop","textChars":13,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/al87ed8b","slide":4,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":4,"bbox":[70,180,330,145]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":4,"text":"1. Onboard","textPreview":"1. Onboard","textChars":10,"textLines":1,"bbox":[92,200,286,32]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":4,"text":"Create a portco, project and starting context.","textPreview":"Create a portco, project and starting context.","textChars":46,"textLines":1,"bbox":[92,242,286,71]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":4,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[416,235,38,40]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":4,"bbox":[460,180,330,145]}
+{"kind":"textbox","id":"sh/obm58z25","slide":4,"text":"2. Capture","textPreview":"2. Capture","textChars":10,"textLines":1,"bbox":[482,200,286,32]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":4,"text":"Ingest docs, use voice, run Digital Twin discovery, brainstorm or dictate a memo.","textPreview":"Ingest docs, use voice, run Digital Twin discovery, brainstorm or dictate a memo.","textChars":81,"textLines":1,"bbox":[482,242,286,71]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":4,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[806,235,38,40]}
+{"kind":"shape","id":"sh/w7mp0bi9","slide":4,"bbox":[850,180,330,145]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":4,"text":"3. Reason","textPreview":"3. Reason","textChars":9,"textLines":1,"bbox":[872,200,286,32]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":4,"text":"Diagnose first, then research, frameworks, options, contradictions and red-team.","textPreview":"Diagnose first, then research, frameworks, options, contradictions and red-team.","textChars":80,"textLines":1,"bbox":[872,242,286,71]}
+{"kind":"shape","id":"sh/7adsji5s","slide":4,"bbox":[70,385,330,145]}
+{"kind":"textbox","id":"sh/wval87ed","slide":4,"text":"4. Test","textPreview":"4. Test","textChars":7,"textLines":1,"bbox":[92,405,286,32]}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":4,"text":"War-game options, run cross-company shocks and simulate financial outcomes.","textPreview":"War-game options, run cross-company shocks and simulate financial outcomes.","textChars":75,"textLines":1,"bbox":[92,447,286,71]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":4,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[416,440,38,40]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":4,"bbox":[460,385,330,145]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":4,"text":"5. Execute","textPreview":"5. Execute","textChars":10,"textLines":1,"bbox":[482,405,286,32]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":4,"text":"Decompose to initiatives, KPIs, milestones, risks and Linear-linked work.","textPreview":"Decompose to initiatives, KPIs, milestones, risks and Linear-linked work.","textChars":73,"textLines":1,"bbox":[482,447,286,71]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":4,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[806,440,38,40]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":4,"bbox":[850,385,330,145]}
+{"kind":"textbox","id":"sh/z61032ls","slide":4,"text":"6. Learn","textPreview":"6. Learn","textChars":8,"textLines":1,"bbox":[872,405,286,32]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":4,"text":"Record predictions, close outcomes, calibrate, mine patterns and promote playbooks.","textPreview":"Record predictions, close outcomes, calibrate, mine patterns and promote playbooks.","textChars":83,"textLines":1,"bbox":[872,447,286,71]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":4,"text":"The compounding effect comes from the loop, not from any single screen: memory improves diagnosis; predictions make reasoning measurable; outcomes teach calibration; playbooks turn repeated wins into reusable procedure.","textPreview":"The compounding effect comes from the loop, not from any single screen: memory improves diagnosis; predictions make reasoning measurable;...","textChars":219,"textLines":1,"bbox":[92,596,1080,42]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":4,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/tkxd6k","slide":4,"text":""}
+{"kind":"slide","id":"sl/0htvr0","slide":5,"title":"BUILD STATUS","textShapes":20}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":5,"text":"BUILD STATUS","textPreview":"BUILD STATUS","textChars":12,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":5,"text":"Status: broad surface, phased gates","textPreview":"Status: broad surface, phased gates","textChars":35,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/cvixczed","slide":5,"bbox":[42,132,1196,1]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":5,"text":"The feature matrix distinguishes code-shipped and unit-tested capabilities from phase gates that still depend on deploy metrics, external integrations, TTS/vision infrastructure, or accumulated real usage data.","textPreview":"The feature matrix distinguishes code-shipped and unit-tested capabilities from phase gates that still depend on deploy metrics, external...","textChars":210,"textLines":1,"bbox":[42,154,1120,60]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":5,"text":"Code-shipped capabilities","textPreview":"Code-shipped capabilities","textChars":25,"textLines":1,"bbox":[84,260,220,26]}
+{"kind":"shape","id":"sh/54zidony","slide":5,"bbox":[324,265,760,16]}
+{"kind":"shape","id":"sh/cj6tovah","slide":5,"bbox":[324,265,570,16]}
+{"kind":"textbox","id":"sh/judg7ads","slide":5,"text":"42","textPreview":"42","textChars":2,"textLines":1,"bbox":[1094,260,50,24]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":5,"text":"Partially shipped or data/infra gated","textPreview":"Partially shipped or data/infra gated","textChars":37,"textLines":1,"bbox":[84,310,220,26]}
+{"kind":"shape","id":"sh/47y1kre1","slide":5,"bbox":[324,315,760,16]}
+{"kind":"shape","id":"sh/tsvu9kni","slide":5,"bbox":[324,315,176.43,16]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":5,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1094,310,50,24]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":5,"text":"Not yet built or deferred","textPreview":"Not yet built or deferred","textChars":25,"textLines":1,"bbox":[84,360,220,26]}
+{"kind":"shape","id":"sh/4vmtwra5","slide":5,"bbox":[324,365,760,16]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":5,"bbox":[324,365,162.86,16]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":5,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1094,360,50,24]}
+{"kind":"shape","id":"sh/bat47y1k","slide":5,"bbox":[42,455,360,128]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":5,"text":"Completed foundation","textPreview":"Completed foundation","textChars":20,"textLines":1,"bbox":[64,475,316,32]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":5,"text":"Phase 0 is marked complete: tenancy, roles, memory schema, prediction ledger, LLM router, budget enforcer, redactor, cost dashboard, audit, usage events and export.","textPreview":"Phase 0 is marked complete: tenancy, roles, memory schema, prediction ledger, LLM router, budget enforcer, redactor, cost dashboard, audi...","textChars":164,"textLines":1,"bbox":[64,517,316,54]}
+{"kind":"shape","id":"sh/xs72x4na","slide":5,"bbox":[460,455,360,128]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":5,"text":"Shipped beyond foundation","textPreview":"Shipped beyond foundation","textChars":25,"textLines":1,"bbox":[482,475,316,32]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":5,"text":"Phases 1-8 show many implemented surfaces: Digital Twin, GraphRAG, research, simulation, strategic tracker, calibration math, pattern mining, Linear and more.","textPreview":"Phases 1-8 show many implemented surfaces: Digital Twin, GraphRAG, research, simulation, strategic tracker, calibration math, pattern min...","textChars":158,"textLines":1,"bbox":[482,517,316,54]}
+{"kind":"shape","id":"sh/q1orytsv","slide":5,"bbox":[878,455,360,128]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":5,"text":"Gate nuance","textPreview":"Gate nuance","textChars":11,"textLines":1,"bbox":[900,475,316,32]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":5,"text":"Several phase gates remain open because they require real closed predictions, portfolio data, deploy observability, voice/TTS, vision, GPU or external connector work.","textPreview":"Several phase gates remain open because they require real closed predictions, portfolio data, deploy observability, voice/TTS, vision, GP...","textChars":166,"textLines":1,"bbox":[900,517,316,54]}
+{"kind":"shape","id":"sh/je9cvixc","slide":5,"bbox":[155,626,12,12]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":5,"text":"code shipped","textPreview":"code shipped","textChars":12,"textLines":1,"bbox":[175,620,180,26]}
+{"kind":"shape","id":"sh/xczed8v6","slide":5,"bbox":[365,626,12,12]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":5,"text":"partially gated","textPreview":"partially gated","textChars":15,"textLines":1,"bbox":[385,620,180,26]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":5,"bbox":[600,626,12,12]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":5,"text":"not built","textPreview":"not built","textChars":9,"textLines":1,"bbox":[620,620,180,26]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":5,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/9w3m94fu","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/0htvr0","slide":5,"text":""}
+{"kind":"slide","id":"sl/ufema7","slide":6,"title":"BUILT UI EVIDENCE","textShapes":7}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":6,"text":"BUILT UI EVIDENCE","textPreview":"BUILT UI EVIDENCE","textChars":17,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":6,"text":"The actual operating shell","textPreview":"The actual operating shell","textChars":26,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/ra5gbq1o","slide":6,"bbox":[42,132,1196,1]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":6,"text":"Left: authenticated overview shell with grouped navigation, health metrics, quick actions, memory, prediction ledger and system status.","textPreview":"Left: authenticated overview shell with grouped navigation, health metrics, quick actions, memory, prediction ledger and system status.","textChars":135,"textLines":1,"bbox":[64,552,530,50]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":6,"text":"Right: financial simulation surface showing 10,000-path Monte Carlo output, NPV metrics, downside risk and percentile distribution.","textPreview":"Right: financial simulation surface showing 10,000-path Monte Carlo output, NPV metrics, downside risk and percentile distribution.","textChars":131,"textLines":1,"bbox":[675,552,530,50]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":6,"text":"Screens captured from the local built bundle; demo API data was mocked only to render authenticated states.","textPreview":"Screens captured from the local built bundle; demo API data was mocked only to render authenticated states.","textChars":107,"textLines":1,"bbox":[42,622,720,28]}
+{"kind":"textbox","id":"sh/9w3m94fu","slide":6,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"image","id":"im/h4byhgn2","slide":6,"name":"","geometry":"roundRect","alt":"Cairn overview screen","bbox":[42,164,585,366]}
+{"kind":"image","id":"im/sji5snel","slide":6,"name":"","geometry":"roundRect","alt":"Cairn financial simulation result screen","bbox":[653,164,585,366]}
+{"kind":"notes","id":"nt/ufema7","slide":6,"text":""}
+{"kind":"slide","id":"sl/vx28g5","slide":7,"title":"FOUNDATION","textShapes":16}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":7,"text":"FOUNDATION","textPreview":"FOUNDATION","textChars":10,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":7,"text":"Security and tenancy are first-class","textPreview":"Security and tenancy are first-class","textChars":36,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/4zidonyd","slide":7,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/f6dcbulw","slide":7,"bbox":[70,178,10,44]}
+{"kind":"textbox","id":"sh/mlkjm1cf","slide":7,"text":"Scope","textPreview":"Scope","textChars":5,"textLines":1,"bbox":[98,181,210,44]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":7,"text":"tenant -> company -> project -> session -> user; every row carries namespace context instead of relying on UI filters.","textPreview":"tenant -> company -> project -> session -> user; every row carries namespace context instead of relying on UI filters.","textChars":118,"textLines":1,"bbox":[315,182,835,44]}
+{"kind":"shape","id":"sh/4r65wjud","slide":7,"bbox":[70,248,10,44]}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":7,"text":"Roles","textPreview":"Roles","textChars":5,"textLines":1,"bbox":[98,251,210,44]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":7,"text":"admin, GP, operator and portco_team with company access scoping; privileged portfolio surfaces are GP-only.","textPreview":"admin, GP, operator and portco_team with company access scoping; privileged portfolio surfaces are GP-only.","textChars":107,"textLines":1,"bbox":[315,252,835,44]}
+{"kind":"shape","id":"sh/sji5snel","slide":7,"bbox":[70,318,10,44]}
+{"kind":"textbox","id":"sh/h4byhgn2","slide":7,"text":"Audit","textPreview":"Audit","textChars":5,"textLines":1,"bbox":[98,321,210,44]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":7,"text":"confidential reads and cross-company actions emit append-only audit entries with tier, trace and metadata.","textPreview":"confidential reads and cross-company actions emit append-only audit entries with tier, trace and metadata.","textChars":106,"textLines":1,"bbox":[315,322,835,44]}
+{"kind":"shape","id":"sh/3ylc7u54","slide":7,"bbox":[70,388,10,44]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":7,"text":"Export","textPreview":"Export","textChars":6,"textLines":1,"bbox":[98,391,210,44]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":7,"text":"per-company encrypted archive export is GP-only and returns signed download URLs for board packs, portability or backups.","textPreview":"per-company encrypted archive export is GP-only and returns signed download URLs for board packs, portability or backups.","textChars":121,"textLines":1,"bbox":[315,392,835,44]}
+{"kind":"shape","id":"sh/a5gbq1or","slide":7,"bbox":[70,458,10,44]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":7,"text":"Connectors","textPreview":"Connectors","textChars":10,"textLines":1,"bbox":[98,461,210,44]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":7,"text":"Linear is implemented with encrypted credentials and issue push; Notion and Jira are present as controlled stubs.","textPreview":"Linear is implemented with encrypted credentials and issue push; Notion and Jira are present as controlled stubs.","textChars":113,"textLines":1,"bbox":[315,462,835,44]}
+{"kind":"shape","id":"sh/hoza1gvy","slide":7,"bbox":[250,555,780,78]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":7,"text":"Key design point","textPreview":"Key design point","textChars":16,"textLines":1,"bbox":[272,575,736,32]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":7,"text":"Cross-company intelligence is deliberately rare, explicit and logged. The app treats the portfolio boundary as a privilege boundary, not just a navigation boundary.","textPreview":"Cross-company intelligence is deliberately rare, explicit and logged. The app treats the portfolio boundary as a privilege boundary, not ...","textChars":164,"textLines":1,"bbox":[272,617,736,4]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":7,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/at47y1kr","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/vx28g5","slide":7,"text":""}
+{"kind":"slide","id":"sl/jsbxui","slide":8,"title":"LLM ROUTER","textShapes":24}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":8,"text":"LLM ROUTER","textPreview":"LLM ROUTER","textChars":10,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":8,"text":"The AI control plane","textPreview":"The AI control plane","textChars":20,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":8,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/ed8bat47","slide":8,"bbox":[60,210,170,188]}
+{"kind":"textbox","id":"sh/7u54zido","slide":8,"text":"Domain agent","textPreview":"Domain agent","textChars":12,"textLines":1,"bbox":[78,234,134,52]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":8,"text":"diagnosis, research, red-team, strategic extract, Digital Twin, etc.","textPreview":"diagnosis, research, red-team, strategic extract, Digital Twin, etc.","textChars":68,"textLines":1,"bbox":[78,294,134,90]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":8,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[234,286,26,30]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":8,"bbox":[258,210,170,188]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":8,"text":"Router","textPreview":"Router","textChars":6,"textLines":1,"bbox":[276,234,134,52]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":8,"text":"single model dispatch point: complete, embed, structured","textPreview":"single model dispatch point: complete, embed, structured","textChars":56,"textLines":1,"bbox":[276,294,134,90]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":8,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[432,286,26,30]}
+{"kind":"shape","id":"sh/hk3q5o7q","slide":8,"bbox":[456,210,170,188]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":8,"text":"Redactor","textPreview":"Redactor","textChars":8,"textLines":1,"bbox":[474,234,134,52]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":8,"text":"SSN, credit cards, email, phone, bearer tokens, API keys and secrets","textPreview":"SSN, credit cards, email, phone, bearer tokens, API keys and secrets","textChars":68,"textLines":1,"bbox":[474,294,134,90]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":8,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[630,286,26,30]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":8,"bbox":[654,210,170,188]}
+{"kind":"textbox","id":"sh/obm58z25","slide":8,"text":"Budget","textPreview":"Budget","textChars":6,"textLines":1,"bbox":[672,234,134,52]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":8,"text":"warn at 80%, block at 100%, hard-kill above 1.5x estimate","textPreview":"warn at 80%, block at 100%, hard-kill above 1.5x estimate","textChars":57,"textLines":1,"bbox":[672,294,134,90]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":8,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[828,286,26,30]}
+{"kind":"shape","id":"sh/eloj2t83","slide":8,"bbox":[852,210,170,188]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":8,"text":"Model config","textPreview":"Model config","textChars":12,"textLines":1,"bbox":[870,234,134,52]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":8,"text":"task-to-model mapping in models.yaml; no hardcoded provider choices","textPreview":"task-to-model mapping in models.yaml; no hardcoded provider choices","textChars":67,"textLines":1,"bbox":[870,294,134,90]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":8,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[1026,286,26,30]}
+{"kind":"shape","id":"sh/ed8bat47","slide":8,"bbox":[1050,210,170,188]}
+{"kind":"textbox","id":"sh/7u54zido","slide":8,"text":"Logs","textPreview":"Logs","textChars":4,"textLines":1,"bbox":[1068,234,134,52]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":8,"text":"tokens, cost, latency, success, error, budget flag and trace ID","textPreview":"tokens, cost, latency, success, error, budget flag and trace ID","textChars":63,"textLines":1,"bbox":[1068,294,134,90]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":8,"text":"The important intelligence choice: every AI operation passes through the same choke point before touching a provider. That makes privacy, cost, observability, model routing and structured-output validation systemic rather than optional.","textPreview":"The important intelligence choice: every AI operation passes through the same choke point before touching a provider. That makes privacy,...","textChars":236,"textLines":1,"bbox":[96,468,1088,78]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":8,"bbox":[300,568,680,62]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":8,"text":"Structured output stance","textPreview":"Structured output stance","textChars":24,"textLines":1,"bbox":[322,588,636,32]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":8,"text":"Model output is treated as untrusted. Verdicts are computed by deterministic code from validated JSON, not accepted as model-provided booleans.","textPreview":"Model output is treated as untrusted. Verdicts are computed by deterministic code from validated JSON, not accepted as model-provided boo...","textChars":143,"textLines":1,"bbox":[322,630,636,-12]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":8,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/jsbxui","slide":8,"text":""}
+{"kind":"slide","id":"sl/5t5ytp","slide":9,"title":"COMPOUNDING KNOWLEDGE","textShapes":26}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":9,"text":"COMPOUNDING KNOWLEDGE","textPreview":"COMPOUNDING KNOWLEDGE","textChars":21,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":9,"text":"The memory engine","textPreview":"The memory engine","textChars":17,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":9,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":9,"bbox":[56,182,160,156]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":9,"text":"Ingest","textPreview":"Ingest","textChars":6,"textLines":1,"bbox":[74,206,124,52]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":9,"text":"docs, text, URL, PDF, DOCX, voice and discovery inputs","textPreview":"docs, text, URL, PDF, DOCX, voice and discovery inputs","textChars":54,"textLines":1,"bbox":[74,266,124,58]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":9,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[221,250,30,30]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":9,"bbox":[254,182,160,156]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":9,"text":"Trust","textPreview":"Trust","textChars":5,"textLines":1,"bbox":[272,206,124,52]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":9,"text":"source prior, quarantine and provenance cluster","textPreview":"source prior, quarantine and provenance cluster","textChars":47,"textLines":1,"bbox":[272,266,124,58]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":9,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[419,250,30,30]}
+{"kind":"shape","id":"sh/1orytsvu","slide":9,"bbox":[452,182,160,156]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":9,"text":"Normalize","textPreview":"Normalize","textChars":9,"textLines":1,"bbox":[470,206,124,52]}
+{"kind":"textbox","id":"sh/judg7ads","slide":9,"text":"canonical proposition before embedding","textPreview":"canonical proposition before embedding","textChars":38,"textLines":1,"bbox":[470,266,124,58]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":9,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[617,250,30,30]}
+{"kind":"shape","id":"sh/1032lszq","slide":9,"bbox":[650,182,160,156]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":9,"text":"Decide","textPreview":"Decide","textChars":6,"textLines":1,"bbox":[668,206,124,52]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":9,"text":"ADD / UPDATE / SUPERSEDE / NOOP","textPreview":"ADD / UPDATE / SUPERSEDE / NOOP","textChars":31,"textLines":1,"bbox":[668,266,124,58]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":9,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[815,250,30,30]}
+{"kind":"shape","id":"sh/2p8nqxs7","slide":9,"bbox":[848,182,160,156]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":9,"text":"Write","textPreview":"Write","textChars":5,"textLines":1,"bbox":[866,206,124,52]}
+{"kind":"textbox","id":"sh/gvy90je9","slide":9,"text":"bi-temporal valid_at, invalid_at, ingested_at","textPreview":"bi-temporal valid_at, invalid_at, ingested_at","textChars":45,"textLines":1,"bbox":[866,266,124,58]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":9,"text":"->","textPreview":"->","textChars":2,"textLines":1,"bbox":[1013,250,30,30]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":9,"bbox":[1046,182,160,156]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":9,"text":"Retrieve","textPreview":"Retrieve","textChars":8,"textLines":1,"bbox":[1064,206,124,52]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":9,"text":"dense + BM25 + graph hop + RRF + MMR","textPreview":"dense + BM25 + graph hop + RRF + MMR","textChars":36,"textLines":1,"bbox":[1064,266,124,58]}
+{"kind":"shape","id":"sh/94fu18jq","slide":9,"bbox":[80,405,520,120]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":9,"text":"Why bi-temporal matters","textPreview":"Why bi-temporal matters","textChars":23,"textLines":1,"bbox":[102,425,476,32]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":9,"text":"Strategy needs to know what was believed when a past decision was made. Cairn supersedes rather than destructively updating, preserving history for calibration and review.","textPreview":"Strategy needs to know what was believed when a past decision was made. Cairn supersedes rather than destructively updating, preserving h...","textChars":171,"textLines":1,"bbox":[102,467,476,46]}
+{"kind":"shape","id":"sh/xczed8v6","slide":9,"bbox":[680,405,520,120]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":9,"text":"Why dimensional tags matter","textPreview":"Why dimensional tags matter","textChars":27,"textLines":1,"bbox":[702,425,476,32]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":9,"text":"Memory carries market, segment, product, geo, channel, tech, capability, framework and horizon tags so retrieval can be specific without dumping context into prompts.","textPreview":"Memory carries market, segment, product, geo, channel, tech, capability, framework and horizon tags so retrieval can be specific without ...","textChars":166,"textLines":1,"bbox":[702,467,476,46]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":9,"text":"This is the moat: the app is designed to remember, refine, contradict, decay, consolidate and retrieve strategic knowledge with provenance.","textPreview":"This is the moat: the app is designed to remember, refine, contradict, decay, consolidate and retrieve strategic knowledge with provenance.","textChars":139,"textLines":1,"bbox":[116,586,1048,40]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":9,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/5t5ytp","slide":9,"text":""}
+{"kind":"slide","id":"sl/4f4a78","slide":10,"title":"MEASURABLE STRATEGY","textShapes":21}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":10,"text":"MEASURABLE STRATEGY","textPreview":"MEASURABLE STRATEGY","textChars":19,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/judg7ads","slide":10,"text":"Prediction ledger to learning loop","textPreview":"Prediction ledger to learning loop","textChars":34,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/u9knih4b","slide":10,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/1orytsvu","slide":10,"bbox":[92,165,70,52]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":10,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[115,173,30,30]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":10,"text":"Claim emitted","textPreview":"Claim emitted","textChars":13,"textLines":1,"bbox":[192,167,280,28]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":10,"text":"agent produces strategic assertion with confidence, horizon and framework","textPreview":"agent produces strategic assertion with confidence, horizon and framework","textChars":73,"textLines":1,"bbox":[492,170,690,42]}
+{"kind":"shape","id":"sh/5gbq1ory","slide":10,"bbox":[126,217,2,30]}
+{"kind":"shape","id":"sh/cvixczed","slide":10,"bbox":[92,247,70,52]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":10,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[115,255,30,30]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":10,"text":"Prediction recorded","textPreview":"Prediction recorded","textChars":19,"textLines":1,"bbox":[192,249,280,28]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":10,"text":"same transaction, company-scoped, linked to user/project/session","textPreview":"same transaction, company-scoped, linked to user/project/session","textChars":64,"textLines":1,"bbox":[492,252,690,42]}
+{"kind":"shape","id":"sh/tsvu9kni","slide":10,"bbox":[126,299,2,30]}
+{"kind":"shape","id":"sh/mp0bi9s3","slide":10,"bbox":[92,329,70,52]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":10,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[115,337,30,30]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":10,"text":"Outcome closes","textPreview":"Outcome closes","textChars":14,"textLines":1,"bbox":[192,331,280,28]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":10,"text":"real or synthetic outcome is attached with evidence and measured date","textPreview":"real or synthetic outcome is attached with evidence and measured date","textChars":69,"textLines":1,"bbox":[492,334,690,42]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":10,"bbox":[126,381,2,30]}
+{"kind":"shape","id":"sh/b2hwfyxo","slide":10,"bbox":[92,411,70,52]}
+{"kind":"textbox","id":"sh/7u54zido","slide":10,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[115,419,30,30]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":10,"text":"Calibration scores","textPreview":"Calibration scores","textChars":18,"textLines":1,"bbox":[192,413,280,28]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":10,"text":"Brier and Murphy reliability / resolution / uncertainty","textPreview":"Brier and Murphy reliability / resolution / uncertainty","textChars":55,"textLines":1,"bbox":[492,416,690,42]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":10,"bbox":[126,463,2,30]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":10,"bbox":[92,493,70,52]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":10,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[115,501,30,30]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":10,"text":"Patterns promote","textPreview":"Patterns promote","textChars":16,"textLines":1,"bbox":[192,495,280,28]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":10,"text":"recurring structures become playbooks when evidence clears the gate","textPreview":"recurring structures become playbooks when evidence clears the gate","textChars":67,"textLines":1,"bbox":[492,498,690,42]}
+{"kind":"shape","id":"sh/7adsji5s","slide":10,"bbox":[770,578,430,62]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":10,"text":"Synthetic is separate","textPreview":"Synthetic is separate","textChars":21,"textLines":1,"bbox":[792,598,386,32]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":10,"text":"War-games and simulations are tagged synthetic so abundant cheap simulated outcomes never distort real-world calibration.","textPreview":"War-games and simulations are tagged synthetic so abundant cheap simulated outcomes never distort real-world calibration.","textChars":121,"textLines":1,"bbox":[792,640,386,-12]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":10,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/4f4a78","slide":10,"text":""}
+{"kind":"slide","id":"sl/ksijfh","slide":11,"title":"FEATURE FAMILY","textShapes":17}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":11,"text":"FEATURE FAMILY","textPreview":"FEATURE FAMILY","textChars":14,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":11,"text":"Strategy intake: multiple ways to feed the brain","textPreview":"Strategy intake: multiple ways to feed the brain","textChars":48,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":11,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/2t83itgf","slide":11,"bbox":[54,170,360,125]}
+{"kind":"textbox","id":"sh/re1w7mp0","slide":11,"text":"Universal ingest","textPreview":"Universal ingest","textChars":16,"textLines":1,"bbox":[76,190,316,32]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":11,"text":"Text, markdown, HTML, URL, PDF and DOCX are live; audio, video and image ingestion are explicitly pending.","textPreview":"Text, markdown, HTML, URL, PDF and DOCX are live; audio, video and image ingestion are explicitly pending.","textChars":106,"textLines":1,"bbox":[76,232,316,51]}
+{"kind":"shape","id":"sh/9knih4by","slide":11,"bbox":[460,170,360,125]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":11,"text":"Discovery / Digital Twin","textPreview":"Discovery / Digital Twin","textChars":24,"textLines":1,"bbox":[482,190,316,32]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":11,"text":"Dimension-steered interview, graded coverage, funnel gates, persistence and AI transformation strategy synthesis.","textPreview":"Dimension-steered interview, graded coverage, funnel gates, persistence and AI transformation strategy synthesis.","textChars":113,"textLines":1,"bbox":[482,232,316,51]}
+{"kind":"shape","id":"sh/3m94fu18","slide":11,"bbox":[866,170,360,125]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":11,"text":"Brainstorm mode","textPreview":"Brainstorm mode","textChars":15,"textLines":1,"bbox":[888,190,316,32]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":11,"text":"Four-phase thinking surface with silent extractors for hypotheses, options, assumptions, risks and open questions.","textPreview":"Four-phase thinking surface with silent extractors for hypotheses, options, assumptions, risks and open questions.","textChars":114,"textLines":1,"bbox":[888,232,316,51]}
+{"kind":"shape","id":"sh/s72x4nap","slide":11,"bbox":[54,345,360,125]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":11,"text":"Memo dictation","textPreview":"Memo dictation","textChars":14,"textLines":1,"bbox":[76,365,316,32]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":11,"text":"Monologue becomes a structured one-page memo, preserving a fast capture-to-artifact path.","textPreview":"Monologue becomes a structured one-page memo, preserving a fast capture-to-artifact path.","textChars":89,"textLines":1,"bbox":[76,407,316,51]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":11,"bbox":[460,345,360,125]}
+{"kind":"textbox","id":"sh/sji5snel","slide":11,"text":"Advisory personas","textPreview":"Advisory personas","textChars":17,"textLines":1,"bbox":[482,365,316,32]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":11,"text":"Coach, challenger, devil's advocate and other roles let the same issue be interrogated from different angles.","textPreview":"Coach, challenger, devil's advocate and other roles let the same issue be interrogated from different angles.","textChars":109,"textLines":1,"bbox":[482,407,316,51]}
+{"kind":"shape","id":"sh/ap4r65wj","slide":11,"bbox":[866,345,360,125]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":11,"text":"Strategy artifacts","textPreview":"Strategy artifacts","textChars":18,"textLines":1,"bbox":[888,365,316,32]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":11,"text":"External strategies become first-class inputs through recognition, Share-and-Apply and apply-war-game paths.","textPreview":"External strategies become first-class inputs through recognition, Share-and-Apply and apply-war-game paths.","textChars":108,"textLines":1,"bbox":[888,407,316,51]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":11,"text":"The intake layer is deliberately multimodal in concept, but rigorous in storage: capture is not value until it becomes scoped memory, artifacts, predictions or execution items.","textPreview":"The intake layer is deliberately multimodal in concept, but rigorous in storage: capture is not value until it becomes scoped memory, art...","textChars":176,"textLines":1,"bbox":[130,565,1020,48]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":11,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/ksijfh","slide":11,"text":""}
+{"kind":"slide","id":"sl/isyefi","slide":12,"title":"FROM QUESTION TO TESTED RECOMMENDATION","textShapes":16}
+{"kind":"textbox","id":"sh/re1w7mp0","slide":12,"text":"FROM QUESTION TO TESTED RECOMMENDATION","textPreview":"FROM QUESTION TO TESTED RECOMMENDATION","textChars":38,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":12,"text":"Reasoning mesh","textPreview":"Reasoning mesh","textChars":14,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/9knih4by","slide":12,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":12,"bbox":[54,172,350,152]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":12,"bbox":[54,172,8,152]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":12,"text":"Diagnose first","textPreview":"Diagnose first","textChars":14,"textLines":1,"bbox":[74,188,318,28]}
+{"kind":"textbox","id":"sh/9w3m94fu","slide":12,"text":"Reframe the question\nClassify the situation\nAvoid premature framework picking","textPreview":"Reframe the question | Classify the situation | Avoid premature framework picking","textChars":77,"textLines":3,"bbox":[74,227,318,88]}
+{"kind":"shape","id":"sh/2hwfyxob","slide":12,"bbox":[464,172,350,152]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":12,"bbox":[464,172,8,152]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":12,"text":"Research mesh","textPreview":"Research mesh","textChars":13,"textLines":1,"bbox":[484,188,318,28]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":12,"text":"Chief Strategist orchestrator\n8 specialist agents\nGrounded in company memory","textPreview":"Chief Strategist orchestrator | 8 specialist agents | Grounded in company memory","textChars":76,"textLines":3,"bbox":[484,227,318,88]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":12,"bbox":[874,172,350,152]}
+{"kind":"shape","id":"sh/0z61032l","slide":12,"bbox":[874,172,8,152]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":12,"text":"Frameworks","textPreview":"Frameworks","textChars":10,"textLines":1,"bbox":[894,188,318,28]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":12,"text":"Porter\nAnsoff\nJTBD\nWardley\n3 Horizons\nBCG\nBlue Ocean\nDisruption","textPreview":"Porter | Ansoff | JTBD | Wardley | 3 Horizons | BCG | Blue Ocean | Disruption","textChars":63,"textLines":8,"bbox":[894,227,318,88]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":12,"bbox":[54,386,350,152]}
+{"kind":"shape","id":"sh/0nuxc3yl","slide":12,"bbox":[54,386,8,152]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":12,"text":"Options + MCDA","textPreview":"Options + MCDA","textChars":14,"textLines":1,"bbox":[74,402,318,28]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":12,"text":"Generate strategic options\nScore trade-offs\nSensitivity analysis","textPreview":"Generate strategic options | Score trade-offs | Sensitivity analysis","textChars":64,"textLines":3,"bbox":[74,441,318,88]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":12,"bbox":[464,386,350,152]}
+{"kind":"shape","id":"sh/f6dcbulw","slide":12,"bbox":[464,386,8,152]}
+{"kind":"textbox","id":"sh/4r65wjud","slide":12,"text":"Red team","textPreview":"Red team","textChars":8,"textLines":1,"bbox":[484,402,318,28]}
+{"kind":"textbox","id":"sh/xc3ylc7u","slide":12,"text":"Hostile personas\nFailure modes\nDeterministic verdict","textPreview":"Hostile personas | Failure modes | Deterministic verdict","textChars":52,"textLines":3,"bbox":[484,441,318,88]}
+{"kind":"shape","id":"sh/mtwra5gb","slide":12,"bbox":[874,386,350,152]}
+{"kind":"shape","id":"sh/fepkzupw","slide":12,"bbox":[874,386,8,152]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":12,"text":"Contradictions","textPreview":"Contradictions","textChars":14,"textLines":1,"bbox":[894,402,318,28]}
+{"kind":"textbox","id":"sh/xkf6dcbu","slide":12,"text":"Find conflicting beliefs\nReview evidence\nResolve or quarantine","textPreview":"Find conflicting beliefs | Review evidence | Resolve or quarantine","textChars":62,"textLines":3,"bbox":[894,441,318,88]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":12,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/isyefi","slide":12,"text":""}
+{"kind":"slide","id":"sl/sok117","slide":13,"title":"TESTING THE STRATEGY","textShapes":13}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":13,"text":"TESTING THE STRATEGY","textPreview":"TESTING THE STRATEGY","textChars":20,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":13,"text":"Simulation and financial intelligence","textPreview":"Simulation and financial intelligence","textChars":37,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/qtcj6tov","slide":13,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/87ed8bat","slide":13,"bbox":[642,165,270,135]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":13,"text":"War-game","textPreview":"War-game","textChars":8,"textLines":1,"bbox":[664,185,226,32]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":13,"text":"Four-arena simulation across customer, talent, capital and regulator lenses. Writes synthetic outcomes to the ledger.","textPreview":"Four-arena simulation across customer, talent, capital and regulator lenses. Writes synthetic outcomes to the ledger.","textChars":117,"textLines":1,"bbox":[664,227,226,61]}
+{"kind":"shape","id":"sh/x4nap4r6","slide":13,"bbox":[952,165,270,135]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":13,"text":"Cross-company shock","textPreview":"Cross-company shock","textChars":19,"textLines":1,"bbox":[974,185,226,32]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":13,"text":"GP-only simulation of one shock across multiple portcos with explicit cross-company safeguards.","textPreview":"GP-only simulation of one shock across multiple portcos with explicit cross-company safeguards.","textChars":95,"textLines":1,"bbox":[974,227,226,61]}
+{"kind":"shape","id":"sh/bat47y1k","slide":13,"bbox":[642,335,270,160]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":13,"text":"Monte Carlo","textPreview":"Monte Carlo","textChars":11,"textLines":1,"bbox":[664,355,226,32]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":13,"text":"Seeded NPV / IRR risk engine with mean, median, variance, P10-P90, probability of loss, VaR, CVaR and Sharpe.","textPreview":"Seeded NPV / IRR risk engine with mean, median, variance, P10-P90, probability of loss, VaR, CVaR and Sharpe.","textChars":109,"textLines":1,"bbox":[664,397,226,86]}
+{"kind":"shape","id":"sh/m1cfa9w3","slide":13,"bbox":[952,335,270,160]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":13,"text":"Dual currency","textPreview":"Dual currency","textChars":13,"textLines":1,"bbox":[974,355,226,32]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":13,"text":"Pure USD <-> INR-Crore conversion and formatting; live FX tool is a documented follow-up.","textPreview":"Pure USD <-> INR-Crore conversion and formatting; live FX tool is a documented follow-up.","textChars":89,"textLines":1,"bbox":[974,397,226,86]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":13,"text":"The key shift: strategy choices can be pressure-tested probabilistically and logged as evidence, rather than left as narrative confidence.","textPreview":"The key shift: strategy choices can be pressure-tested probabilistically and logged as evidence, rather than left as narrative confidence.","textChars":138,"textLines":1,"bbox":[140,570,1000,42]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":13,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"image","id":"im/cj6tovah","slide":13,"name":"","geometry":"roundRect","alt":"Financial simulation result screen","bbox":[42,166,540,330]}
+{"kind":"notes","id":"nt/sok117","slide":13,"text":""}
+{"kind":"slide","id":"sl/wvqcq9","slide":14,"title":"OPERATOR LAYER","textShapes":16}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":14,"text":"OPERATOR LAYER","textPreview":"OPERATOR LAYER","textChars":14,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":14,"text":"Strategy to execution bridge","textPreview":"Strategy to execution bridge","textChars":28,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/90je9cvi","slide":14,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/y1kre1w7","slide":14,"bbox":[78,170,10,48]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":14,"text":"Decomposer","textPreview":"Decomposer","textChars":10,"textLines":1,"bbox":[106,173,210,48]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":14,"text":"Thesis -> initiatives -> OKRs -> tasks, making strategic intent executable.","textPreview":"Thesis -> initiatives -> OKRs -> tasks, making strategic intent executable.","textChars":75,"textLines":1,"bbox":[323,174,835,48]}
+{"kind":"shape","id":"sh/9s36hcrm","slide":14,"bbox":[78,252,10,48]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":14,"text":"Pre-mortem","textPreview":"Pre-mortem","textChars":10,"textLines":1,"bbox":[106,255,210,48]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":14,"text":"Failure-first risk register before launch, so weak plans are challenged early.","textPreview":"Failure-first risk register before launch, so weak plans are challenged early.","textChars":78,"textLines":1,"bbox":[323,256,835,48]}
+{"kind":"shape","id":"sh/72x4nap4","slide":14,"bbox":[78,334,10,48]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":14,"text":"Strategic tracker","textPreview":"Strategic tracker","textChars":17,"textLines":1,"bbox":[106,337,210,48]}
+{"kind":"textbox","id":"sh/p8nqxs72","slide":14,"text":"AI extracts KPIs, milestones and risks from strategy context, normalizes them and writes tables.","textPreview":"AI extracts KPIs, milestones and risks from strategy context, normalizes them and writes tables.","textChars":96,"textLines":1,"bbox":[323,338,835,48]}
+{"kind":"shape","id":"sh/0nuxc3yl","slide":14,"bbox":[78,416,10,48]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":14,"text":"Drift detection","textPreview":"Drift detection","textChars":15,"textLines":1,"bbox":[106,419,210,48]}
+{"kind":"textbox","id":"sh/itgfmlkj","slide":14,"text":"Schedule, KPI and thesis drift detection with replan suggestions.","textPreview":"Schedule, KPI and thesis drift detection with replan suggestions.","textChars":65,"textLines":1,"bbox":[323,420,835,48]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":14,"bbox":[78,498,10,48]}
+{"kind":"textbox","id":"sh/0z61032l","slide":14,"text":"Linear connector","textPreview":"Linear connector","textChars":16,"textLines":1,"bbox":[106,501,210,48]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":14,"text":"Encrypted credentials, connection test, teams, issue creation and initiative push.","textPreview":"Encrypted credentials, connection test, teams, issue creation and initiative push.","textChars":82,"textLines":1,"bbox":[323,502,835,48]}
+{"kind":"shape","id":"sh/i5sneloj","slide":14,"bbox":[235,590,810,58]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":14,"text":"Why this matters","textPreview":"Why this matters","textChars":16,"textLines":1,"bbox":[257,610,766,32]}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":14,"text":"The app does not stop at advice. It tries to convert strategic reasoning into tracked operating objects: KPIs, milestones, risks, tasks, connectors and drift loops.","textPreview":"The app does not stop at advice. It tries to convert strategic reasoning into tracked operating objects: KPIs, milestones, risks, tasks, ...","textChars":164,"textLines":1,"bbox":[257,652,766,-16]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":14,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/wvqcq9","slide":14,"text":""}
+{"kind":"slide","id":"sl/jxq74b","slide":15,"title":"CROSS-COMPANY LEVERAGE","textShapes":14}
+{"kind":"textbox","id":"sh/udg7adsj","slide":15,"text":"CROSS-COMPANY LEVERAGE","textPreview":"CROSS-COMPANY LEVERAGE","textChars":22,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/54zidony","slide":15,"text":"Portfolio intelligence","textPreview":"Portfolio intelligence","textChars":22,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/cj6tovah","slide":15,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/nap4r65w","slide":15,"bbox":[70,175,330,155]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":15,"text":"Synergy Scout","textPreview":"Synergy Scout","textChars":13,"textLines":1,"bbox":[92,195,286,32]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":15,"text":"Nine-axis cross-portfolio detector that can identify revenue, capability, customer, procurement, talent and technology synergies.","textPreview":"Nine-axis cross-portfolio detector that can identify revenue, capability, customer, procurement, talent and technology synergies.","textChars":129,"textLines":1,"bbox":[92,237,286,81]}
+{"kind":"shape","id":"sh/cvixczed","slide":15,"bbox":[475,175,330,155]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":15,"text":"Pattern distillation","textPreview":"Pattern distillation","textChars":20,"textLines":1,"bbox":[497,195,286,32]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":15,"text":"Anonymized pattern promotion with N>=3 publication gate, designed to learn from companies without exposing raw company data.","textPreview":"Anonymized pattern promotion with N>=3 publication gate, designed to learn from companies without exposing raw company data.","textChars":124,"textLines":1,"bbox":[497,237,286,81]}
+{"kind":"shape","id":"sh/w3m94fu1","slide":15,"bbox":[880,175,330,155]}
+{"kind":"textbox","id":"sh/loj2t83i","slide":15,"text":"Briefing","textPreview":"Briefing","textChars":8,"textLines":1,"bbox":[902,195,286,32]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":15,"text":"Daily or weekly text briefing builder that turns platform signals into a compact read; TTS audio remains pending.","textPreview":"Daily or weekly text briefing builder that turns platform signals into a compact read; TTS audio remains pending.","textChars":113,"textLines":1,"bbox":[902,237,286,81]}
+{"kind":"shape","id":"sh/3itgfmlk","slide":15,"bbox":[70,400,520,130]}
+{"kind":"textbox","id":"sh/wb2hwfyx","slide":15,"text":"Permission model","textPreview":"Permission model","textChars":16,"textLines":1,"bbox":[92,420,476,32]}
+{"kind":"textbox","id":"sh/lwval87e","slide":15,"text":"Cross-company reads are GP-only, query-validated, UI-gated and audit-logged. Each memory search remains scoped to one company.","textPreview":"Cross-company reads are GP-only, query-validated, UI-gated and audit-logged. Each memory search remains scoped to one company.","textChars":126,"textLines":1,"bbox":[92,462,476,56]}
+{"kind":"shape","id":"sh/e9cvixcz","slide":15,"bbox":[690,400,520,130]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":15,"text":"The portfolio thesis","textPreview":"The portfolio thesis","textChars":20,"textLines":1,"bbox":[712,420,476,32]}
+{"kind":"textbox","id":"sh/sneloj2t","slide":15,"text":"The app is built to let learning compound across portcos through distilled patterns and synergies, not by blindly mixing confidential raw memory.","textPreview":"The app is built to let learning compound across portcos through distilled patterns and synergies, not by blindly mixing confidential raw...","textChars":145,"textLines":1,"bbox":[712,462,476,56]}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":15,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/jxq74b","slide":15,"text":""}
+{"kind":"slide","id":"sl/7wkf9y","slide":16,"title":"PERSISTENCE LAYER","textShapes":19}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":16,"text":"PERSISTENCE LAYER","textPreview":"PERSISTENCE LAYER","textChars":17,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":16,"text":"Data model: 22 tables","textPreview":"Data model: 22 tables","textChars":21,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/zed8v6ps","slide":16,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/obm58z25","slide":16,"bbox":[78,160,500,88]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":16,"bbox":[78,160,8,88]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":16,"text":"Workspace","textPreview":"Workspace","textChars":9,"textLines":1,"bbox":[98,176,468,28]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":16,"text":"tenant\nusers\ncompany\nstrategy_project\nsession","textPreview":"tenant | users | company | strategy_project | session","textChars":45,"textLines":5,"bbox":[98,215,468,24]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":16,"bbox":[648,160,500,88]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":16,"bbox":[648,160,8,88]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":16,"text":"Memory","textPreview":"Memory","textChars":6,"textLines":1,"bbox":[668,176,468,28]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":16,"text":"memory_item\ncontradiction\nsource_trust_register","textPreview":"memory_item | contradiction | source_trust_register","textChars":47,"textLines":3,"bbox":[668,215,468,24]}
+{"kind":"shape","id":"sh/nuxc3ylc","slide":16,"bbox":[78,278,500,88]}
+{"kind":"shape","id":"sh/y90je9cv","slide":16,"bbox":[78,278,8,88]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":16,"text":"Learning","textPreview":"Learning","textChars":8,"textLines":1,"bbox":[98,294,468,28]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":16,"text":"prediction\noutcome\ndecision","textPreview":"prediction | outcome | decision","textChars":27,"textLines":3,"bbox":[98,333,468,24]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":16,"bbox":[648,278,500,88]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":16,"bbox":[648,278,8,88]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":16,"text":"Operations","textPreview":"Operations","textChars":10,"textLines":1,"bbox":[668,294,468,28]}
+{"kind":"textbox","id":"sh/czed8v6p","slide":16,"text":"audit_log\nusage_event\nllm_call_log\nexport_job","textPreview":"audit_log | usage_event | llm_call_log | export_job","textChars":45,"textLines":4,"bbox":[668,333,468,24]}
+{"kind":"shape","id":"sh/8bat47y1","slide":16,"bbox":[78,396,500,88]}
+{"kind":"shape","id":"sh/1w7mp0bi","slide":16,"bbox":[78,396,8,88]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":16,"text":"Connectors","textPreview":"Connectors","textChars":10,"textLines":1,"bbox":[98,412,468,28]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":16,"text":"connector_credential\nconnector_link","textPreview":"connector_credential | connector_link","textChars":35,"textLines":2,"bbox":[98,451,468,24]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":16,"bbox":[648,396,500,88]}
+{"kind":"shape","id":"sh/18jqh0fe","slide":16,"bbox":[648,396,8,88]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":16,"text":"Digital Twin","textPreview":"Digital Twin","textChars":12,"textLines":1,"bbox":[668,412,468,28]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":16,"text":"digital_twin\ncompleteness_tracking","textPreview":"digital_twin | completeness_tracking","textChars":34,"textLines":2,"bbox":[668,451,468,24]}
+{"kind":"shape","id":"sh/crmhk3q5","slide":16,"bbox":[78,514,500,88]}
+{"kind":"shape","id":"sh/1cfa9w3m","slide":16,"bbox":[78,514,8,88]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":16,"text":"Execution","textPreview":"Execution","textChars":9,"textLines":1,"bbox":[98,530,468,28]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":16,"text":"strategy_kpi\nstrategy_milestone\nstrategy_risk","textPreview":"strategy_kpi | strategy_milestone | strategy_risk","textChars":45,"textLines":3,"bbox":[98,569,468,24]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":16,"text":"The schema shows the product intent clearly: strategy work is not a transient chat. It is a persisted, namespaced, auditable system of claims, decisions, outcomes, memory, costs and execution objects.","textPreview":"The schema shows the product intent clearly: strategy work is not a transient chat. It is a persisted, namespaced, auditable system of cl...","textChars":200,"textLines":1,"bbox":[162,632,956,38]}
+{"kind":"textbox","id":"sh/wjudg7ad","slide":16,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":16,"text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/7wkf9y","slide":16,"text":""}
+{"kind":"slide","id":"sl/rykwky","slide":17,"title":"COST, AUDIT, TOOLS","textShapes":16}
+{"kind":"textbox","id":"sh/neloj2t8","slide":17,"text":"COST, AUDIT, TOOLS","textPreview":"COST, AUDIT, TOOLS","textChars":18,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/czed8v6p","slide":17,"text":"Observability and governance","textPreview":"Observability and governance","textChars":28,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/5kb6xkf6","slide":17,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/u54zidon","slide":17,"bbox":[70,185,250,220]}
+{"kind":"textbox","id":"sh/nqxs72x4","slide":17,"text":"80%","textPreview":"80%","textChars":3,"textLines":1,"bbox":[94,209,202,64]}
+{"kind":"textbox","id":"sh/cbulwval","slide":17,"text":"budget warning threshold before a model call reaches the soft dollar cap.","textPreview":"budget warning threshold before a model call reaches the soft dollar cap.","textChars":73,"textLines":1,"bbox":[94,287,202,108]}
+{"kind":"shape","id":"sh/5sneloj2","slide":17,"bbox":[375,185,250,220]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":17,"text":"100%","textPreview":"100%","textChars":4,"textLines":1,"bbox":[399,209,202,64]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":17,"text":"soft cap block point. Calls are stopped server-side, not politely suggested client-side.","textPreview":"soft cap block point. Calls are stopped server-side, not politely suggested client-side.","textChars":88,"textLines":1,"bbox":[399,287,202,108]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":17,"bbox":[680,185,250,220]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":17,"text":"1.5x","textPreview":"1.5x","textChars":4,"textLines":1,"bbox":[704,209,202,64]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":17,"text":"hard-kill above estimate with no override path, protecting the system from runaway usage.","textPreview":"hard-kill above estimate with no override path, protecting the system from runaway usage.","textChars":89,"textLines":1,"bbox":[704,287,202,108]}
+{"kind":"shape","id":"sh/wra5gbq1","slide":17,"bbox":[985,185,250,220]}
+{"kind":"textbox","id":"sh/7u54zido","slide":17,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[1009,209,202,64]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":17,"text":"registered MCP tools: web_search, web_fetch, edgar_filings and lookup_memory.","textPreview":"registered MCP tools: web_search, web_fetch, edgar_filings and lookup_memory.","textChars":77,"textLines":1,"bbox":[1009,287,202,108]}
+{"kind":"shape","id":"sh/l0rqd4vm","slide":17,"bbox":[115,478,480,115]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":17,"text":"Tool gateway","textPreview":"Tool gateway","textChars":12,"textLines":1,"bbox":[137,498,436,32]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":17,"text":"External tools route through the MCP gateway. The gateway exposes a declarative registry and dispatch point instead of scattering tool calls across agents.","textPreview":"External tools route through the MCP gateway. The gateway exposes a declarative registry and dispatch point instead of scattering tool ca...","textChars":155,"textLines":1,"bbox":[137,540,436,41]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":17,"bbox":[685,478,480,115]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":17,"text":"Cost dashboard","textPreview":"Cost dashboard","textChars":14,"textLines":1,"bbox":[707,498,436,32]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":17,"text":"LLM calls log model, tokens in/out, cost, latency, trace, success/error and budget-enforced status for per-user, company and session review.","textPreview":"LLM calls log model, tokens in/out, cost, latency, trace, success/error and budget-enforced status for per-user, company and session review.","textChars":140,"textLines":1,"bbox":[707,540,436,41]}
+{"kind":"textbox","id":"sh/83itgfml","slide":17,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":17,"text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/rykwky","slide":17,"text":""}
+{"kind":"slide","id":"sl/5dz9f0","slide":18,"title":"JUNE 2026 CHANGES","textShapes":16}
+{"kind":"textbox","id":"sh/sneloj2t","slide":18,"text":"JUNE 2026 CHANGES","textPreview":"JUNE 2026 CHANGES","textChars":17,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/32lszqtc","slide":18,"text":"Recent consolidation and quality bar","textPreview":"Recent consolidation and quality bar","textChars":36,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/ahoza1gv","slide":18,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/lkjm1cfa","slide":18,"bbox":[64,170,250,205]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":18,"text":"31","textPreview":"31","textChars":2,"textLines":1,"bbox":[88,194,202,64]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":18,"text":"ultra-audit passes over the prototype consolidation surface.","textPreview":"ultra-audit passes over the prototype consolidation surface.","textChars":60,"textLines":1,"bbox":[88,272,202,93]}
+{"kind":"shape","id":"sh/at47y1kr","slide":18,"bbox":[360,170,250,205]}
+{"kind":"textbox","id":"sh/loj2t83i","slide":18,"text":"71","textPreview":"71","textChars":2,"textLines":1,"bbox":[384,194,202,64]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":18,"text":"confirmed defects fixed across tenancy, finance, migration, logic, React/UX, cost/DoS and a11y areas.","textPreview":"confirmed defects fixed across tenancy, finance, migration, logic, React/UX, cost/DoS and a11y areas.","textChars":101,"textLines":1,"bbox":[384,272,202,93]}
+{"kind":"shape","id":"sh/udg7adsj","slide":18,"bbox":[656,170,250,205]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":18,"text":"557","textPreview":"557","textChars":3,"textLines":1,"bbox":[680,194,202,64]}
+{"kind":"textbox","id":"sh/cj6tovah","slide":18,"text":"tests reported passing after the campaign, up from 500 in the consolidation notes.","textPreview":"tests reported passing after the campaign, up from 500 in the consolidation notes.","textChars":82,"textLines":1,"bbox":[680,272,202,93]}
+{"kind":"shape","id":"sh/54zidony","slide":18,"bbox":[952,170,250,205]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":18,"text":"0003","textPreview":"0003","textChars":4,"textLines":1,"bbox":[976,194,202,64]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":18,"text":"additive migration adding Digital Twin, completeness and strategy tracking tables.","textPreview":"additive migration adding Digital Twin, completeness and strategy tracking tables.","textChars":82,"textLines":1,"bbox":[976,272,202,93]}
+{"kind":"shape","id":"sh/cvixczed","slide":18,"bbox":[115,445,480,128]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":18,"text":"What was salvaged","textPreview":"What was salvaged","textChars":17,"textLines":1,"bbox":[137,465,436,32]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":18,"text":"StrategyForge contributed Monte Carlo, dual-currency and structured-output auto-write. Dynamo contributed Digital Twin conversational intake. Both were hardened and integrated into Cairn.","textPreview":"StrategyForge contributed Monte Carlo, dual-currency and structured-output auto-write. Dynamo contributed Digital Twin conversational int...","textChars":187,"textLines":1,"bbox":[137,507,436,54]}
+{"kind":"shape","id":"sh/jm1cfa9w","slide":18,"bbox":[685,445,480,128]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":18,"text":"What was deliberately not ported","textPreview":"What was deliberately not ported","textChars":32,"textLines":1,"bbox":[707,465,436,32]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":18,"text":"Fake multi-model fallback, hardcoded roadmaps/ROI, cosmetic grounding and placeholder document processing were left behind for real implementations.","textPreview":"Fake multi-model fallback, hardcoded roadmaps/ROI, cosmetic grounding and placeholder document processing were left behind for real imple...","textChars":148,"textLines":1,"bbox":[707,507,436,54]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":18,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":18,"text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/5dz9f0","slide":18,"text":""}
+{"kind":"slide","id":"sl/noocvl","slide":19,"title":"ROADMAP HONESTY","textShapes":17}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":19,"text":"ROADMAP HONESTY","textPreview":"ROADMAP HONESTY","textChars":15,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":19,"text":"What is still gated","textPreview":"What is still gated","textChars":19,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/xs72x4na","slide":19,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/qtcj6tov","slide":19,"bbox":[60,160,520,92]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":19,"text":"Realtime voice","textPreview":"Realtime voice","textChars":14,"textLines":1,"bbox":[82,180,476,32]}
+{"kind":"textbox","id":"sh/8z25kb6x","slide":19,"text":"OpenAI Realtime / Gemini Live abstraction and persistent mini-player are not yet built.","textPreview":"OpenAI Realtime / Gemini Live abstraction and persistent mini-player are not yet built.","textChars":87,"textLines":1,"bbox":[82,222,476,18]}
+{"kind":"shape","id":"sh/1gvy90je","slide":19,"bbox":[660,160,520,92]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":19,"text":"TTS playback","textPreview":"TTS playback","textChars":12,"textLines":1,"bbox":[682,180,476,32]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":19,"text":"War-game and briefing audio depend on TTS infrastructure.","textPreview":"War-game and briefing audio depend on TTS infrastructure.","textChars":57,"textLines":1,"bbox":[682,222,476,18]}
+{"kind":"shape","id":"sh/je9cvixc","slide":19,"bbox":[60,292,520,92]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":19,"text":"Vision in/out","textPreview":"Vision in/out","textChars":13,"textLines":1,"bbox":[82,312,476,32]}
+{"kind":"textbox","id":"sh/1gvy90je","slide":19,"text":"Slides, whiteboards, chart extraction and raster diagram export are still gated.","textPreview":"Slides, whiteboards, chart extraction and raster diagram export are still gated.","textChars":80,"textLines":1,"bbox":[82,354,476,18]}
+{"kind":"shape","id":"sh/8z25kb6x","slide":19,"bbox":[660,292,520,92]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":19,"text":"Live research UI","textPreview":"Live research UI","textChars":16,"textLines":1,"bbox":[682,312,476,32]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":19,"text":"Research agents exist, but the streaming activity-tree view is not built.","textPreview":"Research agents exist, but the streaming activity-tree view is not built.","textChars":73,"textLines":1,"bbox":[682,354,476,18]}
+{"kind":"shape","id":"sh/xs72x4na","slide":19,"bbox":[60,424,520,92]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":19,"text":"Data-dependent learning","textPreview":"Data-dependent learning","textChars":23,"textLines":1,"bbox":[82,444,476,32]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":19,"text":"Calibration resolver and portfolio dashboard need closed predictions and portfolio data.","textPreview":"Calibration resolver and portfolio dashboard need closed predictions and portfolio data.","textChars":88,"textLines":1,"bbox":[82,486,476,18]}
+{"kind":"shape","id":"sh/qd4vmtwr","slide":19,"bbox":[660,424,520,92]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":19,"text":"External connectors","textPreview":"External connectors","textChars":19,"textLines":1,"bbox":[682,444,476,32]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":19,"text":"Linear is live; Notion, Jira, KPI data connectors, Slack and live FX remain pending or stubbed.","textPreview":"Linear is live; Notion, Jira, KPI data connectors, Slack and live FX remain pending or stubbed.","textChars":95,"textLines":1,"bbox":[682,486,476,18]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":19,"text":"This makes the deck credible: Cairn already has a very large code-shipped surface, while the remaining work is mostly live infra, data accumulation, richer multimodal UX and external integrations.","textPreview":"This makes the deck credible: Cairn already has a very large code-shipped surface, while the remaining work is mostly live infra, data ac...","textChars":196,"textLines":1,"bbox":[130,606,1020,42]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":19,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/noocvl","slide":19,"text":""}
+{"kind":"slide","id":"sl/2dxryb","slide":20,"title":"POSITIONING","textShapes":12}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":20,"text":"POSITIONING","textPreview":"POSITIONING","textChars":11,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/0z61032l","slide":20,"text":"Why it is different","textPreview":"Why it is different","textChars":19,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":20,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/ih4byhgn","slide":20,"bbox":[75,178,500,140]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":20,"text":"Not a chatbot","textPreview":"Not a chatbot","textChars":13,"textLines":1,"bbox":[97,198,456,32]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":20,"text":"The core product unit is not a conversation. It is a company-scoped strategic state: memory, claims, predictions, decisions, outcomes and execution artifacts.","textPreview":"The core product unit is not a conversation. It is a company-scoped strategic state: memory, claims, predictions, decisions, outcomes and...","textChars":158,"textLines":1,"bbox":[97,240,456,66]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":20,"bbox":[705,178,500,140]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":20,"text":"Not a static dashboard","textPreview":"Not a static dashboard","textChars":22,"textLines":1,"bbox":[727,198,456,32]}
+{"kind":"textbox","id":"sh/7y1kre1w","slide":20,"text":"Dashboards are one surface. Cairn also captures, reasons, researches, simulates, critiques, decomposes, tracks, audits and learns.","textPreview":"Dashboards are one surface. Cairn also captures, reasons, researches, simulates, critiques, decomposes, tracks, audits and learns.","textChars":130,"textLines":1,"bbox":[727,240,456,66]}
+{"kind":"shape","id":"sh/rmhk3q5o","slide":20,"bbox":[75,380,500,148]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":20,"text":"Not generic AI","textPreview":"Not generic AI","textChars":14,"textLines":1,"bbox":[97,400,456,32]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":20,"text":"The engine has domain-specific guardrails: diagnosis precedes frameworks, every model call is routed, every emitted claim can be measured, and portfolio learning is anonymized and gated.","textPreview":"The engine has domain-specific guardrails: diagnosis precedes frameworks, every model call is routed, every emitted claim can be measured...","textChars":186,"textLines":1,"bbox":[97,442,456,74]}
+{"kind":"shape","id":"sh/g7adsji5","slide":20,"bbox":[705,380,500,148]}
+{"kind":"textbox","id":"sh/rytsvu9k","slide":20,"text":"The north star","textPreview":"The north star","textChars":14,"textLines":1,"bbox":[727,400,456,32]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":20,"text":"A private strategy intelligence layer where every session compounds into better context, better calibration and better reusable playbooks for the next decision.","textPreview":"A private strategy intelligence layer where every session compounds into better context, better calibration and better reusable playbooks...","textChars":160,"textLines":1,"bbox":[727,442,456,74]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":20,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":20,"text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/2dxryb","slide":20,"text":""}
+{"kind":"slide","id":"sl/oozqj9","slide":21,"title":"APPENDIX","textShapes":14}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":21,"text":"APPENDIX","textPreview":"APPENDIX","textChars":8,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":21,"text":"Capability catalog, part 1","textPreview":"Capability catalog, part 1","textChars":26,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/at47y1kr","slide":21,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/l87ed8ba","slide":21,"bbox":[70,174,10,54]}
+{"kind":"textbox","id":"sh/sneloj2t","slide":21,"text":"Workspace","textPreview":"Workspace","textChars":9,"textLines":1,"bbox":[98,177,210,54]}
+{"kind":"textbox","id":"sh/32lszqtc","slide":21,"text":"Overview, Companies, Onboarding, Projects","textPreview":"Overview, Companies, Onboarding, Projects","textChars":41,"textLines":1,"bbox":[315,178,805,54]}
+{"kind":"shape","id":"sh/ahoza1gv","slide":21,"bbox":[70,270,10,54]}
+{"kind":"textbox","id":"sh/lwval87e","slide":21,"text":"Knowledge","textPreview":"Knowledge","textChars":9,"textLines":1,"bbox":[98,273,210,54]}
+{"kind":"textbox","id":"sh/wb2hwfyx","slide":21,"text":"Memory, Connections, Ingest, Voice Intake","textPreview":"Memory, Connections, Ingest, Voice Intake","textChars":41,"textLines":1,"bbox":[315,274,805,54]}
+{"kind":"shape","id":"sh/2lszqtcj","slide":21,"bbox":[70,366,10,54]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":21,"text":"Intake","textPreview":"Intake","textChars":6,"textLines":1,"bbox":[98,369,210,54]}
+{"kind":"textbox","id":"sh/knih4byh","slide":21,"text":"Digital Twin, Brainstorm, Memo, Personas, Strategy Artifacts","textPreview":"Digital Twin, Brainstorm, Memo, Personas, Strategy Artifacts","textChars":60,"textLines":1,"bbox":[315,370,805,54]}
+{"kind":"shape","id":"sh/d8bat47y","slide":21,"bbox":[70,462,10,54]}
+{"kind":"textbox","id":"sh/29gr2p8n","slide":21,"text":"Reasoning","textPreview":"Reasoning","textChars":9,"textLines":1,"bbox":[98,465,210,54]}
+{"kind":"textbox","id":"sh/vu9knih4","slide":21,"text":"Diagnose, Research, Contradictions, Frameworks, Diagrams, Options, Red Team","textPreview":"Diagnose, Research, Contradictions, Frameworks, Diagrams, Options, Red Team","textChars":75,"textLines":1,"bbox":[315,466,805,54]}
+{"kind":"shape","id":"sh/kf6dcbul","slide":21,"bbox":[230,584,820,62]}
+{"kind":"textbox","id":"sh/d0z61032","slide":21,"text":"Implementation pattern","textPreview":"Implementation pattern","textChars":22,"textLines":1,"bbox":[252,604,776,32]}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":21,"text":"Each surface generally maps route -> page -> tRPC router -> service or agent file. That makes the app navigable despite its breadth.","textPreview":"Each surface generally maps route -> page -> tRPC router -> service or agent file. That makes the app navigable despite its breadth.","textChars":132,"textLines":1,"bbox":[252,646,776,-12]}
+{"kind":"textbox","id":"sh/vixczed8","slide":21,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/neloj2t8","slide":21,"text":"21","textPreview":"21","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/oozqj9","slide":21,"text":""}
+{"kind":"slide","id":"sl/y8fpgq","slide":22,"title":"APPENDIX","textShapes":15}
+{"kind":"textbox","id":"sh/judg7ads","slide":22,"text":"APPENDIX","textPreview":"APPENDIX","textChars":8,"textLines":1,"bbox":[42,30,520,26]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":22,"text":"Capability catalog, part 2","textPreview":"Capability catalog, part 2","textChars":26,"textLines":1,"bbox":[42,58,900,62]}
+{"kind":"shape","id":"sh/1032lszq","slide":22,"bbox":[42,132,1196,1]}
+{"kind":"shape","id":"sh/u18jqh0f","slide":22,"bbox":[70,164,10,50]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":22,"text":"Simulation","textPreview":"Simulation","textChars":10,"textLines":1,"bbox":[98,167,210,50]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":22,"text":"War-Game, Cross-Co War-Game, Financial Simulation","textPreview":"War-Game, Cross-Co War-Game, Financial Simulation","textChars":49,"textLines":1,"bbox":[315,168,805,50]}
+{"kind":"shape","id":"sh/1orytsvu","slide":22,"bbox":[70,250,10,50]}
+{"kind":"textbox","id":"sh/upwb2hwf","slide":22,"text":"Execution","textPreview":"Execution","textChars":9,"textLines":1,"bbox":[98,253,210,50]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":22,"text":"Decompose, Pre-Mortem, Drift, KPI Library, Strategic Tracker, Linear","textPreview":"Decompose, Pre-Mortem, Drift, KPI Library, Strategic Tracker, Linear","textChars":68,"textLines":1,"bbox":[315,254,805,50]}
+{"kind":"shape","id":"sh/7u54zido","slide":22,"bbox":[70,336,10,50]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":22,"text":"Learning","textPreview":"Learning","textChars":8,"textLines":1,"bbox":[98,339,210,50]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":22,"text":"Predictions, Calibration, Attribution, Constitutional Audit, Playbooks, Pattern Mining","textPreview":"Predictions, Calibration, Attribution, Constitutional Audit, Playbooks, Pattern Mining","textChars":86,"textLines":1,"bbox":[315,340,805,50]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":22,"bbox":[70,422,10,50]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":22,"text":"Portfolio","textPreview":"Portfolio","textChars":9,"textLines":1,"bbox":[98,425,210,50]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":22,"text":"Synergy Scout, Pattern Distillation, Briefing","textPreview":"Synergy Scout, Pattern Distillation, Briefing","textChars":45,"textLines":1,"bbox":[315,426,805,50]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":22,"bbox":[70,508,10,50]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":22,"text":"Operations","textPreview":"Operations","textChars":10,"textLines":1,"bbox":[98,511,210,50]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":22,"text":"Cost Dashboard, Audit Log, Usage Events, Export, Connectors, MCP Tools, Users, Manual","textPreview":"Cost Dashboard, Audit Log, Usage Events, Export, Connectors, MCP Tools, Users, Manual","textChars":85,"textLines":1,"bbox":[315,512,805,50]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":22,"text":"The breadth is already visible in the UI navigation, but the stronger story is underneath: controlled AI routing, bi-temporal memory, prediction-ledger measurement and portfolio-safe learning.","textPreview":"The breadth is already visible in the UI navigation, but the stronger story is underneath: controlled AI routing, bi-temporal memory, pre...","textChars":192,"textLines":1,"bbox":[138,612,1000,44]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":22,"text":"CAIRN strategy platform","textPreview":"CAIRN strategy platform","textChars":23,"textLines":1,"bbox":[42,666,280,20]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":22,"text":"22","textPreview":"22","textChars":2,"textLines":1,"bbox":[1190,666,48,20]}
+{"kind":"notes","id":"nt/y8fpgq","slide":22,"text":""}

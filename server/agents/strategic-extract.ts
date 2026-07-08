@@ -89,6 +89,7 @@ export async function extractStrategicItems(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         { role: "system", content: SYSTEM_INSTRUCTION },
         { role: "user", content: trimmed },

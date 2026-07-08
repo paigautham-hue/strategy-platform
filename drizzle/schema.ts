@@ -632,6 +632,49 @@ export const strategyRisks = mysqlTable(
 );
 
 // ─────────────────────────────────────────────
+// ANALYSIS RUNS — persisted AI outputs
+// ─────────────────────────────────────────────
+// Every reasoning-surface result (diagnosis, research, war-game, …) is saved
+// here so strategy work is revisitable and exportable instead of evaporating
+// when the user navigates away. C1-namespaced like every AI-derived row.
+
+export const analysisKindEnum = [
+  "diagnosis",
+  "research",
+  "frameworks",
+  "options",
+  "red_team",
+  "war_game",
+  "pre_mortem",
+  "briefing",
+  "brainstorm",
+  "decompose",
+] as const;
+
+export const analysisRuns = mysqlTable(
+  "analysis_run",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    tenantId: varchar("tenantId", { length: 64 }).notNull(),
+    companyId: int("companyId").notNull(),
+    projectId: int("projectId"),
+    kind: mysqlEnum("kind", analysisKindEnum).notNull(),
+    /** The question/strategy/input that produced this run, truncated for lists. */
+    inputSummary: varchar("inputSummary", { length: 512 }).notNull(),
+    /** The full normalized agent result. */
+    result: json("result").$type<Record<string, unknown>>().notNull(),
+    model: varchar("model", { length: 128 }),
+    costUsd: float("costUsd"),
+    createdBy: int("createdBy"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (t) => [
+    index("idx_analysis_company_kind").on(t.tenantId, t.companyId, t.kind),
+    index("idx_analysis_created").on(t.createdAt),
+  ]
+);
+
+// ─────────────────────────────────────────────
 // EXPORTS
 // ─────────────────────────────────────────────
 
@@ -656,3 +699,4 @@ export type CompletenessTracking = typeof completenessTracking.$inferSelect;
 export type StrategyKpi = typeof strategyKpis.$inferSelect;
 export type StrategyMilestone = typeof strategyMilestones.$inferSelect;
 export type StrategyRisk = typeof strategyRisks.$inferSelect;
+export type AnalysisRun = typeof analysisRuns.$inferSelect;

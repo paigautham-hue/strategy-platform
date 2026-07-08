@@ -1,4 +1,5 @@
 import { ENV } from "./env";
+import { invokeAnthropic } from "./anthropic";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -70,6 +71,12 @@ export type InvokeParams = {
    *  replaces the default. The Manus forge endpoint accepts model="auto" to let the
    *  platform choose; task-specific overrides flow from models.yaml via the router. */
   model?: string;
+  /** Provider from models.yaml ("manus_builtin" | "anthropic"). Consumed by
+   *  invokeCompletion() to dispatch; invokeLLM() itself is always the forge path. */
+  provider?: string;
+  /** Sampling temperature from the models.yaml task profile. Omitted for models
+   *  that reject it (the Anthropic path filters per-model). */
+  temperature?: number;
 };
 
 export type ToolCall = {
@@ -220,7 +227,7 @@ const resolveApiUrl = () =>
 
 const assertApiKey = () => {
   if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+    throw new Error("BUILT_IN_FORGE_API_KEY is not configured");
   }
 };
 
@@ -282,6 +289,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     responseFormat,
     response_format,
     model,
+    maxTokens,
+    max_tokens,
+    temperature,
   } = params;
 
   // M1: Use the model provided by the router (from models.yaml).
@@ -305,9 +315,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
+  // M1: token cap and temperature come from the models.yaml task profile via
+  // the router — previously hardcoded (32768 + thinking budget), which made
+  // the per-task profiles dead config.
+  payload.max_tokens = maxTokens ?? max_tokens ?? 4096;
+  if (typeof temperature === "number") {
+    payload.temperature = temperature;
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
@@ -338,4 +351,29 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   }
 
   return (await response.json()) as InvokeResult;
+}
+
+/**
+ * Provider dispatcher — the ONE completion entry point for the router (C3).
+ *
+ * provider === "anthropic" → invokeAnthropic, degrading to the forge on a
+ * missing key or ANY failure (network, 4xx/5xx, overload, refusal) so a paid
+ * provider outage can never break the app. The forge fallback uses
+ * model: undefined (forge auto); the returned response.model tells the router
+ * what actually ran, so degraded calls are visible in llm_call_log.
+ */
+export async function invokeCompletion(params: InvokeParams): Promise<InvokeResult> {
+  if (params.provider === "anthropic") {
+    if (!ENV.anthropicApiKey) {
+      console.warn("[llm] ANTHROPIC_API_KEY missing — degrading to forge");
+      return invokeLLM({ ...params, model: undefined });
+    }
+    try {
+      return await invokeAnthropic(params);
+    } catch (err) {
+      console.warn("[llm] Anthropic call failed — degrading to forge:", err);
+      return invokeLLM({ ...params, model: undefined });
+    }
+  }
+  return invokeLLM(params);
 }

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Swords, Flag, Users, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { SectionLabel } from "@/components/SectionLabel";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface WarGameProps {
   activeCompanyId: number | null;
@@ -143,6 +144,8 @@ export default function WarGame({ activeCompanyId }: WarGameProps) {
           </p>
         </>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="war_game" />
     </div>
   );
 }

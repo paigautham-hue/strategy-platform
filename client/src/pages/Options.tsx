@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, ListChecks, Sparkles, Trophy } from "lucide-react";
 import { toast } from "sonner";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface OptionsProps {
   activeCompanyId: number | null;
@@ -130,6 +131,8 @@ export default function Options({ activeCompanyId }: OptionsProps) {
           ))}
         </div>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="options" />
     </div>
   );
 }

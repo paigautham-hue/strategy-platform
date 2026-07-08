@@ -147,6 +147,7 @@ export async function runResearchAgent(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "worker",
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
@@ -335,6 +336,7 @@ async function synthesizeFindings(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "planner",
       messages: [
         {
           role: "system",

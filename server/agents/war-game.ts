@@ -230,6 +230,7 @@ export async function runWarGame(
 
     try {
       const result = await router.structured<Record<string, unknown>>({
+        task: "planner",
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -251,6 +252,7 @@ export async function runWarGame(
   let outcome = { outcome: "The war-game produced no clear outcome.", survived: false, keyLearnings: [] as string[] };
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "planner",
       messages: [
         {
           role: "system",

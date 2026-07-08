@@ -97,6 +97,21 @@ export const MANUAL_SECTIONS: ManualSection[] = [
           "each one's memory is kept strictly separate.",
       },
       {
+        term: "Ask Cairn (Overview)",
+        body:
+          "The fastest way in: type any strategic question in the Ask Cairn box on the Overview " +
+          "page. Cairn diagnoses it and offers the right next step — research it, apply frameworks, " +
+          "or generate options — so the core loop never requires hunting through the sidebar.",
+      },
+      {
+        term: "History — saved runs & export",
+        body:
+          "Every diagnosis, research run, framework analysis, options run, red-team, war-game, " +
+          "pre-mortem, decomposition, and briefing is saved automatically. Revisit them on the " +
+          "History page (or the 'Past runs' panel on each surface) and export any run as a " +
+          "print-ready document (use your browser's Save as PDF).",
+      },
+      {
         term: "The Overview dashboard",
         body:
           "The home screen shows company count, memory size, the prediction ledger, your LLM cost, and " +
@@ -557,6 +572,20 @@ export const MANUAL_SECTIONS: ManualSection[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const FAQ_ITEMS: FaqItem[] = [
+  {
+    q: "Which AI models does Cairn use?",
+    a: "The right model for the right job. Complex planning and synthesis (diagnosis, research " +
+      "synthesis, red-team, war-games, decomposition, options) run on Claude Fable 5; fast " +
+      "extraction and structured output run on Claude Haiku; high-volume specialist fan-out and " +
+      "creative brainstorming run on the platform's built-in models. Assignments live in a config " +
+      "file, and if a provider is unavailable the call degrades gracefully to the built-in model — " +
+      "the app never breaks.",
+  },
+  {
+    q: "Are my results saved if I navigate away?",
+    a: "Yes. Every reasoning run is saved automatically and listed on the History page and in the " +
+      "'Past runs' panel on each surface. Any saved run can be exported as a print-ready document.",
+  },
   {
     q: "Where do I start?",
     a: "Onboard a company, select it as the active company, then Ingest a few documents so the " +

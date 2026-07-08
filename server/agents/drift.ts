@@ -275,6 +275,7 @@ export async function proposeReplan(
 ): Promise<ReplanProposal> {
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         {
           role: "system",

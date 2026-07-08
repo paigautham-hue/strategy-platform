@@ -48,6 +48,12 @@ import { parseVoiceIntent } from "./services/voice-intent";
 import { diagnoseQuestion } from "./agents/diagnosis";
 import { runResearchMesh } from "./agents/research";
 import {
+  saveAnalysisRun,
+  listAnalysisRuns,
+  getAnalysisRun,
+  type AnalysisKind,
+} from "./services/analysis-runs";
+import {
   mintRealtimeSession,
   buildVoiceSystemPrompt,
   checkVoiceRateLimit,
@@ -142,6 +148,27 @@ async function assertCompanyAccessible(
   assertCompanyAccess(ctx.user, companyId);
   const company = await getCompany(ctx.user.tenantId, companyId);
   if (!company) throw new TRPCError({ code: "NOT_FOUND", message: "Company not found" });
+}
+
+/**
+ * Fire-and-forget persistence of a reasoning result to analysis_run history.
+ * Best-effort by design — the user's result must never block on the history write.
+ */
+function persistAnalysisRun(
+  ctx: { user: { id: number; tenantId: string } },
+  companyId: number,
+  kind: AnalysisKind,
+  inputSummary: string,
+  result: unknown,
+) {
+  void saveAnalysisRun({
+    tenantId: ctx.user.tenantId,
+    companyId,
+    kind,
+    inputSummary,
+    result: result as Record<string, unknown>,
+    createdBy: ctx.user.id,
+  });
 }
 
 /** Require GP or admin role */
@@ -696,7 +723,9 @@ const diagnosisRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return diagnoseQuestion(input.question, routerCtx, input.companyContext);
+      const result = await diagnoseQuestion(input.question, routerCtx, input.companyContext);
+      persistAnalysisRun(ctx, input.companyId, "diagnosis", input.question, result);
+      return result;
     }),
 });
 
@@ -715,7 +744,9 @@ const researchRouter = router({
         input.companyId,
         routerCtx,
       );
-      return { diagnosis, brief };
+      const result = { diagnosis, brief };
+      persistAnalysisRun(ctx, input.companyId, "research", input.question, result);
+      return result;
     }),
 });
 
@@ -938,7 +969,9 @@ const frameworksRouter = router({
         input.companyId,
         routerCtx,
       );
-      return { diagnosis, ...result };
+      const combined = { diagnosis, ...result };
+      persistAnalysisRun(ctx, input.companyId, "frameworks", input.question, combined);
+      return combined;
     }),
 });
 
@@ -949,7 +982,9 @@ const optionsRouter = router({
     .input(z.object({ companyId: z.number(), question: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return runOptionAnalysis(input.question, input.companyId, routerCtx);
+      const result = await runOptionAnalysis(input.question, input.companyId, routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "options", input.question, result);
+      return result;
     }),
 });
 
@@ -960,7 +995,9 @@ const redTeamRouter = router({
     .input(z.object({ companyId: z.number(), strategy: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return redTeamStrategy(input.strategy, input.companyId, routerCtx);
+      const result = await redTeamStrategy(input.strategy, input.companyId, routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "red_team", input.strategy, result);
+      return result;
     }),
 });
 
@@ -994,6 +1031,7 @@ const warGameRouter = router({
       } catch {
         /* ledger write is best-effort — never block the war-game result */
       }
+      persistAnalysisRun(ctx, input.companyId, "war_game", input.strategy, result);
       return result;
     }),
 
@@ -1144,7 +1182,9 @@ const decomposerRouter = router({
     .input(z.object({ companyId: z.number(), thesis: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return decomposeStrategy(input.thesis, input.companyId, routerCtx);
+      const result = await decomposeStrategy(input.thesis, input.companyId, routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "decompose", input.thesis, result);
+      return result;
     }),
 
   // Pre-mortem launch ritual — run before an initiative goes "active".
@@ -1158,7 +1198,9 @@ const decomposerRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return runPreMortem(input.initiative, input.context ?? "", input.companyId, routerCtx);
+      const result = await runPreMortem(input.initiative, input.context ?? "", input.companyId, routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "pre_mortem", input.initiative, result);
+      return result;
     }),
 });
 
@@ -1420,7 +1462,54 @@ const briefingRouter = router({
       }
 
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return buildBriefing(input.cadence, company.name, signalLines.join("\n"), routerCtx);
+      const result = await buildBriefing(input.cadence, company.name, signalLines.join("\n"), routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "briefing", `${input.cadence} briefing — ${company.name}`, result);
+      return result;
+    }),
+});
+
+// ─── Analysis Run History Router ──────────────────────────────────────────────
+// Saved reasoning outputs (diagnosis, research, war-game, …) — list, revisit,
+// and export instead of losing results on navigation.
+
+const analysisRunKinds = z.enum([
+  "diagnosis",
+  "research",
+  "frameworks",
+  "options",
+  "red_team",
+  "war_game",
+  "pre_mortem",
+  "briefing",
+  "brainstorm",
+  "decompose",
+]);
+
+const analysisRunsRouter = router({
+  list: protectedProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        kind: analysisRunKinds.optional(),
+        limit: z.number().min(1).max(200).optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      return listAnalysisRuns(ctx.user.tenantId, input.companyId, {
+        kind: input.kind,
+        limit: input.limit,
+      });
+    }),
+
+  get: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const run = await getAnalysisRun(ctx.user.tenantId, input.id);
+      if (!run) throw new TRPCError({ code: "NOT_FOUND", message: "Analysis run not found" });
+      // C1: the run's company must be accessible to this caller.
+      assertCompanyAccess(ctx.user, run.companyId);
+      return run;
     }),
 });
 
@@ -2017,6 +2106,7 @@ export const appRouter = router({
   voice: voiceRouter,
   diagnosis: diagnosisRouter,
   research: researchRouter,
+  analysisRuns: analysisRunsRouter,
   realtime: realtimeRouter,
   frameworks: frameworksRouter,
   options: optionsRouter,

@@ -236,6 +236,7 @@ export async function runOptionAnalysis(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "planner",
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },

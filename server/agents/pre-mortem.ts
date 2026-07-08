@@ -190,6 +190,7 @@ export async function runPreMortem(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "planner",
       messages: [
         { role: "system", content: SYSTEM_INSTRUCTION },
         { role: "user", content: user },

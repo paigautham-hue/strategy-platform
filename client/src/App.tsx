@@ -6,7 +6,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { PlatformLayout } from "./components/PlatformLayout";
 import { VoiceOverlay } from "./components/VoiceOverlay";
 import { VoiceMiniPlayer } from "./components/VoiceMiniPlayer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ import McpTools from "./pages/McpTools";
 import Connectors from "./pages/Connectors";
 import Users from "./pages/Users";
 import Manual from "./pages/Manual";
+import HistoryPage from "./pages/HistoryPage";
 import NotFound from "./pages/NotFound";
 
 // ─── Login gate ───────────────────────────────────────────────────────────────
@@ -129,8 +131,40 @@ function LoginGate({ children }: { children: React.ReactNode }) {
 
 // ─── App shell ────────────────────────────────────────────────────────────────
 
+// The active company survives a page refresh — without this, every reload
+// drops the selection and re-blocks nearly every page behind "Select a company".
+const ACTIVE_COMPANY_KEY = "cairn-active-company-id";
+
+function loadActiveCompanyId(): number | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_COMPANY_KEY);
+    const parsed = raw === null ? NaN : Number(raw);
+    return Number.isInteger(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 function AppShell() {
-  const [activeCompanyId, setActiveCompanyId] = useState<number | null>(null);
+  const [activeCompanyId, setActiveCompanyIdState] = useState<number | null>(loadActiveCompanyId);
+
+  const setActiveCompanyId = (id: number | null) => {
+    setActiveCompanyIdState(id);
+    try {
+      if (id === null) localStorage.removeItem(ACTIVE_COMPANY_KEY);
+      else localStorage.setItem(ACTIVE_COMPANY_KEY, String(id));
+    } catch {
+      // Storage unavailable (private mode) — selection is session-only.
+    }
+  };
+
+  // Clear a restored selection that no longer exists (company deleted, or the
+  // stored id belongs to a company this user can't see).
+  const { data: companies } = trpc.company.list.useQuery();
+  useEffect(() => {
+    if (!companies || activeCompanyId === null) return;
+    if (!companies.some((c) => c.id === activeCompanyId)) setActiveCompanyId(null);
+  }, [companies, activeCompanyId]);
 
   return (
     <PlatformLayout
@@ -139,6 +173,7 @@ function AppShell() {
     >
       <Switch>
         <Route path="/" component={() => <Overview activeCompanyId={activeCompanyId} />} />
+        <Route path="/history" component={() => <HistoryPage activeCompanyId={activeCompanyId} />} />
         <Route path="/companies" component={() => <Companies onSelect={setActiveCompanyId} />} />
         <Route path="/onboarding" component={() => <Onboarding onSelect={setActiveCompanyId} />} />
         <Route path="/projects" component={() => <Projects activeCompanyId={activeCompanyId} />} />

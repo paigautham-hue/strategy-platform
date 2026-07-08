@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Swords, ShieldAlert, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface RedTeamProps {
   activeCompanyId: number | null;
@@ -112,6 +113,8 @@ export default function RedTeam({ activeCompanyId }: RedTeamProps) {
           </div>
         </>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="red_team" />
     </div>
   );
 }

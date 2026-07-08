@@ -176,6 +176,7 @@ export async function minePatterns(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "worker",
       messages: [
         { role: "system", content: SYSTEM_INSTRUCTION },
         { role: "user", content: `PAST PROJECTS:\n\n${rendered}` },

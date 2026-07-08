@@ -243,6 +243,7 @@ export async function runSynergyScout(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "worker",
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },

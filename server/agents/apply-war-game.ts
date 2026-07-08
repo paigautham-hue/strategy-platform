@@ -179,6 +179,7 @@ export async function runApplyDeepMode(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         { role: "system", content: COMPARE_SYSTEM },
         { role: "user", content: user },

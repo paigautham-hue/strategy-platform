@@ -15,15 +15,15 @@ completion_providers:
     description: "Default completion for strategic analysis"
 
   extraction:
-    provider: manus_builtin
-    model: auto
+    provider: anthropic
+    model: claude-haiku-4-5        # Cheap, reliable classification/extraction
     max_tokens: 2048
     temperature: 0.1               # Low temperature for deterministic extraction
     description: "Claim extraction, canonical normalization, PII detection"
 
   structured:
-    provider: manus_builtin
-    model: auto
+    provider: anthropic
+    model: claude-haiku-4-5
     max_tokens: 2048
     temperature: 0.0               # Zero temperature for JSON schema output
     description: "Structured JSON output (prediction ledger, memory normalization)"
@@ -34,6 +34,20 @@ completion_providers:
     max_tokens: 8192
     temperature: 0.7
     description: "Brainstorm mode, option generation (Phase 4)"
+
+  planner:
+    provider: anthropic
+    model: claude-fable-5          # Frontier planner for complex reasoning/synthesis
+    max_tokens: 8192
+    # NOTE: no temperature key — claude-fable-5 rejects sampling params (400)
+    description: "Complex planning & synthesis: diagnosis, research synthesis, red-team, war-game adjudication, decomposition"
+
+  worker:
+    provider: manus_builtin
+    model: auto                    # Bulk fan-out stays on the cheap forge path
+    max_tokens: 4096
+    temperature: 0.3
+    description: "High-volume specialist fan-out (research specialists, frameworks)"
 
 # ─── Embedding Models ─────────────────────────────────────────────────────────
 
@@ -88,3 +102,9 @@ budget_defaults:
     max_output_tokens: 2000
     soft_cap_usd: 0.08
     estimated_cost_usd: 0.04
+
+  planner:
+    max_input_tokens: 16000        # Fable 5 pricing ($10/$50 per MTok) needs a
+    max_output_tokens: 8000        # larger envelope — the $0.10 completion cap
+    soft_cap_usd: 0.75             # would block every planner call outright
+    estimated_cost_usd: 0.40

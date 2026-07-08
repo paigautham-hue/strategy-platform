@@ -17,7 +17,7 @@
 
 import { nanoid } from "nanoid";
 import Ajv from "ajv";
-import { invokeLLM } from "../_core/llm";
+import { invokeCompletion } from "../_core/llm";
 import { ENV } from "../_core/env";
 import { redactMessages, redact } from "./redactor";
 import {
@@ -28,10 +28,16 @@ import {
   DEFAULT_ENVELOPE,
   type BudgetEnvelope,
 } from "./budget";
-import { getCompletionConfig, getActiveEmbeddingConfig } from "./models-config";
+import {
+  getCompletionConfig,
+  getActiveEmbeddingConfig,
+  getBudgetDefaults,
+  type TaskName,
+} from "./models-config";
 import { getDb } from "../db";
 import { llmCallLogs } from "../../drizzle/schema";
 import { embeddingCache, embeddingCacheKey } from "../services/cache";
+import { and, eq, gte, sum } from "drizzle-orm";
 
 // ─── AJV instance for M4 ──────────────────────────────────────────────────────
 
@@ -53,7 +59,7 @@ export interface CompleteOptions {
   systemPrompt?: string;
   envelope?: BudgetEnvelope;
   ctx: RouterContext;
-  task?: "default" | "extraction" | "structured" | "creative";
+  task?: TaskName;
 }
 
 export interface EmbedOptions {
@@ -71,6 +77,8 @@ export interface StructuredOptions<T = unknown> {
   };
   envelope?: BudgetEnvelope;
   ctx: RouterContext;
+  /** M1: task tier from models.yaml (planner/worker/extraction/…). Defaults to "structured". */
+  task?: TaskName;
 }
 
 export interface RouterResponse {
@@ -138,6 +146,76 @@ async function logCall(params: {
   }
 }
 
+// ─── Per-user/day spend cap (P8) ──────────────────────────────────────────────
+// Sums today's llm_call_log spend per user; cached 60s so the check does not
+// add a DB round-trip to every call. Warn past the soft cap, block past the
+// hard cap. Caps of 0 disable enforcement.
+
+const DAILY_SPEND_TTL_MS = 60_000;
+const dailySpendCache = new Map<number, { total: number; fetchedAt: number }>();
+
+async function checkDailyUserCap(ctx: RouterContext): Promise<void> {
+  const hardCap = ENV.costHardCapUsdPerUserPerDay;
+  const softCap = ENV.costSoftCapUsdPerUserPerDay;
+  if (!ctx.userId || (!hardCap && !softCap)) return;
+
+  const cached = dailySpendCache.get(ctx.userId);
+  let total: number;
+  if (cached && Date.now() - cached.fetchedAt < DAILY_SPEND_TTL_MS) {
+    total = cached.total;
+  } else {
+    try {
+      const db = await getDb();
+      if (!db) return;
+      const startOfDay = new Date();
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      const rows = await db
+        .select({ total: sum(llmCallLogs.costUsd) })
+        .from(llmCallLogs)
+        .where(and(eq(llmCallLogs.userId, ctx.userId), gte(llmCallLogs.createdAt, startOfDay)));
+      total = Number(rows[0]?.total ?? 0);
+      dailySpendCache.set(ctx.userId, { total, fetchedAt: Date.now() });
+    } catch (err) {
+      // Never let the cap check itself break LLM calls.
+      console.error("[router] Daily spend check failed:", err);
+      return;
+    }
+  }
+
+  if (hardCap > 0 && total >= hardCap) {
+    throw new BudgetExceededError(
+      `Daily hard cap: user ${ctx.userId} has spent $${total.toFixed(2)} today (cap $${hardCap.toFixed(2)})`,
+      true
+    );
+  }
+  if (softCap > 0 && total >= softCap) {
+    console.warn(
+      `[router] Daily soft cap: user ${ctx.userId} has spent $${total.toFixed(2)} today (soft cap $${softCap.toFixed(2)})`
+    );
+  }
+}
+
+/**
+ * Derive a per-call budget envelope from the task's models.yaml budget
+ * defaults. Without this, the flat $0.10 DEFAULT_ENVELOPE would block every
+ * planner (claude-fable-5) call outright.
+ */
+function envelopeForTask(task: TaskName): BudgetEnvelope {
+  const budgetKey =
+    task === "planner" ? "planner"
+    : task === "extraction" ? "extraction"
+    : task === "structured" ? "structured"
+    : "completion";
+  const defaults = getBudgetDefaults(budgetKey);
+  return {
+    maxInputTokens: defaults.max_input_tokens,
+    maxOutputTokens: defaults.max_output_tokens,
+    maxLatencyMs: task === "planner" ? 120_000 : DEFAULT_ENVELOPE.maxLatencyMs,
+    softCapUsd: defaults.soft_cap_usd,
+    estimatedCostUsd: defaults.estimated_cost_usd,
+  };
+}
+
 // ─── router.complete ──────────────────────────────────────────────────────────
 
 /**
@@ -146,12 +224,16 @@ async function logCall(params: {
  */
 export async function complete(opts: CompleteOptions): Promise<RouterResponse> {
   const traceId = opts.ctx.traceId ?? nanoid(16);
-  const envelope = opts.envelope ?? DEFAULT_ENVELOPE;
+  const task: TaskName = opts.task ?? "default";
+  const envelope = opts.envelope ?? envelopeForTask(task);
   const start = Date.now();
 
   // M1: Read model config from models.yaml
-  const modelCfg = getCompletionConfig(opts.task ?? "default");
-  const modelLabel = `${modelCfg.provider}/${modelCfg.model}`;
+  const modelCfg = getCompletionConfig(task);
+  let modelLabel = `${modelCfg.provider}/${modelCfg.model}`;
+
+  // P8: per-user/day spend cap
+  await checkDailyUserCap(opts.ctx);
 
   // C5: Redact PII before any LLM call
   const redactedMessages = redactMessages(
@@ -199,10 +281,13 @@ export async function complete(opts: CompleteOptions): Promise<RouterResponse> {
       ? [{ role: "system", content: opts.systemPrompt }, ...redactedMessages]
       : redactedMessages;
 
-    const response = await invokeLLM({
-      messages: allMessages as Parameters<typeof invokeLLM>[0]["messages"],
-      // M1: pass model from models.yaml — Manus forge uses this to select the backend model
+    const response = await invokeCompletion({
+      messages: allMessages as Parameters<typeof invokeCompletion>[0]["messages"],
+      // M1: full task profile from models.yaml — provider, model, token cap, temperature
+      provider: modelCfg.provider,
       model: modelCfg.model !== "auto" ? modelCfg.model : undefined,
+      maxTokens: modelCfg.max_tokens,
+      temperature: modelCfg.temperature,
     });
     const rawContent = response.choices?.[0]?.message?.content ?? "";
     content = typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent);
@@ -213,7 +298,11 @@ export async function complete(opts: CompleteOptions): Promise<RouterResponse> {
     } else {
       tokensOut = estimateTokens(content);
     }
-    costUsd = estimateCost(tokensIn, tokensOut);
+    // Cost + log use the ACTUAL model that ran (a degraded Anthropic call
+    // falls back to forge — response.model makes that visible in llm_call_log).
+    const actualModel = response.model || modelCfg.model;
+    modelLabel = `${modelCfg.provider}/${actualModel}`;
+    costUsd = estimateCost(tokensIn, tokensOut, actualModel);
   } catch (err) {
     success = false;
     errorMessage = err instanceof Error ? err.message : String(err);
@@ -271,6 +360,9 @@ export async function embed(opts: EmbedOptions): Promise<EmbedResponse> {
   if (!ENV.openAiApiKey) {
     throw new Error("[router] OPENAI_API_KEY is not configured. Cannot generate real embeddings.");
   }
+
+  // P8: per-user/day spend cap
+  await checkDailyUserCap(opts.ctx);
 
   // C5: Redact PII
   const { redacted } = redact(opts.text);
@@ -353,8 +445,7 @@ export async function embed(opts: EmbedOptions): Promise<EmbedResponse> {
     // B3: Stamp the exact model string returned by OpenAI (e.g. "text-embedding-3-small")
     actualModel = data.model;
     tokensIn = data.usage?.prompt_tokens ?? inputTokens;
-    // OpenAI embedding pricing: $0.02 / 1M tokens
-    costUsd = (tokensIn / 1_000_000) * 0.02;
+    costUsd = estimateCost(tokensIn, 0, actualModel);
     // 8.1: Cache the vector so the same text is never embedded twice.
     if (embedding.length > 0) embeddingCache.set(embedCacheKey, embedding);
   } catch (err) {
@@ -401,12 +492,16 @@ export async function embed(opts: EmbedOptions): Promise<EmbedResponse> {
  */
 export async function structured<T = unknown>(opts: StructuredOptions<T>): Promise<{ data: T } & RouterResponse> {
   const traceId = opts.ctx.traceId ?? nanoid(16);
-  const envelope = opts.envelope ?? DEFAULT_ENVELOPE;
+  const task: TaskName = opts.task ?? "structured";
+  const envelope = opts.envelope ?? envelopeForTask(task);
   const start = Date.now();
 
-  // M1: Use structured task config from models.yaml
-  const modelCfg = getCompletionConfig("structured");
-  const modelLabel = `${modelCfg.provider}/${modelCfg.model}`;
+  // M1: Task tier from models.yaml (agents pass task: "planner" etc.)
+  const modelCfg = getCompletionConfig(task);
+  let modelLabel = `${modelCfg.provider}/${modelCfg.model}`;
+
+  // P8: per-user/day spend cap
+  await checkDailyUserCap(opts.ctx);
 
   // C5: Redact PII
   const redactedMessages = redactMessages(
@@ -451,14 +546,17 @@ export async function structured<T = unknown>(opts: StructuredOptions<T>): Promi
   let content = "";
 
   try {
-    const response = await invokeLLM({
-      messages: redactedMessages as Parameters<typeof invokeLLM>[0]["messages"],
+    const response = await invokeCompletion({
+      messages: redactedMessages as Parameters<typeof invokeCompletion>[0]["messages"],
       response_format: {
         type: "json_schema",
         json_schema: opts.schema,
       },
-      // M1: pass model from models.yaml
+      // M1: full task profile from models.yaml
+      provider: modelCfg.provider,
       model: modelCfg.model !== "auto" ? modelCfg.model : undefined,
+      maxTokens: modelCfg.max_tokens,
+      temperature: modelCfg.temperature,
     });
 
     const rawStructured = response.choices?.[0]?.message?.content ?? "{}";
@@ -488,7 +586,10 @@ export async function structured<T = unknown>(opts: StructuredOptions<T>): Promi
     } else {
       tokensOut = estimateTokens(content);
     }
-    costUsd = estimateCost(tokensIn, tokensOut);
+    // Cost + log use the ACTUAL model that ran (visible when a call degrades to forge)
+    const actualModel = response.model || modelCfg.model;
+    modelLabel = `${modelCfg.provider}/${actualModel}`;
+    costUsd = estimateCost(tokensIn, tokensOut, actualModel);
   } catch (err) {
     success = false;
     errorMessage = err instanceof Error ? err.message : String(err);

@@ -240,6 +240,7 @@ export async function generateAiStrategy(
 ): Promise<AiStrategy> {
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         { role: "system", content: STRATEGY_SYSTEM_INSTRUCTION },
         { role: "user", content: renderTwinForPrompt(twin, companyName) },

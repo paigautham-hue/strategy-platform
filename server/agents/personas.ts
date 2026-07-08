@@ -173,6 +173,7 @@ export async function consultPersona(
 
   try {
     const result = await router.structured<Record<string, unknown>>({
+      task: "extraction",
       messages: [
         { role: "system", content: persona.stance },
         { role: "user", content: user },

@@ -10,9 +10,9 @@
 
 | | |
 |---|---|
-| **Generated / Last Major Update** | 2026-05-21 (Phase 1 complete) |
-| **Version** | v0.2.0 (Phase 1 complete — memory engine end-to-end) |
-| **Current Phase** | Phase 1 ✅ complete — Phase 2 (Diagnosis + Research Mesh) is next |
+| **Generated / Last Major Update** | 2026-07-08 (multi-provider model routing + persisted analysis runs) |
+| **Version** | v0.3.0 (Phases 2–8 code-shipped 🟡 — gates pending real usage; see Phase Status) |
+| **Current Phase** | Phases 0–1 ✅ gates met; Phases 2–8 🟡 code-shipped, gates pending real usage/data/deploy |
 | **Deployment URL** | Manus-hosted (see project settings for live URL) |
 | **Repository** | [paigautham-hue/strategy-platform](https://github.com/paigautham-hue/strategy-platform) (private) |
 | **Branch** | `main` |
@@ -63,7 +63,7 @@
 | **7** | Portfolio + Synergy + Voice Briefing | 🟡 | 2026-05-21 | — | — | 7.1 Synergy, 7.2 Distillation, 7.6 Briefing builder shipped; 7.3 dashboard / 7.5 applied library / TTS audio need portfolio data + infra |
 | **8** | Harden, Optimize, On-Prem Lane | 🟡 | 2026-05-22 | — | — | 8.1 caching, 8.2 prompt compression, 8.4 ADRs + runbook shipped; on-prem vLLM / perf tuning / monitoring need deploy infra |
 
-**Currently active workstream:** Phase 1 — Memory, Ingest, Voice Intake, Hygiene Crons (next to build).
+**Currently active workstream:** hardening for real usage — multi-provider model routing (Fable 5 planner tier), persisted analysis-run history + export, UX friction fixes. All phase code is shipped; gates 2–8 await real usage/data/deploy.
 
 ---
 
@@ -189,6 +189,15 @@ badly under-reported, marking shipped+tested features as ☐):
 ## Recent Changes (most recent first — append-only)
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
+
+### 2026-07-08 · Multi-provider model routing (Fable 5 planner) + persisted analysis runs + UX friction fixes
+- **Multi-provider routing (C3/ADR-003 honored — config flips, one choke-point).** New `server/_core/anthropic.ts` (raw-fetch provider, system-message hoisting, JSON-instruction structured output, refusal detection, 120s timeout, NEVER sends `temperature`/`thinking` to always-on-thinking models). `server/_core/llm.ts` gains `invokeCompletion()` — the single dispatcher the router calls; `provider: "anthropic"` degrades to forge on missing key or ANY failure (app never breaks). **Fixed the config→runtime gap**: the hardcoded `max_tokens: 32768` + `thinking: {budget_tokens:128}` are gone; `temperature`/`max_tokens` from `models.yaml` task profiles now actually reach the provider.
+- **Task tiers in `models.yaml`**: `planner` → `claude-fable-5` (diagnosis, research synthesis, decompose, red-team, war-game rounds+adjudication, cross-co war-game, options, pre-mortem — one-line `task:` label per agent call site); `extraction`/`structured` → `claude-haiku-4-5`; `worker` (research specialist fan-out, frameworks, synergy-scout, pattern-mining) + `creative` (brainstorm, vision) stay on forge auto. New `planner` budget envelope (soft cap $0.75 — the old flat $0.10 cap would have blocked every Fable call). Broken-YAML fallback pins planner/worker to forge so a config failure never silently routes to a paid provider.
+- **Accurate per-model pricing** in `budget.ts` (`PRICING_PER_MTOK`, longest-prefix match: fable-5 $10/$50, haiku-4.5 $1/$5, gemini-2.5-flash $0.30/$2.50, embeddings) — cost logs use the ACTUAL model that ran (`llm_call_log.model` shows forge-degraded calls). **Per-user/day cost caps now enforced server-side** in the router (`COST_SOFT_CAP/HARD_CAP_USD_PER_USER_PER_DAY`, 60s-cached daily sum; warn/block).
+- **Persisted analysis runs (the ephemeral-deliverables gap).** New `analysis_run` table (migration `0004_secret_chat.sql`, additive-only) + `server/services/analysis-runs.ts` (best-effort save, C1-scoped list/get) + `analysisRuns` tRPC router. Diagnosis, research, frameworks, options, red-team, war-game, decompose, pre-mortem, and briefing mutations now persist their results. Client: `components/AnalysisHistory.tsx` ("Past runs" panels on Diagnosis/Research/Options/RedTeam/WarGame + generic result renderer + **print/PDF export**, zero deps) and a new `/history` page (all kinds, filterable).
+- **UX friction fixes**: `activeCompanyId` persists to localStorage (validated against the company list — a refresh no longer dead-ends every page); sidebar regrouped 11 → 6 task-oriented collapsible groups (only the current page's group starts open); Overview gains **Ask Cairn** — a question-first box that diagnoses and links the suggested next step (research / frameworks / options).
+- **Hygiene**: `.project-config.json` untracked + gitignored (rotate the exposed keys via Manus); misleading missing-forge-key error string fixed; `ANTHROPIC_API_KEY` documented in env.
+- **Verification**: `tsc` clean · production build clean · **569/585 tests pass, 16 skipped, 0 fail** (+28 new provider tests: payload construction, refusal/fence handling, fallback behavior, pricing, tier config, planner envelope). Live Fable-5 smoke test pending `ANTHROPIC_API_KEY` in Manus env — until set, planner/extraction tiers degrade to forge by design; verify post-deploy via `llm_call_log.model`.
 
 ### 2026-06-30 · Prototype consolidation COMPLETE — merged after a 31-pass ultra-audit
 - The salvage work (Monte Carlo + currency, MGPS fixture, doc reconciliation, Dynamo Digital Twin intake, persistence + structured-output auto-write, UI surfaces) is complete and merged to `main`.
