@@ -33,7 +33,13 @@ import { filterAccessibleCompanies, canAccessCompany } from "./services/access";
 import { encryptSecret, decryptSecret } from "./connectors/crypto";
 import { testLinearConnection, listLinearTeams, createLinearIssue } from "./connectors/linear";
 import { CONNECTOR_REGISTRY, isConnectorAvailable } from "./connectors";
-import { writeMemory, queryMemory, supersedeMemory } from "./services/memory";
+import {
+  writeMemory,
+  queryMemory,
+  supersedeMemory,
+  purgeMemoryItem,
+  purgeCompanyMemory,
+} from "./services/memory";
 import { hybridSearchMemory } from "./services/memory-search";
 import { writeLayerMemory, queryLayerMemory } from "./services/memory-layers";
 import { recordPrediction, closePrediction, listPredictions, listOpenPredictions, resolvePrediction, extractClaims } from "./services/predictions";
@@ -383,6 +389,42 @@ const memoryRouter = router({
         sessionId: input.sessionId,
         rawContent: input.rawContent,
       });
+    }),
+
+  // Purge — hard-delete dummy/test/wrong data. C19's supersede-never-delete
+  // protects real beliefs; purge is for rows that were never a belief at all.
+  // Operator-gated (portco_team cannot wipe), company-access checked, audited.
+  deleteItem: operatorProcedure
+    .input(z.object({ companyId: z.number(), itemId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      const deleted = await purgeMemoryItem({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        itemId: input.itemId,
+      });
+      if (!deleted) throw new TRPCError({ code: "NOT_FOUND", message: "Memory item not found" });
+      return { deleted: true } as const;
+    }),
+
+  purge: operatorProcedure
+    .input(
+      z.object({
+        companyId: z.number(),
+        projectId: z.number().optional(),
+        /** Explicit confirmation — the client must send true after the user confirms. */
+        confirm: z.literal(true),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await assertCompanyAccessible(ctx, input.companyId);
+      const removed = await purgeCompanyMemory({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        companyId: input.companyId,
+        projectId: input.projectId,
+      });
+      return { removed } as const;
     }),
 
   // Memory layers (1.7) — global framework canon + the GP's preference overlay.

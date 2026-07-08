@@ -583,6 +583,14 @@ export const FAQ_ITEMS: FaqItem[] = [
       "breaks.",
   },
   {
+    q: "I put in test or wrong data — how do I remove it?",
+    a: "On the Memory page, use the trash icon on any single item, or the 'Clear memory' button to " +
+      "wipe everything for the active company (you must type CLEAR to confirm). Deletion is " +
+      "permanent, restricted to operators and above, and every purge is recorded in the audit log. " +
+      "Note this is for dummy/test/wrong data — genuinely outdated beliefs are better superseded, " +
+      "which preserves the history.",
+  },
+  {
     q: "What file types can I ingest?",
     a: "Drag and drop (or click to browse) PDF, Word (.docx), PowerPoint (.pptx), Excel (.xlsx/.xls/.csv), " +
       "Markdown, and plain text — up to 20 MB. Text is extracted in your browser, then key claims are " +

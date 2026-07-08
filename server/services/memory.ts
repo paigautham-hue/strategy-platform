@@ -348,6 +348,102 @@ export async function supersedeMemory(
   return newItem;
 }
 
+// ─── purge_memory ─────────────────────────────────────────────────────────────
+// C19's supersede-never-delete protects the history of REAL beliefs. Purge
+// exists for the other case: dummy/test/wrong data that was never a belief at
+// all. It hard-deletes, is operator-gated at the router, and every purge is
+// audit-logged with what was removed.
+
+/** Hard-delete a single memory item (tenant-scoped). Returns true if deleted. */
+export async function purgeMemoryItem(params: {
+  tenantId: string;
+  userId?: number;
+  itemId: number;
+}): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+
+  // Fetch first so the audit entry records what was removed (C1: tenant-scoped).
+  const [item] = await db
+    .select()
+    .from(memoryItems)
+    .where(and(eq(memoryItems.id, params.itemId), eq(memoryItems.tenantId, params.tenantId)))
+    .limit(1);
+  if (!item) return false;
+
+  await db
+    .delete(memoryItems)
+    .where(and(eq(memoryItems.id, params.itemId), eq(memoryItems.tenantId, params.tenantId)));
+
+  void appendAudit({
+    tenantId: params.tenantId,
+    companyId: item.companyId,
+    projectId: item.projectId ?? undefined,
+    userId: params.userId,
+    action: "delete",
+    resourceType: "memory_item",
+    resourceId: String(params.itemId),
+    confidentialityTier: "confidential",
+    metadata: { purged: true, canonicalForm: item.canonicalForm?.slice(0, 200) },
+  });
+  return true;
+}
+
+/**
+ * Hard-delete ALL memory for a company (optionally scoped to one project).
+ * Returns the number of rows removed.
+ */
+export async function purgeCompanyMemory(params: {
+  tenantId: string;
+  userId?: number;
+  companyId: number;
+  projectId?: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const scope = [
+    eq(memoryItems.tenantId, params.tenantId),
+    eq(memoryItems.companyId, params.companyId),
+    ...(params.projectId !== undefined ? [eq(memoryItems.projectId, params.projectId)] : []),
+  ];
+
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(memoryItems)
+    .where(and(...scope));
+
+  if (Number(count) > 0) {
+    await db.delete(memoryItems).where(and(...scope));
+    // Contradiction edges reference memory ids — clear the company's edges too
+    // so nothing points at rows that no longer exist.
+    if (params.projectId === undefined) {
+      await db
+        .delete(contradictions)
+        .where(
+          and(
+            eq(contradictions.tenantId, params.tenantId),
+            eq(contradictions.companyId, params.companyId)
+          )
+        );
+    }
+  }
+
+  void appendAudit({
+    tenantId: params.tenantId,
+    companyId: params.companyId,
+    projectId: params.projectId,
+    userId: params.userId,
+    action: "delete",
+    resourceType: "memory_item",
+    resourceId: params.projectId !== undefined ? `project:${params.projectId}` : `company:${params.companyId}`,
+    confidentialityTier: "confidential",
+    metadata: { purged: true, scope: params.projectId !== undefined ? "project" : "company", rows: Number(count) },
+  });
+
+  return Number(count);
+}
+
 // ─── query_memory ─────────────────────────────────────────────────────────────
 
 /**

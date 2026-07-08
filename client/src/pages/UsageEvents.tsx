@@ -1,3 +1,4 @@
+import { Fragment, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,7 @@ import { Activity } from "lucide-react";
 
 export default function UsageEvents() {
   const { data: events, isLoading } = trpc.audit.usageEvents.useQuery({ limit: 100 });
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
     <div className="p-6 space-y-6 animate-fade-in">
@@ -44,7 +46,12 @@ export default function UsageEvents() {
                 </thead>
                 <tbody>
                   {events?.map((e) => (
-                    <tr key={e.id} className="border-b border-border/20 hover:bg-secondary/20">
+                    <Fragment key={e.id}>
+                    <tr
+                      className="border-b border-border/20 hover:bg-secondary/20 cursor-pointer"
+                      title="Click for the event payload"
+                      onClick={() => setExpandedId(expandedId === e.id ? null : e.id)}
+                    >
                       <td className="py-2 pr-4 text-muted-foreground whitespace-nowrap">
                         {new Date(e.createdAt).toLocaleString()}
                       </td>
@@ -64,6 +71,16 @@ export default function UsageEvents() {
                       <td className="py-2 pr-4 text-muted-foreground">{e.userId ?? "—"}</td>
                       <td className="py-2 text-muted-foreground">{e.companyId ?? "—"}</td>
                     </tr>
+                    {expandedId === e.id && (
+                      <tr className="border-b border-border/20 bg-secondary/10">
+                        <td colSpan={6} className="py-2 px-3">
+                          <pre className="whitespace-pre-wrap break-all text-[11px] font-mono text-muted-foreground bg-secondary/30 rounded p-2 border border-border/30">
+                            {e.metadata != null ? JSON.stringify(e.metadata, null, 2) : "No payload."}
+                          </pre>
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>

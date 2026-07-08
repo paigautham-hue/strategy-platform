@@ -55,7 +55,7 @@ function StatCard({
   loading?: boolean;
 }) {
   const content = (
-    <Card className="card-glass hover:border-gold/30 transition-colors cursor-pointer group">
+    <Card className={`card-glass transition-colors group ${href ? "hover:border-gold/30 cursor-pointer" : ""}`}>
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-1">

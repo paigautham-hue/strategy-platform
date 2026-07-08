@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Users, MessageSquare, Quote } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ export default function Personas({ activeCompanyId }: PersonasProps) {
   const [personaId, setPersonaId] = useState<string>("");
   const [question, setQuestion] = useState("");
 
-  const { data: personas } = trpc.persona.list.useQuery();
+  const { data: personas, isLoading: personasLoading } = trpc.persona.list.useQuery();
 
   const consultMut = trpc.persona.consult.useMutation({
     onSuccess: (r) => toast.success(`${r.personaLabel} responded`),
@@ -51,6 +52,8 @@ export default function Personas({ activeCompanyId }: PersonasProps) {
           <CardTitle className="font-heading text-lg">Choose a persona</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
+          {personasLoading &&
+            [1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
           {personas?.map((p) => (
             <button
               key={p.id}

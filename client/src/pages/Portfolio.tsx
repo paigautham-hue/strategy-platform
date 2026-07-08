@@ -4,14 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LayoutDashboard, CheckCircle2, XCircle, Target } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
   activeCompanyId: number | null;
+  /** Clicking a company row makes it the active company. */
+  onCompanySwitch?: (id: number) => void;
 }
 
-export default function Portfolio({ activeCompanyId }: Props) {
+export default function Portfolio({ activeCompanyId, onCompanySwitch }: Props) {
   const overview = trpc.portfolio.overview.useQuery(undefined, { retry: false });
   const [actuals, setActuals] = useState<Record<number, string>>({});
 
@@ -78,11 +81,28 @@ export default function Portfolio({ activeCompanyId }: Props) {
           <CardTitle className="font-heading text-lg">By company</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          {(data?.companies ?? []).length === 0 && (
+          {overview.isLoading && (
+            <div className="space-y-2">
+              {[1, 2].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+            </div>
+          )}
+          {!overview.isLoading && (data?.companies ?? []).length === 0 && (
             <p className="text-sm text-muted-foreground font-body">No companies yet.</p>
           )}
           {(data?.companies ?? []).map((c) => (
-            <div key={c.companyId} className="rounded border border-border/40 bg-secondary/20 p-3 flex items-center justify-between gap-3">
+            <div
+              key={c.companyId}
+              role="button"
+              tabIndex={0}
+              title="Click to make this the active company"
+              onClick={() => onCompanySwitch?.(c.companyId)}
+              onKeyDown={(e) => e.key === "Enter" && onCompanySwitch?.(c.companyId)}
+              className={`rounded border p-3 flex items-center justify-between gap-3 cursor-pointer transition-colors ${
+                c.companyId === activeCompanyId
+                  ? "border-gold/40 bg-gold/5"
+                  : "border-border/40 bg-secondary/20 hover:border-gold/30"
+              }`}
+            >
               <div>
                 <p className="text-sm font-heading text-foreground">{c.name}</p>
                 <p className="text-xs text-muted-foreground font-body">

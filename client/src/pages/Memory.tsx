@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Plus, Search, AlertCircle, Lock } from "lucide-react";
+import { Brain, Plus, Search, AlertCircle, Lock, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,14 +22,95 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 interface MemoryProps {
   activeCompanyId: number | null;
 }
 
-export default function Memory({ activeCompanyId }: MemoryProps) {
+/** Danger-zone dialog: wipe ALL memory for the company after typed confirmation. */
+function ClearMemoryDialog({
+  companyId,
+  itemCount,
+  onDone,
+}: {
+  companyId: number;
+  itemCount: number;
+  onDone: () => void;
+}) {
   const [open, setOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+
+  const purgeMut = trpc.memory.purge.useMutation({
+    onSuccess: (r) => {
+      toast.success(`Cleared ${r.removed} memory item(s)`);
+      setOpen(false);
+      setConfirmText("");
+      onDone();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setConfirmText(""); }}>
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          variant="outline"
+          className="font-sans gap-2 border-destructive/40 text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="h-4 w-4" /> Clear memory
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-card border-border/60 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-heading text-destructive flex items-center gap-2">
+            <Trash2 className="h-4 w-4" /> Clear all memory for this company
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
+          <p className="text-sm text-muted-foreground font-body leading-relaxed">
+            This permanently deletes <span className="text-foreground font-medium">{itemCount}+ memory item(s)</span> and
+            their contradiction links. Use it to remove dummy, test, or wrong data. This cannot be undone —
+            every analysis afterwards starts from an empty memory.
+          </p>
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
+              Type <span className="text-destructive font-medium">CLEAR</span> to confirm
+            </label>
+            <Input
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="CLEAR"
+              className="bg-secondary/50 border-border/60"
+            />
+          </div>
+          <Button
+            variant="destructive"
+            className="w-full font-sans gap-2"
+            disabled={confirmText !== "CLEAR" || purgeMut.isPending}
+            onClick={() => purgeMut.mutate({ companyId, confirm: true })}
+          >
+            <Trash2 className="h-4 w-4" />
+            {purgeMut.isPending ? "Clearing…" : "Permanently clear all memory"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default function Memory({ activeCompanyId }: MemoryProps) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Debounce: hybrid search embeds the query — don't fire one per keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setSearchQuery(searchInput), 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
   const [rawContent, setRawContent] = useState("");
   const [claimModality, setClaimModality] = useState<"actual" | "hypothetical" | "simulated" | "counterfactual">("actual");
   const [confidence, setConfidence] = useState("0.7");
@@ -48,6 +129,17 @@ export default function Memory({ activeCompanyId }: MemoryProps) {
     },
     onError: (e) => toast.error(e.message),
   });
+
+  const deleteMut = trpc.memory.deleteItem.useMutation({
+    onSuccess: () => {
+      toast.success("Memory item deleted");
+      refetch();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  // Purge is operator-gated server-side; hide the controls from portco_team.
+  const canPurge = user?.role !== "portco_team";
 
   if (!activeCompanyId) {
     return (
@@ -68,6 +160,14 @@ export default function Memory({ activeCompanyId }: MemoryProps) {
             Company-scoped isolation enforced · Bi-temporal (C19) · Canonical form (C20)
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        {canPurge && (
+          <ClearMemoryDialog
+            companyId={activeCompanyId}
+            itemCount={memories?.length ?? 0}
+            onDone={() => refetch()}
+          />
+        )}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="gradient-gold text-background font-sans gap-2">
@@ -146,14 +246,15 @@ export default function Memory({ activeCompanyId }: MemoryProps) {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search memory by keyword..."
           className="pl-9 bg-secondary/50 border-border/60 font-sans"
         />
@@ -216,6 +317,22 @@ export default function Memory({ activeCompanyId }: MemoryProps) {
                   <span className="text-[10px] text-muted-foreground font-sans ml-auto">
                     {new Date(m.validAt).toLocaleDateString()}
                   </span>
+                  {canPurge && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                      title="Delete this memory item (for wrong/test data)"
+                      disabled={deleteMut.isPending}
+                      onClick={() => {
+                        if (window.confirm("Permanently delete this memory item? This cannot be undone.")) {
+                          deleteMut.mutate({ companyId: activeCompanyId, itemId: m.id });
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

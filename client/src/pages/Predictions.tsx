@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Plus, AlertCircle, CheckCircle2 } from "lucide-react";
+import { TrendingUp, Plus, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +20,83 @@ interface PredictionsProps {
   activeCompanyId: number | null;
 }
 
+/** Inline outcome-resolution form for an open prediction. */
+function ResolveForm({
+  predictionId,
+  companyId,
+  onDone,
+}: {
+  predictionId: number;
+  companyId: number;
+  onDone: () => void;
+}) {
+  const [held, setHeld] = useState<boolean | null>(null);
+  const [actualValue, setActualValue] = useState("");
+
+  const resolveMut = trpc.prediction.resolve.useMutation({
+    onSuccess: () => {
+      toast.success("Outcome recorded — calibration updated");
+      onDone();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <div className="mt-2 ml-8 space-y-2 rounded border border-border/40 bg-secondary/30 p-3">
+      <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
+        Record the real-world outcome
+      </p>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant={held === true ? "default" : "outline"}
+          className={`h-7 text-xs gap-1.5 ${held === true ? "bg-success/20 text-success border border-success/40 hover:bg-success/30" : ""}`}
+          onClick={() => setHeld(true)}
+        >
+          <CheckCircle2 className="h-3 w-3" /> Held
+        </Button>
+        <Button
+          size="sm"
+          variant={held === false ? "default" : "outline"}
+          className={`h-7 text-xs gap-1.5 ${held === false ? "bg-destructive/20 text-destructive border border-destructive/40 hover:bg-destructive/30" : ""}`}
+          onClick={() => setHeld(false)}
+        >
+          <XCircle className="h-3 w-3" /> Did not hold
+        </Button>
+      </div>
+      <Textarea
+        value={actualValue}
+        onChange={(e) => setActualValue(e.target.value)}
+        placeholder="What actually happened?"
+        className="bg-secondary/50 border-border/60 font-body text-sm"
+        rows={2}
+      />
+      <Button
+        size="sm"
+        className="w-full gradient-gold text-background font-sans text-xs"
+        disabled={held === null || !actualValue.trim() || resolveMut.isPending}
+        onClick={() =>
+          resolveMut.mutate({
+            predictionId,
+            companyId,
+            held: held as boolean,
+            actualValue: actualValue.trim(),
+          })
+        }
+      >
+        {resolveMut.isPending ? "Recording…" : "Record outcome"}
+      </Button>
+    </div>
+  );
+}
+
 export default function Predictions({ activeCompanyId }: PredictionsProps) {
   const [open, setOpen] = useState(false);
   const [claim, setClaim] = useState("");
   const [confidence, setConfidence] = useState("0.7");
   const [framework, setFramework] = useState("");
   const [horizon, setHorizon] = useState("");
+  const [resolvingId, setResolvingId] = useState<number | null>(null);
 
   const { data: predictions, isLoading, refetch } = trpc.prediction.list.useQuery(
     { companyId: activeCompanyId!, limit: 100 },
@@ -198,7 +269,27 @@ export default function Predictions({ activeCompanyId }: PredictionsProps) {
                   <span className="text-[10px] text-muted-foreground font-sans ml-auto">
                     {new Date(p.createdAt).toLocaleDateString()}
                   </span>
+                  {!p.outcomeId && p.outcomeClass !== "synthetic" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 text-[11px] px-2"
+                      onClick={() => setResolvingId(resolvingId === p.id ? null : p.id)}
+                    >
+                      {resolvingId === p.id ? "Cancel" : "Resolve"}
+                    </Button>
+                  )}
                 </div>
+                {resolvingId === p.id && (
+                  <ResolveForm
+                    predictionId={p.id}
+                    companyId={activeCompanyId}
+                    onDone={() => {
+                      setResolvingId(null);
+                      refetch();
+                    }}
+                  />
+                )}
               </CardContent>
             </Card>
           ))}

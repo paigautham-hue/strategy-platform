@@ -210,7 +210,7 @@ function AppShell() {
         <Route path="/playbooks" component={() => <Playbooks activeCompanyId={activeCompanyId} />} />
         <Route path="/patterns" component={() => <PatternMining activeCompanyId={activeCompanyId} />} />
         <Route path="/synergy" component={SynergyScout} />
-        <Route path="/portfolio" component={() => <Portfolio activeCompanyId={activeCompanyId} />} />
+        <Route path="/portfolio" component={() => <Portfolio activeCompanyId={activeCompanyId} onCompanySwitch={setActiveCompanyId} />} />
         <Route path="/distillation" component={Distillation} />
         <Route path="/briefing" component={() => <Briefing activeCompanyId={activeCompanyId} />} />
         <Route path="/cost" component={CostDashboard} />
