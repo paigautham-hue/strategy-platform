@@ -143,6 +143,14 @@ async function logCall(params: {
     });
   } catch (err) {
     console.error("[router] Failed to log LLM call:", err);
+  } finally {
+    // Keep the daily-cap cache truthful within its TTL: without this, a burst
+    // of parallel calls (research fan-out) each passes the check against a
+    // stale snapshot and the per-user/day cap can be blown straight through.
+    if (params.ctx.userId && params.costUsd > 0) {
+      const cached = dailySpendCache.get(params.ctx.userId);
+      if (cached) cached.total += params.costUsd;
+    }
   }
 }
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Download, AlertCircle, Lock, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { GpOnlyGate } from "./Distillation";
 
 interface ExportPageProps {
   activeCompanyId: number | null;
@@ -36,6 +37,7 @@ export default function ExportPage({ activeCompanyId }: ExportPageProps) {
   }
 
   return (
+    <GpOnlyGate>
     <div className="p-6 space-y-6 animate-fade-in">
       <div>
         <h2 className="font-heading text-2xl text-foreground">Encrypted Export</h2>
@@ -129,5 +131,6 @@ export default function ExportPage({ activeCompanyId }: ExportPageProps) {
         </CardContent>
       </Card>
     </div>
+    </GpOnlyGate>
   );
 }

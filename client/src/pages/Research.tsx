@@ -20,10 +20,12 @@ const CONF_COLOR: Record<string, string> = {
 
 export default function Research({ activeCompanyId }: ResearchProps) {
   const [question, setQuestion] = useState("");
+  const utils = trpc.useUtils();
 
   const runMut = trpc.research.run.useMutation({
     onSuccess: (r) => {
       toast.success(`Research complete — ${r.brief.specialists.length} specialists reported`);
+      void utils.analysisRuns.list.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });

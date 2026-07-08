@@ -15,10 +15,13 @@ interface WarGameProps {
 
 export default function WarGame({ activeCompanyId }: WarGameProps) {
   const [strategy, setStrategy] = useState("");
+  const utils = trpc.useUtils();
 
   const runMut = trpc.warGame.run.useMutation({
-    onSuccess: (r) =>
-      toast.success(`War-game complete — strategy ${r.survived ? "survived" : "did not survive"}`),
+    onSuccess: (r) => {
+      toast.success(`War-game complete — strategy ${r.survived ? "survived" : "did not survive"}`);
+      void utils.analysisRuns.list.invalidate();
+    },
     onError: (e) => toast.error(e.message),
   });
 

@@ -109,7 +109,8 @@ import { twinDimensionEnum, type UserRole } from "../drizzle/schema";
 import { generateDiagram } from "./agents/diagram";
 import { multiHopQuery } from "./services/entity-graph";
 import { listContradictions, resolveContradiction } from "./services/contradictions";
-import { emitUsage, auditCrossCompanyRead } from "./middleware/audit";
+import { emitUsage, auditCrossCompanyRead, appendAudit } from "./middleware/audit";
+import { redact } from "./ai/redactor";
 import * as mcpGateway from "./ai/mcp-gateway";
 import type { RouterContext } from "./ai/router";
 
@@ -402,6 +403,7 @@ const memoryRouter = router({
         tenantId: ctx.user.tenantId,
         userId: ctx.user.id,
         itemId: input.itemId,
+        companyId: input.companyId,
       });
       if (!deleted) throw new TRPCError({ code: "NOT_FOUND", message: "Memory item not found" });
       return { deleted: true } as const;
@@ -436,6 +438,14 @@ const memoryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // The GLOBAL layer feeds every company's reasoning — writing to it is
+      // GP/admin-only. The user layer stays per-caller.
+      if (input.layer === "global" && ctx.user.role !== "gp" && ctx.user.role !== "admin") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only a GP or admin may write to the global knowledge layer.",
+        });
+      }
       return writeLayerMemory(
         input.layer,
         ctx.user.tenantId,
@@ -469,6 +479,16 @@ const predictionRouter = router({
   list: protectedProcedure
     .input(z.object({ companyId: z.number(), projectId: z.number().optional(), limit: z.number().optional() }))
     .query(async ({ ctx, input }) => {
+      // C6: predictions are confidential strategic claims — audit the read.
+      void appendAudit({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        userId: ctx.user.id,
+        action: "read",
+        resourceType: "prediction",
+        resourceId: "list",
+        confidentialityTier: "confidential",
+      });
       return listPredictions({ tenantId: ctx.user.tenantId, ...input });
     }),
 
@@ -525,7 +545,18 @@ const predictionRouter = router({
   // Open (unresolved) real predictions awaiting a real-world outcome.
   listOpen: protectedProcedure
     .input(z.object({ companyId: z.number(), overdueOnly: z.boolean().optional(), limit: z.number().min(1).max(200).optional() }))
-    .query(({ ctx, input }) => listOpenPredictions({ tenantId: ctx.user.tenantId, ...input })),
+    .query(({ ctx, input }) => {
+      void appendAudit({
+        tenantId: ctx.user.tenantId,
+        companyId: input.companyId,
+        userId: ctx.user.id,
+        action: "read",
+        resourceType: "prediction",
+        resourceId: "list-open",
+        confidentialityTier: "confidential",
+      });
+      return listOpenPredictions({ tenantId: ctx.user.tenantId, ...input });
+    }),
 
   // Record the real-world outcome of a prediction → feeds the calibration record.
   resolve: protectedProcedure
@@ -788,6 +819,26 @@ const researchRouter = router({
       );
       const result = { diagnosis, brief };
       persistAnalysisRun(ctx, input.companyId, "research", input.question, result);
+      // C2: shipped claims enter the prediction ledger. Best-effort, but a
+      // failure is loudly logged — a silent ledger gap breaks calibration.
+      try {
+        const claims = await extractClaims(brief.synthesis, routerCtx);
+        for (const c of claims.slice(0, 5)) {
+          await recordPrediction({
+            tenantId: ctx.user.tenantId,
+            companyId: input.companyId,
+            userId: ctx.user.id,
+            claim: c.claim,
+            confidence: Math.max(0, Math.min(1, c.confidence)),
+            framework: c.framework,
+            horizon: c.horizon,
+            model: "research-mesh",
+            outcomeClass: "real",
+          });
+        }
+      } catch (err) {
+        console.error("[ledger] research claim recording FAILED:", err);
+      }
       return result;
     }),
 });
@@ -897,10 +948,13 @@ const realtimeRouter = router({
         case "lookup_company": {
           const company = await getCompany(ctx.user.tenantId, input.companyId);
           if (!company) return { error: "Company not found." };
+          // C5: redact free-text fields before they reach the realtime provider.
           return {
             name: company.name,
             industry: (company as any).industry ?? null,
-            description: (company as any).description ?? null,
+            description: (company as any).description
+              ? redact(String((company as any).description)).redacted
+              : null,
           };
         }
         case "lookup_memory": {
@@ -913,9 +967,21 @@ const realtimeRouter = router({
             limit: 6,
             ctx: buildRouterCtx(ctx, { companyId: input.companyId }),
           });
+          // C6: voice reads of confidential memory are audited like any other read.
+          void appendAudit({
+            tenantId: ctx.user.tenantId,
+            companyId: input.companyId,
+            userId: ctx.user.id,
+            action: "read",
+            resourceType: "memory_item",
+            resourceId: `voice-lookup:${query.slice(0, 80)}`,
+            confidentialityTier: "confidential",
+            metadata: { surface: "voice", results: items.length },
+          });
           return {
             results: items.map((m: any) => ({
-              content: m.content,
+              // C5: redact before the content is spoken through a hosted provider.
+              content: typeof m.content === "string" ? redact(m.content).redacted : m.content,
               layer: m.layer ?? m.kind ?? null,
               validAt: m.validAt ?? null,
             })),
@@ -933,10 +999,20 @@ const realtimeRouter = router({
             getCalibrationRecords({ tenantId: ctx.user.tenantId, companyId: input.companyId }),
           ]);
           const scorecard = computeScorecard(records);
+          void appendAudit({
+            tenantId: ctx.user.tenantId,
+            companyId: input.companyId,
+            userId: ctx.user.id,
+            action: "read",
+            resourceType: "prediction",
+            resourceId: "voice-lookup",
+            confidentialityTier: "confidential",
+            metadata: { surface: "voice", openCount: open.length },
+          });
           return {
             openCount: open.length,
             predictions: open.map((p: any) => ({
-              claim: p.claim ?? null,
+              claim: typeof p.claim === "string" ? redact(p.claim).redacted : null,
               confidence: p.confidence ?? null,
               targetDate: p.targetDate ?? null,
             })),
@@ -1070,8 +1146,10 @@ const warGameRouter = router({
           horizon: "simulated",
           outcomeClass: "synthetic",
         });
-      } catch {
-        /* ledger write is best-effort — never block the war-game result */
+      } catch (err) {
+        // Best-effort: the user still gets the result, but a ledger gap is
+        // never silent (C2) — it breaks calibration if it goes unnoticed.
+        console.error("[ledger] war-game prediction write FAILED:", err);
       }
       persistAnalysisRun(ctx, input.companyId, "war_game", input.strategy, result);
       return result;
@@ -1138,8 +1216,8 @@ const warGameRouter = router({
             horizon: "simulated",
             outcomeClass: "synthetic",
           });
-        } catch {
-          /* ledger write is best-effort */
+        } catch (err) {
+          console.error("[ledger] cross-company war-game prediction write FAILED:", err);
         }
       }
       return result;
@@ -1908,9 +1986,10 @@ const visionRouter = router({
     }),
 
   // Vision OUT: generate a raster image (e.g. a diagram export) from a prompt.
+  // C5: the prompt is redacted before it reaches the image provider.
   generate: protectedProcedure
     .input(z.object({ prompt: z.string().min(1).max(2_000) }))
-    .mutation(({ input }) => generateVisual(input.prompt)),
+    .mutation(({ input }) => generateVisual(redact(input.prompt).redacted)),
 });
 
 // ─── Strategic Management Router (Phase 5 — structured-output auto-write; from StrategyForge) ─

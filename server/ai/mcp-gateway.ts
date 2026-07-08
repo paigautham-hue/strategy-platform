@@ -16,6 +16,7 @@ import type { RouterContext } from "./router";
 import { getDb } from "../db";
 import { memoryItems } from "../../drizzle/schema";
 import { and, eq, isNull } from "drizzle-orm";
+import { appendAudit } from "../middleware/audit";
 
 // ─── Tool Registry Types ──────────────────────────────────────────────────────
 
@@ -158,6 +159,20 @@ async function lookupMemoryHandler(
   const filtered = rows.filter((r) =>
     r.canonicalForm.toLowerCase().includes(queryLower)
   );
+
+  // C6: MCP memory reads are confidential reads — audit like every other path.
+  void appendAudit({
+    tenantId: ctx.tenantId,
+    companyId: ctx.companyId,
+    projectId: ctx.projectId,
+    userId: ctx.userId,
+    action: "read",
+    resourceType: "memory_item",
+    resourceId: `mcp-lookup:${input.query.slice(0, 80)}`,
+    confidentialityTier: "confidential",
+    traceId: ctx.traceId,
+    metadata: { tool: "lookup_memory", results: filtered.length },
+  });
 
   return { memories: filtered };
 }

@@ -152,17 +152,54 @@ interface AnalysisHistoryProps {
   kind?: AnalysisKind;
   limit?: number;
   title?: string;
+  /** Render skeleton/empty/error states instead of disappearing (History page). */
+  showEmpty?: boolean;
 }
 
-export function AnalysisHistory({ companyId, kind, limit, title }: AnalysisHistoryProps) {
+export function AnalysisHistory({ companyId, kind, limit, title, showEmpty }: AnalysisHistoryProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const { data: runs, isLoading } = trpc.analysisRuns.list.useQuery({
+  const { data: runs, isLoading, isError, error } = trpc.analysisRuns.list.useQuery({
     companyId,
     kind,
     limit: limit ?? 20,
   });
 
-  if (isLoading || !runs || runs.length === 0) return null;
+  // Per-page panels stay invisible until there is history to show; the
+  // History page (showEmpty) always renders its state.
+  if (!showEmpty && (isLoading || isError || !runs || runs.length === 0)) return null;
+
+  if (showEmpty && isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-14 w-full rounded bg-secondary/40 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+  if (showEmpty && isError) {
+    return (
+      <Card className="card-glass border-destructive/40">
+        <CardContent className="py-8 text-center text-sm text-muted-foreground font-body">
+          Could not load history{error?.message ? ` — ${error.message}` : ""}. Try refreshing.
+        </CardContent>
+      </Card>
+    );
+  }
+  if (showEmpty && (!runs || runs.length === 0)) {
+    return (
+      <Card className="card-glass">
+        <CardContent className="py-12 text-center space-y-1">
+          <History className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-foreground font-body">No saved runs yet.</p>
+          <p className="text-xs text-muted-foreground font-body">
+            Run a diagnosis, research, war-game, or any other analysis — every result is saved here automatically.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+  if (!runs || runs.length === 0) return null;
 
   return (
     <Card className="card-glass">

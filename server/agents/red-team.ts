@@ -216,12 +216,14 @@ export async function redTeamStrategy(
     });
     return normalizeRedTeamReview(result.data, strategy);
   } catch {
+    // Fail CLOSED: a review that could not run must never read as a pass —
+    // "survived" here would clear strategies the red team never saw.
     return {
       strategy,
       critiques: [],
-      fatalFlaws: [],
-      verdict: "The red-team review could not be completed.",
-      survivedReview: true,
+      fatalFlaws: ["The red-team review could not be completed — do not treat this strategy as cleared. Re-run the review."],
+      verdict: "Review failed to run. Not cleared.",
+      survivedReview: false,
     };
   }
 }

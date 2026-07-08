@@ -19,8 +19,12 @@ export default function Personas({ activeCompanyId }: PersonasProps) {
 
   const { data: personas, isLoading: personasLoading } = trpc.persona.list.useQuery();
 
+  const utils = trpc.useUtils();
   const consultMut = trpc.persona.consult.useMutation({
-    onSuccess: (r) => toast.success(`${r.personaLabel} responded`),
+    onSuccess: (r) => {
+      toast.success(`${r.personaLabel} responded`);
+      void utils.analysisRuns.list.invalidate();
+    },
     onError: (e) => toast.error(e.message),
   });
 

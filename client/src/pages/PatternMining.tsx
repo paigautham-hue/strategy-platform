@@ -14,7 +14,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface PatternMiningProps {
@@ -24,23 +24,25 @@ interface PatternMiningProps {
 export default function PatternMining({ activeCompanyId }: PatternMiningProps) {
   const [projects, setProjects] = useState<string[]>(["", ""]);
   const [draftedPattern, setDraftedPattern] = useState<string | null>(null);
+  const [, navigate] = useLocation();
 
+  const utils = trpc.useUtils();
   const mineMut = trpc.pattern.mine.useMutation({
-    onSuccess: (r) =>
+    onSuccess: (r) => {
       toast.success(
         `Found ${r.patterns.length} patterns, ${r.antiPatterns.length} anti-patterns`,
-      ),
+      );
+      void utils.analysisRuns.list.invalidate();
+    },
     onError: (e) => toast.error(e.message),
   });
 
   const draftMut = trpc.playbook.draft.useMutation({
     onSuccess: (p) => {
-      toast.success(
-        <span>
-          Playbook drafted and saved: <strong>{p.title}</strong> —{" "}
-          <Link href="/playbooks"><a className="underline">open Playbooks</a></Link>
-        </span>,
-      );
+      toast.success(`Playbook drafted and saved: ${p.title}`, {
+        action: { label: "Open Playbooks", onClick: () => navigate("/playbooks") },
+      });
+      void utils.analysisRuns.list.invalidate();
     },
     onError: (e) => toast.error(e.message),
     onSettled: () => setDraftedPattern(null),

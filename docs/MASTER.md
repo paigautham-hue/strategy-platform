@@ -190,6 +190,18 @@ badly under-reported, marking shipped+tested features as ☐):
 
 > Format: `### YYYY-MM-DD · <one-line summary>` then a few bullet points of what changed and where.
 
+### 2026-07-08 · QA-audit hardening — security, tenancy, ledger integrity (see docs/QA_AUDIT_REPORT_2026-07-08.md)
+- An external QA audit (Cursor) found real defects; all Blocker/High items fixed same-day — full resolution log appended to the report. Highlights:
+- **B1**: Gemini raw API key can no longer reach the browser as a fallback — raw mode is an explicit `GEMINI_USE_EPHEMERAL_TOKENS=false` opt-in only; a failed ephemeral mint now fails the session.
+- **H1 (C1 structural fix)**: new `enforceCompanyScope` middleware on `protectedProcedure` — every procedure whose input carries `companyId` is checked against role + `assignedCompanyIds` at the transport boundary. The company-access gap flagged on 2026-06-30 is closed for the whole API surface.
+- **H2/H3/H10/H11**: memory supersede/delete IDORs closed (tenant+company-scoped lookups), idempotency-key retries return the existing row, supersede validates the old row exists and is current.
+- **H4–H7**: redaction on the voice path (system prompt + all three lookup tools) and vision.generate; audit entries on MCP/voice memory reads and prediction list reads.
+- **H8/H9**: global-layer writes GP-only; export re-encrypted with AES-256-GCM (scrypt key, IV+auth tag) replacing XOR.
+- **C1–C3 (ledger)**: research synthesis claims now recorded to the prediction ledger; ledger-write failures loudly logged; `UNIQUE(outcome.predictionId)` + already-resolved guard kill the double-close race (migration `0006`).
+- **H12/H13**: daily-cap cache incremented per call (parallel fan-out can't blow the cap); red-team fails CLOSED on LLM failure.
+- **Frontend**: onboarding steps gate until a company exists; history panels auto-refresh; `/history` gets loading/empty/error states; distillation preview/publish state resets on edit; cross-co selection capped at 6; GP-only pages gated in UI.
+- **Verification**: tsc clean · build clean · 573/589 tests pass.
+
 ### 2026-07-08 · Multi-provider model routing (Fable 5 planner) + persisted analysis runs + UX friction fixes
 - **Multi-provider routing (C3/ADR-003 honored — config flips, one choke-point).** New `server/_core/anthropic.ts` (raw-fetch provider, system-message hoisting, JSON-instruction structured output, refusal detection, 120s timeout, NEVER sends `temperature`/`thinking` to always-on-thinking models). `server/_core/llm.ts` gains `invokeCompletion()` — the single dispatcher the router calls; `provider: "anthropic"` degrades to forge on missing key or ANY failure (app never breaks). **Fixed the config→runtime gap**: the hardcoded `max_tokens: 32768` + `thinking: {budget_tokens:128}` are gone; `temperature`/`max_tokens` from `models.yaml` task profiles now actually reach the provider.
 - **Task tiers in `models.yaml`**: `planner` → `claude-fable-5` (diagnosis, research synthesis, decompose, red-team, war-game rounds+adjudication, cross-co war-game, options, pre-mortem — one-line `task:` label per agent call site); `extraction`/`structured` → `claude-haiku-4-5`; `worker` (research specialist fan-out, frameworks, synergy-scout, pattern-mining) + `creative` (brainstorm, vision) stay on forge auto. New `planner` budget envelope (soft cap $0.75 — the old flat $0.10 cap would have blocked every Fable call). Broken-YAML fallback pins planner/worker to forge so a config failure never silently routes to a paid provider.

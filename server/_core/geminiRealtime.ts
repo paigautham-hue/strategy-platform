@@ -212,28 +212,35 @@ export async function mintGeminiLiveSession(opts: {
     systemPrompt: opts.systemPrompt,
   });
 
-  const ephemeralToken = await mintEphemeralToken(apiKey);
-
-  if (ephemeralToken) {
+  // Raw-key mode exists ONLY as an explicit operator opt-in (kill switch env
+  // var) — e.g. a dev environment whose key has no ephemeral-token access.
+  // It ships the raw API key to the browser, so it must never be an implicit
+  // fallback: a failed mint fails the session instead (B1).
+  if (process.env.GEMINI_USE_EPHEMERAL_TOKENS === "false") {
     return {
-      token: ephemeralToken,
-      authMethod: "ephemeral",
+      token: apiKey,
+      authMethod: "raw",
       model: GEMINI_LIVE_MODEL,
       voice,
-      apiVersion: "v1alpha",
+      apiVersion: "v1beta",
       setup,
     };
   }
 
-  // Graceful fallback — ship the raw key on the v1beta endpoint. The token
-  // is never theft-proof here, but the rest of the path is byte-identical
-  // below the auth layer (the client picks v1beta + ?key= from authMethod).
+  const ephemeralToken = await mintEphemeralToken(apiKey);
+  if (!ephemeralToken) {
+    throw new Error(
+      "Gemini Live is temporarily unavailable — ephemeral token mint failed. " +
+        "The raw API key is never sent to the browser. Retry shortly, or use the OpenAI engine.",
+    );
+  }
+
   return {
-    token: apiKey,
-    authMethod: "raw",
+    token: ephemeralToken,
+    authMethod: "ephemeral",
     model: GEMINI_LIVE_MODEL,
     voice,
-    apiVersion: "v1beta",
+    apiVersion: "v1alpha",
     setup,
   };
 }
@@ -245,11 +252,6 @@ export async function mintGeminiLiveSession(opts: {
  * degrade to the raw-key path.
  */
 async function mintEphemeralToken(apiKey: string): Promise<string | null> {
-  if (process.env.GEMINI_USE_EPHEMERAL_TOKENS === "false") {
-    // Kill switch — operator explicitly forced raw-key mode.
-    return null;
-  }
-
   const now = Date.now();
   const expireTime = new Date(now + EXPIRE_MS).toISOString();
   const newSessionExpireTime = new Date(now + NEW_SESSION_EXPIRE_MS).toISOString();

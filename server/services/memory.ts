@@ -114,6 +114,24 @@ export async function writeMemory(input: WriteMemoryInput): Promise<MemoryItem> 
   const idempotencyKey = input.idempotencyKey ?? nanoid(32);
   const provenanceClusterId = input.provenanceClusterId ?? nanoid(16);
 
+  // C12: idempotency — when the caller supplied a key, a retry must return the
+  // existing row instead of creating a duplicate (and must not re-spend on
+  // normalization/embedding).
+  if (input.idempotencyKey) {
+    const [existing] = await db
+      .select()
+      .from(memoryItems)
+      .where(
+        and(
+          eq(memoryItems.tenantId, input.tenantId),
+          eq(memoryItems.companyId, input.companyId),
+          eq(memoryItems.idempotencyKey, input.idempotencyKey),
+        )
+      )
+      .limit(1);
+    if (existing) return existing;
+  }
+
   const ctx: RouterContext = {
     tenantId: input.tenantId,
     companyId: input.companyId,
@@ -230,6 +248,29 @@ export async function supersedeMemory(
 ): Promise<MemoryItem> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+
+  // C1: the old item must exist in the SAME tenant + company as the new
+  // content — otherwise a caller with access to company A could retire
+  // company B's memory by guessing an id (IDOR). Also guards the silent
+  // bi-temporal break where a bogus oldItemId inserted the new row while
+  // invalidating nothing.
+  const [oldItem] = await db
+    .select({ id: memoryItems.id, invalidAt: memoryItems.invalidAt })
+    .from(memoryItems)
+    .where(
+      and(
+        eq(memoryItems.id, oldItemId),
+        eq(memoryItems.tenantId, newContent.tenantId),
+        eq(memoryItems.companyId, newContent.companyId),
+      )
+    )
+    .limit(1);
+  if (!oldItem) {
+    throw new Error(`Memory item ${oldItemId} not found in this company — nothing superseded.`);
+  }
+  if (oldItem.invalidAt) {
+    throw new Error(`Memory item ${oldItemId} is already invalidated — supersede the current item instead.`);
+  }
 
   // Step 1: Prepare all data for the new item BEFORE opening the transaction
   // (embedding call can be slow; we don't want to hold a transaction open during it)
@@ -354,26 +395,40 @@ export async function supersedeMemory(
 // all. It hard-deletes, is operator-gated at the router, and every purge is
 // audit-logged with what was removed.
 
-/** Hard-delete a single memory item (tenant-scoped). Returns true if deleted. */
+/** Hard-delete a single memory item (tenant + company scoped). Returns true if deleted. */
 export async function purgeMemoryItem(params: {
   tenantId: string;
   userId?: number;
   itemId: number;
+  /** C1: the item must belong to this company — the caller's access was checked against it. */
+  companyId: number;
 }): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
 
-  // Fetch first so the audit entry records what was removed (C1: tenant-scoped).
+  // Fetch first so the audit entry records what was removed (C1: tenant+company scoped).
   const [item] = await db
     .select()
     .from(memoryItems)
-    .where(and(eq(memoryItems.id, params.itemId), eq(memoryItems.tenantId, params.tenantId)))
+    .where(
+      and(
+        eq(memoryItems.id, params.itemId),
+        eq(memoryItems.tenantId, params.tenantId),
+        eq(memoryItems.companyId, params.companyId),
+      )
+    )
     .limit(1);
   if (!item) return false;
 
   await db
     .delete(memoryItems)
-    .where(and(eq(memoryItems.id, params.itemId), eq(memoryItems.tenantId, params.tenantId)));
+    .where(
+      and(
+        eq(memoryItems.id, params.itemId),
+        eq(memoryItems.tenantId, params.tenantId),
+        eq(memoryItems.companyId, params.companyId),
+      )
+    );
 
   void appendAudit({
     tenantId: params.tenantId,

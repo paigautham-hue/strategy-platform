@@ -21,7 +21,7 @@ import {
 import { storagePut, storageGetSignedUrl } from "../storage";
 import { appendAudit } from "../middleware/audit";
 import { nanoid } from "nanoid";
-import { createHash } from "crypto";
+import { scryptSync, randomBytes, createCipheriv } from "crypto";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -105,15 +105,16 @@ export async function createExport(input: ExportRequest): Promise<ExportResult> 
 
     const plaintext = JSON.stringify(archive, null, 2);
 
-    // Simple encryption: XOR with repeating SHA-256 key
-    // Phase 1: replace with AES-256-GCM using per-company KMS key
-    const encryptionKey = process.env.JWT_SECRET ?? "default-phase0-key";
-    const keyHash = createHash("sha256").update(encryptionKey + input.companyId).digest();
-    const plaintextBuf = Buffer.from(plaintext, "utf-8");
-    const encrypted = Buffer.alloc(plaintextBuf.length);
-    for (let i = 0; i < plaintextBuf.length; i++) {
-      encrypted[i] = plaintextBuf[i] ^ keyHash[i % keyHash.length];
-    }
+    // AES-256-GCM (authenticated encryption). Key derived per company via
+    // scrypt from JWT_SECRET; a random IV per export. File layout:
+    // magic "CAIRNv1" | 12-byte IV | 16-byte auth tag | ciphertext.
+    // Decrypt with the same derivation: scrypt(JWT_SECRET, "cairn-export:" + companyId, 32).
+    const encryptionSecret = process.env.JWT_SECRET ?? "default-phase0-key";
+    const key = scryptSync(encryptionSecret, `cairn-export:${input.companyId}`, 32);
+    const iv = randomBytes(12);
+    const cipher = createCipheriv("aes-256-gcm", key, iv);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, "utf-8"), cipher.final()]);
+    const encrypted = Buffer.concat([Buffer.from("CAIRNv1"), iv, cipher.getAuthTag(), ciphertext]);
 
     // Store in Manus file storage
     const storageKey = `exports/${input.tenantId}/${input.companyId}/${nanoid(16)}.enc`;

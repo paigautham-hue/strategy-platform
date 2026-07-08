@@ -20,11 +20,13 @@ const SEVERITY_STYLE: Record<string, string> = {
 
 export default function RedTeam({ activeCompanyId }: RedTeamProps) {
   const [strategy, setStrategy] = useState("");
+  const utils = trpc.useUtils();
 
   const reviewMut = trpc.redTeam.review.useMutation({
     onSuccess: (r) => {
       if (r.survivedReview) toast.success("Strategy survived red-team review");
       else toast.error(`${r.fatalFlaws.length} fatal flaw(s) found`);
+      void utils.analysisRuns.list.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });

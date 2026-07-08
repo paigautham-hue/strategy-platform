@@ -27,6 +27,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default function Diagnosis({ activeCompanyId }: DiagnosisProps) {
   const [question, setQuestion] = useState("");
+  const utils = trpc.useUtils();
 
   const diagnoseMut = trpc.diagnosis.diagnose.useMutation({
     onSuccess: (d) => {
@@ -35,6 +36,7 @@ export default function Diagnosis({ activeCompanyId }: DiagnosisProps) {
       } else {
         toast.success(`Diagnosed: ${TYPE_LABEL[d.questionType] ?? d.questionType}`);
       }
+      void utils.analysisRuns.list.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });

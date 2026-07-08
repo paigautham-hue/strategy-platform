@@ -262,7 +262,9 @@ export const outcomes = mysqlTable(
 
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
-  (t) => [index("idx_outcome_prediction").on(t.predictionId)]
+  // Unique: a prediction resolves exactly once — a concurrent double-close
+  // fails at the DB rather than silently creating a second outcome row.
+  (t) => [unique("uq_outcome_prediction").on(t.predictionId)]
 );
 
 /** Separate from Prediction — "We should do X" with chosen option + alternatives (J10). */

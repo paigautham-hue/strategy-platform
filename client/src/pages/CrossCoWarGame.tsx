@@ -38,9 +38,15 @@ export default function CrossCoWarGame() {
   const nameOf = (id: number) => companies?.find((c) => c.id === id)?.name ?? `Company ${id}`;
 
   function toggle(id: number) {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+    setSelected((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      // The server caps a cross-company war-game at 6 companies — enforce in the UI too.
+      if (prev.length >= 6) {
+        toast.info("A cross-company war-game supports at most 6 companies.");
+        return prev;
+      }
+      return [...prev, id];
+    });
   }
 
   return (

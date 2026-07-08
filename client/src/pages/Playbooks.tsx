@@ -23,8 +23,12 @@ export default function Playbooks({ activeCompanyId }: PlaybooksProps) {
   const [pattern, setPattern] = useState("");
   const [evidence, setEvidence] = useState("");
 
+  const utils = trpc.useUtils();
   const draftMut = trpc.playbook.draft.useMutation({
-    onSuccess: (p) => toast.success(`Drafted and saved: ${p.title}`),
+    onSuccess: (p) => {
+      toast.success(`Drafted and saved: ${p.title}`);
+      void utils.analysisRuns.list.invalidate();
+    },
     onError: (e) => toast.error(e.message),
   });
 

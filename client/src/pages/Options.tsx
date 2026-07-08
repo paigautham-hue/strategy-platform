@@ -25,9 +25,13 @@ const CRITERIA: { id: string; label: string }[] = [
 
 export default function Options({ activeCompanyId }: OptionsProps) {
   const [question, setQuestion] = useState("");
+  const utils = trpc.useUtils();
 
   const analyzeMut = trpc.options.analyze.useMutation({
-    onSuccess: (r) => toast.success(`${r.options.length} options generated and scored`),
+    onSuccess: (r) => {
+      toast.success(`${r.options.length} options generated and scored`);
+      void utils.analysisRuns.list.invalidate();
+    },
     onError: (e) => toast.error(e.message),
   });
 

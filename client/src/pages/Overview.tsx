@@ -220,22 +220,29 @@ export default function Overview({ activeCompanyId }: OverviewProps) {
                 label: "Onboard your first company",
                 desc: "Create a portfolio company and seed its context.",
                 href: "/onboarding",
+                enabled: true,
               },
               {
                 n: 2,
                 label: "Ingest a document",
                 desc: "Feed in a deck, report, or notes — the platform extracts what matters.",
                 href: "/ingest",
+                enabled: false,
               },
               {
                 n: 3,
                 label: "Run your first diagnosis",
                 desc: "Put a real strategic question to the engine.",
                 href: "/diagnose",
+                enabled: false,
               },
-            ].map((step) => (
-              <Link key={step.n} href={step.href}>
-                <a className="flex items-center gap-3 p-3 rounded-md bg-secondary/40 border border-border/40 hover:border-gold/30 transition-colors group">
+            ].map((step) => {
+              const row = (
+                <div
+                  className={`flex items-center gap-3 p-3 rounded-md bg-secondary/40 border border-border/40 transition-colors ${
+                    step.enabled ? "hover:border-gold/30 group cursor-pointer" : "opacity-50"
+                  }`}
+                >
                   <div className="w-7 h-7 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0">
                     <span className="text-xs font-heading text-gold">{step.n}</span>
                   </div>
@@ -243,12 +250,23 @@ export default function Overview({ activeCompanyId }: OverviewProps) {
                     <p className="text-sm font-sans text-foreground group-hover:text-gold transition-colors">
                       {step.label}
                     </p>
-                    <p className="text-xs text-muted-foreground font-body">{step.desc}</p>
+                    <p className="text-xs text-muted-foreground font-body">
+                      {step.enabled ? step.desc : "Unlocks after step 1 — onboard a company first."}
+                    </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
-                </a>
-              </Link>
-            ))}
+                  {step.enabled && (
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
+                  )}
+                </div>
+              );
+              return step.enabled ? (
+                <Link key={step.n} href={step.href}>
+                  <a>{row}</a>
+                </Link>
+              ) : (
+                <div key={step.n}>{row}</div>
+              );
+            })}
           </CardContent>
         </Card>
       )}

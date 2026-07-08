@@ -124,6 +124,12 @@ export async function closePrediction(input: ClosePredictionInput): Promise<Outc
   if (!pred) {
     throw new Error(`Prediction ${input.predictionId} not found or access denied`);
   }
+  // A prediction closes exactly once — double-resolve (or a concurrent race)
+  // must not create a second outcome row. Belt: this check; suspenders: the
+  // unique index on outcome.predictionId.
+  if (pred.outcomeId != null) {
+    throw new Error(`Prediction ${input.predictionId} is already resolved.`);
+  }
 
   const [inserted] = await db.insert(outcomes).values({
     tenantId: input.tenantId,

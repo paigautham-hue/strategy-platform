@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Combine, Building2, Shield, Sparkles, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { GpOnlyGate } from "./Distillation";
 
 const VALUE_STYLE: Record<string, string> = {
   high: "bg-gold/10 text-gold border-gold/20",
@@ -33,6 +34,7 @@ export default function SynergyScout() {
   }
 
   return (
+    <GpOnlyGate>
     <div className="p-6 space-y-6 animate-fade-in max-w-3xl mx-auto">
       <div>
         <h2 className="font-heading text-2xl text-foreground flex items-center gap-2">
@@ -131,5 +133,6 @@ export default function SynergyScout() {
         </div>
       )}
     </div>
+    </GpOnlyGate>
   );
 }

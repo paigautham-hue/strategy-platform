@@ -16,6 +16,7 @@
  */
 
 import { ENV } from "./env";
+import { redact } from "../ai/redactor";
 
 // Default to the GA `gpt-realtime` model — broadest availability and a
 // simpler request body (no reasoning/parallel_tool_calls fields, which
@@ -93,7 +94,9 @@ export function buildVoiceSystemPrompt(company: {
   const lines: string[] = [STATIC_PROMPT_PREFIX, "", "## ACTIVE COMPANY"];
   lines.push(`Name: ${company.name ?? "Unknown"}`);
   if (company.industry) lines.push(`Industry: ${company.industry}`);
-  if (company.description) lines.push(`About: ${company.description.slice(0, 600)}`);
+  // C5: the description is user-entered free text — redact PII before it
+  // reaches a hosted realtime provider.
+  if (company.description) lines.push(`About: ${redact(company.description.slice(0, 600)).redacted}`);
   lines.push(
     "",
     "Use the lookup tools for anything beyond these basics. Open the conversation with a short, warm greeting and ask what they want to think through.",

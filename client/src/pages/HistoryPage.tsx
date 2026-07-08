@@ -69,6 +69,7 @@ export default function HistoryPage({ activeCompanyId }: HistoryPageProps) {
         kind={kind ?? undefined}
         limit={100}
         title={kind ? `${KIND_LABEL[kind]} runs` : "All runs"}
+        showEmpty
       />
     </div>
   );

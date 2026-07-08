@@ -14,10 +14,27 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 function num(v: string, fallback = 0): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
+}
+
+/** GP-only page gate — mirrors the server's gpProcedure so a direct URL hit
+ *  shows a clear message instead of raw FORBIDDEN errors. */
+export function GpOnlyGate({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  if (user && user.role !== "gp" && user.role !== "admin") {
+    return (
+      <div className="p-6 max-w-3xl mx-auto animate-fade-in">
+        <div className="card-glass rounded-xl border border-border/60 p-6 text-sm text-muted-foreground font-body text-center">
+          This surface is GP-only. Ask an admin if you need access.
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
 }
 
 export default function Distillation() {
@@ -43,6 +60,7 @@ export default function Distillation() {
   const r = previewMut.data;
 
   return (
+    <GpOnlyGate>
     <div className="p-6 space-y-6 animate-fade-in max-w-2xl mx-auto">
       <div>
         <h2 className="font-heading text-2xl text-foreground flex items-center gap-2">
@@ -66,7 +84,13 @@ export default function Distillation() {
         <CardContent className="space-y-4">
           <Textarea
             value={patternText}
-            onChange={(e) => setPatternText(e.target.value)}
+            onChange={(e) => {
+              setPatternText(e.target.value);
+              // The preview/publish state belongs to the OLD text — editing
+              // invalidates both (stale "publishable" must not carry over).
+              if (previewMut.data) previewMut.reset();
+              if (publishMut.data || publishMut.isSuccess) publishMut.reset();
+            }}
             placeholder="Paste the cross-company pattern text…"
             className="bg-secondary/50 border-border/60 min-h-[140px] font-body"
             rows={7}
@@ -153,5 +177,6 @@ export default function Distillation() {
         </>
       )}
     </div>
+    </GpOnlyGate>
   );
 }
