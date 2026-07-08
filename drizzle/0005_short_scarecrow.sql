@@ -1,0 +1,1 @@
+ALTER TABLE `analysis_run` MODIFY COLUMN `kind` enum('diagnosis','research','frameworks','options','red_team','war_game','pre_mortem','briefing','brainstorm','decompose','persona','playbook','pattern_mining') NOT NULL;

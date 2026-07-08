@@ -93,6 +93,16 @@ export default function McpTools({ activeCompanyId }: McpToolsProps) {
 
                 {isExpanded && (
                   <CardContent className="pt-0 space-y-3">
+                    {tool.inputSchema != null && (
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
+                          Expected input
+                        </p>
+                        <pre className="text-[11px] font-mono bg-secondary/40 rounded p-2 border border-border/40 overflow-x-auto max-h-32 text-muted-foreground">
+                          {JSON.stringify(tool.inputSchema, null, 2)}
+                        </pre>
+                      </div>
+                    )}
                     <div className="space-y-1.5">
                       <label className="text-xs text-muted-foreground font-sans uppercase tracking-wider">
                         Input (JSON)

@@ -25,6 +25,9 @@ export const KIND_LABEL = {
   briefing: "Briefing",
   brainstorm: "Brainstorm",
   decompose: "Decomposition",
+  persona: "Persona Consult",
+  playbook: "Playbook",
+  pattern_mining: "Pattern Mining",
 } as const;
 
 export type AnalysisKind = keyof typeof KIND_LABEL;

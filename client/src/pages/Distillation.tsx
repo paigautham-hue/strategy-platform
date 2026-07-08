@@ -34,6 +34,12 @@ export default function Distillation() {
     onError: (e) => toast.error(e.message),
   });
 
+  const publishMut = trpc.distillation.publish.useMutation({
+    onSuccess: () =>
+      toast.success("Published — the anonymized pattern is now in the portfolio-wide knowledge layer"),
+    onError: (e) => toast.error(e.message),
+  });
+
   const r = previewMut.data;
 
   return (
@@ -119,10 +125,29 @@ export default function Distillation() {
                 </Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <p className="text-sm text-foreground font-body leading-relaxed whitespace-pre-line">
                 {r.anonymizedText}
               </p>
+              {r.publishable && (
+                <Button
+                  className="w-full gradient-gold text-background font-sans gap-2"
+                  disabled={publishMut.isPending || publishMut.isSuccess}
+                  onClick={() =>
+                    publishMut.mutate({
+                      patternText: patternText.trim(),
+                      sourcePortcoCount: Math.max(0, num(sourceCount)),
+                    })
+                  }
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  {publishMut.isSuccess
+                    ? "Published to portfolio knowledge"
+                    : publishMut.isPending
+                      ? "Publishing…"
+                      : "Publish to portfolio knowledge"}
+                </Button>
+              )}
             </CardContent>
           </Card>
         </>

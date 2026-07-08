@@ -13,6 +13,7 @@ import {
   ArrowUpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface PlaybooksProps {
   activeCompanyId: number | null;
@@ -23,7 +24,7 @@ export default function Playbooks({ activeCompanyId }: PlaybooksProps) {
   const [evidence, setEvidence] = useState("");
 
   const draftMut = trpc.playbook.draft.useMutation({
-    onSuccess: (p) => toast.success(`Drafted: ${p.title}`),
+    onSuccess: (p) => toast.success(`Drafted and saved: ${p.title}`),
     onError: (e) => toast.error(e.message),
   });
 
@@ -152,6 +153,8 @@ export default function Playbooks({ activeCompanyId }: PlaybooksProps) {
           </CardContent>
         </Card>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="playbook" title="Saved playbooks" />
 
       <Card className="card-glass">
         <CardContent className="p-4 space-y-2">

@@ -598,8 +598,17 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Are my results saved if I navigate away?",
-    a: "Yes. Every reasoning run is saved automatically and listed on the History page and in the " +
-      "'Past runs' panel on each surface. Any saved run can be exported as a print-ready document.",
+    a: "Yes. Every reasoning run — including persona consultations, playbook drafts, and pattern-mining " +
+      "runs — is saved automatically and listed on the History page and in the 'Past runs' panel on " +
+      "each surface. Any saved run can be exported as a print-ready document.",
+  },
+  {
+    q: "How do patterns become playbooks and portfolio knowledge?",
+    a: "Mine past projects on Pattern Mining, then click 'Draft playbook from this pattern' to turn a " +
+      "recurring pattern into a saved playbook with triggers, gated steps, and expected outcomes. For " +
+      "cross-company learning, Distillation anonymizes a pattern and — once it clears the 3-portco " +
+      "gate — 'Publish to portfolio knowledge' adds it to the shared global memory layer that every " +
+      "company's reasoning can draw on (GP only).",
   },
   {
     q: "Where do I start?",

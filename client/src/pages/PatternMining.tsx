@@ -11,8 +11,11 @@ import {
   X,
   Repeat,
   TriangleAlert,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "wouter";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface PatternMiningProps {
   activeCompanyId: number | null;
@@ -20,6 +23,7 @@ interface PatternMiningProps {
 
 export default function PatternMining({ activeCompanyId }: PatternMiningProps) {
   const [projects, setProjects] = useState<string[]>(["", ""]);
+  const [draftedPattern, setDraftedPattern] = useState<string | null>(null);
 
   const mineMut = trpc.pattern.mine.useMutation({
     onSuccess: (r) =>
@@ -28,6 +32,29 @@ export default function PatternMining({ activeCompanyId }: PatternMiningProps) {
       ),
     onError: (e) => toast.error(e.message),
   });
+
+  const draftMut = trpc.playbook.draft.useMutation({
+    onSuccess: (p) => {
+      toast.success(
+        <span>
+          Playbook drafted and saved: <strong>{p.title}</strong> —{" "}
+          <Link href="/playbooks"><a className="underline">open Playbooks</a></Link>
+        </span>,
+      );
+    },
+    onError: (e) => toast.error(e.message),
+    onSettled: () => setDraftedPattern(null),
+  });
+
+  function promoteToPlaybook(patternName: string, description: string, whenItApplies?: string) {
+    if (!activeCompanyId) return;
+    setDraftedPattern(patternName);
+    draftMut.mutate({
+      companyId: activeCompanyId,
+      pattern: `${patternName}: ${description}${whenItApplies ? ` Applies when: ${whenItApplies}` : ""}`,
+      evidenceSummary: `Mined from ${projects.filter((p) => p.trim()).length} past projects on the Pattern Mining surface.`,
+    });
+  }
 
   if (!activeCompanyId) {
     return (
@@ -142,6 +169,18 @@ export default function PatternMining({ activeCompanyId }: PatternMiningProps) {
                         <span className="text-gold">Typical outcome:</span> {p.typicalOutcome}
                       </p>
                     )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs gap-1.5 mt-1"
+                      disabled={draftMut.isPending}
+                      onClick={() => promoteToPlaybook(p.name, p.description, p.whenItApplies)}
+                    >
+                      <BookOpen className="h-3 w-3" />
+                      {draftMut.isPending && draftedPattern === p.name
+                        ? "Drafting playbook…"
+                        : "Draft playbook from this pattern"}
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -183,6 +222,8 @@ export default function PatternMining({ activeCompanyId }: PatternMiningProps) {
           )}
         </>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="pattern_mining" title="Past mining runs" />
     </div>
   );
 }

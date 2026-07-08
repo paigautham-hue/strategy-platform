@@ -36,6 +36,13 @@
       "when": 1783504827204,
       "tag": "0004_secret_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1783509679025,
+      "tag": "0005_short_scarecrow",
+      "breakpoints": true
     }
   ]
 }

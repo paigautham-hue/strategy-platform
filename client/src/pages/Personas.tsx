@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, Users, MessageSquare, Quote } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { AnalysisHistory } from "@/components/AnalysisHistory";
 
 interface PersonasProps {
   activeCompanyId: number | null;
@@ -139,6 +140,8 @@ export default function Personas({ activeCompanyId }: PersonasProps) {
           </CardContent>
         </Card>
       )}
+
+      <AnalysisHistory companyId={activeCompanyId} kind="persona" title="Past consultations" />
     </div>
   );
 }

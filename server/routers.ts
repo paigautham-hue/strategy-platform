@@ -1212,7 +1212,9 @@ const personaRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return consultPersona(input.personaId, input.question, input.companyId, routerCtx);
+      const result = await consultPersona(input.personaId, input.question, input.companyId, routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "persona", input.question, result);
+      return result;
     }),
 });
 
@@ -1368,7 +1370,9 @@ const playbookRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return draftPlaybook(input.pattern, input.evidenceSummary ?? "", routerCtx);
+      const result = await draftPlaybook(input.pattern, input.evidenceSummary ?? "", routerCtx);
+      persistAnalysisRun(ctx, input.companyId, "playbook", input.pattern, result);
+      return result;
     }),
 
   // Pure promotion-gate check — does the evidence clear the next layer?
@@ -1404,7 +1408,15 @@ const patternRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const routerCtx = buildRouterCtx(ctx, { companyId: input.companyId });
-      return minePatterns(input.projects, routerCtx);
+      const result = await minePatterns(input.projects, routerCtx);
+      persistAnalysisRun(
+        ctx,
+        input.companyId,
+        "pattern_mining",
+        `${input.projects.length} projects — ${input.projects[0].slice(0, 120)}`,
+        result,
+      );
+      return result;
     }),
 });
 
@@ -1470,6 +1482,44 @@ const distillationRouter = router({
         sourcePortcoCount: input.sourcePortcoCount,
       });
     }),
+
+  // Publish a distilled (anonymized, gate-cleared) pattern into the GLOBAL
+  // memory layer, where every company's retrieval can draw on it. GP-only.
+  // Re-runs the anonymization + min-N gate server-side — the client's
+  // "publishable" flag is never trusted.
+  publish: gpProcedure
+    .input(
+      z.object({
+        patternText: z.string().min(1),
+        sourcePortcoCount: z.number().min(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const companies = await listCompanies(ctx.user.tenantId);
+      const distilled = await distillPattern({
+        patternText: input.patternText,
+        companyNames: companies.map((c) => c.name),
+        sourcePortcoCount: input.sourcePortcoCount,
+      });
+      if (!distilled.publishable) {
+        throw new TRPCError({ code: "PRECONDITION_FAILED", message: distilled.reason });
+      }
+      const item = await writeLayerMemory(
+        "global",
+        ctx.user.tenantId,
+        distilled.anonymizedText,
+        buildRouterCtx(ctx),
+      );
+      void emitUsage({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        role: ctx.user.role as "gp" | "operator" | "portco_team" | "admin",
+        surface: "api",
+        action: "publish-distilled-pattern",
+        metadata: { memoryItemId: item.id, redactions: distilled.redactionCount },
+      });
+      return { published: true, memoryItemId: item.id, redactionCount: distilled.redactionCount } as const;
+    }),
 });
 
 // ─── Briefing Router (Phase 7) ────────────────────────────────────────────────
@@ -1525,6 +1575,9 @@ const analysisRunKinds = z.enum([
   "briefing",
   "brainstorm",
   "decompose",
+  "persona",
+  "playbook",
+  "pattern_mining",
 ]);
 
 const analysisRunsRouter = router({

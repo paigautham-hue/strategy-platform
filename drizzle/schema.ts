@@ -649,6 +649,9 @@ export const analysisKindEnum = [
   "briefing",
   "brainstorm",
   "decompose",
+  "persona",
+  "playbook",
+  "pattern_mining",
 ] as const;
 
 export const analysisRuns = mysqlTable(
