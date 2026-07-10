@@ -383,6 +383,12 @@ describe("estimateCost per-model pricing", () => {
     expect(estimateCost(1_000_000, 1_000_000, "gemini-2.5-flash")).toBeCloseTo(2.8);
   });
 
+  it("prices the GPT-5.6 tiers (longest-prefix picks the right tier)", () => {
+    expect(estimateCost(1_000_000, 1_000_000, "gpt-5.6")).toBeCloseTo(35);
+    expect(estimateCost(1_000_000, 1_000_000, "gpt-5.6-terra")).toBeCloseTo(17.5);
+    expect(estimateCost(1_000_000, 1_000_000, "gpt-5.6-luna")).toBeCloseTo(7);
+  });
+
   it("keeps the legacy conservative rate when no model is given", () => {
     expect(estimateCost(1_000_000, 1_000_000)).toBeCloseTo(20);
   });

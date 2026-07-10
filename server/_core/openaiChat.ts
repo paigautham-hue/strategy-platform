@@ -14,7 +14,7 @@ import type { InvokeParams, InvokeResult, Message, MessageContent } from "./llm"
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
 const REQUEST_TIMEOUT_MS = 120_000;
 const DEFAULT_MAX_TOKENS = 4096;
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-5.6"; // alias for gpt-5.6-sol; terra/luna are the cheaper tiers
 
 const contentToText = (content: MessageContent | MessageContent[]): string => {
   const parts = Array.isArray(content) ? content : [content];

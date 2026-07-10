@@ -208,7 +208,7 @@ export default function Predictions({ activeCompanyId }: PredictionsProps) {
                     confidence: parseFloat(confidence),
                     framework: framework.trim() || undefined,
                     horizon: horizon.trim() || undefined,
-                    model: "gpt-4o",
+                    model: "gpt-5.6",
                   })
                 }
               >

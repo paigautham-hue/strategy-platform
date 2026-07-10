@@ -501,7 +501,7 @@ const predictionRouter = router({
         claim: z.string().min(1),
         confidence: z.number().min(0).max(1),
         framework: z.string().optional(),
-        model: z.string().default("gpt-4o"),
+        model: z.string().default("gpt-5.6"),
         horizon: z.string().optional(),
         targetDate: z.date().optional(),
         outcomeClass: z.enum(["real", "synthetic"]).optional(),
