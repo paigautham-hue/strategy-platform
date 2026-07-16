@@ -46,6 +46,7 @@ import { recordPrediction, closePrediction, listPredictions, listOpenPredictions
 import { portfolioOverview } from "./services/portfolio";
 import { createExport, getExportJob } from "./services/export";
 import { ingestDocument } from "./services/ingest-pipeline";
+import { startIngestJob, getIngestJob } from "./services/ingest-jobs";
 import { recognizeStrategyArtifact } from "./services/strategy-artifact";
 import { applyStrategyToCompany } from "./agents/apply-strategy";
 import { runApplyDeepMode } from "./agents/apply-war-game";
@@ -687,25 +688,58 @@ const mcpRouter = router({
 
 // ─── Ingest Router ────────────────────────────────────────────────────────────
 
+const ingestInputSchema = z.object({
+  companyId: z.number(),
+  projectId: z.number().optional(),
+  sessionId: z.number().optional(),
+  sourceType: z.enum(["text", "markdown", "html", "url"]),
+  content: z.string().min(1),
+  sourceUrl: z.string().optional(),
+  maxChunks: z.number().min(1).max(100).optional(),
+});
+
 const ingestRouter = router({
+  // Synchronous ingest — fine for small documents; large ones should use
+  // start/status below (a long request dies at the hosting proxy with an
+  // HTML 504 the client can't parse).
   document: protectedProcedure
-    .input(
-      z.object({
-        companyId: z.number(),
-        projectId: z.number().optional(),
-        sessionId: z.number().optional(),
-        sourceType: z.enum(["text", "markdown", "html", "url"]),
-        content: z.string().min(1),
-        sourceUrl: z.string().optional(),
-        maxChunks: z.number().min(1).max(100).optional(),
-      })
-    )
+    .input(ingestInputSchema)
     .mutation(async ({ ctx, input }) => {
       return ingestDocument({
         tenantId: ctx.user.tenantId,
         userId: ctx.user.id,
         ...input,
       });
+    }),
+
+  // Async ingest: returns a jobId immediately; poll `status` for progress.
+  start: protectedProcedure
+    .input(ingestInputSchema)
+    .mutation(({ ctx, input }) => {
+      const jobId = startIngestJob({
+        tenantId: ctx.user.tenantId,
+        userId: ctx.user.id,
+        ...input,
+      });
+      return { jobId } as const;
+    }),
+
+  status: protectedProcedure
+    .input(z.object({ jobId: z.string().min(1) }))
+    .query(({ ctx, input }) => {
+      const job = getIngestJob(input.jobId, ctx.user.tenantId, ctx.user.id);
+      if (!job) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ingest job not found — it may have expired or the server restarted. Re-run the ingest.",
+        });
+      }
+      return {
+        status: job.status,
+        progress: job.progress,
+        result: job.result ?? null,
+        error: job.error ?? null,
+      };
     }),
 });
 

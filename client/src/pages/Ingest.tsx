@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,14 +70,40 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
     void loadFile(files[0]);
   }
 
-  const ingestMut = trpc.ingest.document.useMutation({
+  // Async job flow: `start` returns immediately with a jobId; we poll `status`
+  // for chunk progress. A big document no longer dies at the proxy timeout.
+  const [jobId, setJobId] = useState<string | null>(null);
+  const notifiedRef = useRef<string | null>(null);
+
+  const startMut = trpc.ingest.start.useMutation({
     onSuccess: (r) => {
-      toast.success(
-        `Ingested — ${r.added} added, ${r.noop} duplicate, ${r.contradictions} contradiction(s)`,
-      );
+      setJobId(r.jobId);
+      notifiedRef.current = null;
     },
     onError: (e) => toast.error(e.message),
   });
+
+  const { data: job } = trpc.ingest.status.useQuery(
+    { jobId: jobId! },
+    {
+      enabled: !!jobId,
+      refetchInterval: (query) =>
+        query.state.data?.status === "running" ? 2000 : false,
+    },
+  );
+
+  useEffect(() => {
+    if (!job || !jobId || notifiedRef.current === jobId) return;
+    if (job.status === "complete" && job.result) {
+      notifiedRef.current = jobId;
+      toast.success(
+        `Ingested — ${job.result.added} added, ${job.result.noop} duplicate, ${job.result.contradictions} contradiction(s)`,
+      );
+    } else if (job.status === "error") {
+      notifiedRef.current = jobId;
+      toast.error(job.error ?? "Ingest failed");
+    }
+  }, [job, jobId]);
 
   if (!activeCompanyId) {
     return (
@@ -88,16 +114,18 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
     );
   }
 
-  const result = ingestMut.data;
-  const canSubmit = content.trim().length > 0 && !ingestMut.isPending;
+  const running = startMut.isPending || job?.status === "running";
+  const result = job?.status === "complete" ? job.result : null;
+  const canSubmit = content.trim().length > 0 && !running;
 
   function submit() {
     if (!activeCompanyId) return;
-    ingestMut.mutate({
+    startMut.mutate({
       companyId: activeCompanyId,
       sourceType,
       content: content.trim(),
       sourceUrl: sourceType !== "url" && sourceUrl.trim() ? sourceUrl.trim() : undefined,
+      maxChunks: 100,
     });
   }
 
@@ -223,8 +251,25 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
             onClick={submit}
           >
             <Sparkles className="h-4 w-4" />
-            {ingestMut.isPending ? "Ingesting — chunking, extracting, deciding…" : "Ingest document"}
+            {running
+              ? job?.progress?.total
+                ? `Ingesting — chunk ${job.progress.processed} of ${job.progress.total}…`
+                : "Ingesting — chunking, extracting, deciding…"
+              : "Ingest document"}
           </Button>
+          {running && job?.progress?.total ? (
+            <div className="h-1.5 w-full rounded bg-secondary/60 overflow-hidden">
+              <div
+                className="h-full gradient-gold transition-all duration-500"
+                style={{ width: `${Math.round((job.progress.processed / job.progress.total) * 100)}%` }}
+              />
+            </div>
+          ) : null}
+          {running && (
+            <p className="text-xs text-muted-foreground font-sans text-center">
+              Large documents keep processing in the background — you can leave this page and come back.
+            </p>
+          )}
         </CardContent>
       </Card>
 

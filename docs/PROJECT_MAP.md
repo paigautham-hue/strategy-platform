@@ -74,7 +74,7 @@ Each row: **Feature** · route · client page · tRPC router · key server file(
 |---|---|---|---|---|---|---|
 | Memory | `/memory` | Memory | `memory` | services/memory.ts, memory-search.ts, memory-layers.ts, retrieval/* | ✅ | Bi-temporal claim store + hybrid retrieval. Purge (operator+, audited): per-item delete + typed-confirmation "Clear memory" for dummy/test/wrong data (`memory.deleteItem` / `memory.purge`) |
 | Connections | `/connections` | EntityGraph | `entityGraph` | services/entity-graph.ts, retrieval/graph.ts | ✅ | Multi-hop entity graph (HippoRAG) |
-| Ingest | `/ingest` | Ingest | `ingest` | services/ingest-pipeline.ts, ingest/*, extraction/*; client lib/file-extract.ts | 🟡 | text/md/html/url + drag-&-drop PDF/Word/PowerPoint/Excel/CSV (client-side extraction); audio/video/image pending |
+| Ingest | `/ingest` | Ingest | `ingest` | services/ingest-pipeline.ts, ingest-jobs.ts, ingest/*, extraction/*; client lib/file-extract.ts | 🟡 | text/md/html/url + drag-&-drop PDF/Word/PowerPoint/Excel/CSV (client-side extraction). Large docs run as an ASYNC job (`ingest.start`/`status`, in-process registry, live chunk progress) — the old synchronous path died at the proxy timeout with an HTML 504. audio/video/image pending |
 | Voice Intake | `/voice-intake` | VoiceIntake | `voice` | services/voice-intent.ts, _core/voiceTranscription.ts | ✅ | One-shot STT → intent parse |
 | 🆕 Vision Studio | `/vision` | Vision | `vision` | agents/vision.ts; _core/imageGeneration.ts | ✅ | Vision-in (extract from slide/whiteboard/chart image, multimodal via S3 URL) + image-out (generateImage) |
 

@@ -55,6 +55,8 @@ export interface IngestDocumentInput {
   /** Safety cap on chunks processed per document. Default 25. */
   maxChunks?: number;
   traceId?: string;
+  /** Called after each chunk completes — used by the async job runner for live progress. */
+  onProgress?: (processed: number, total: number) => void;
 }
 
 export interface IngestDocumentResult {
@@ -171,6 +173,7 @@ export async function ingestDocument(
         );
       }
     }
+    input.onProgress?.(result.chunksProcessed, toProcess.length);
   }
 
   // 5 ─ Usage telemetry (non-blocking).
