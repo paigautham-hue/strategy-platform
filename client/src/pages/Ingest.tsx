@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, FileInput, Sparkles, Layers, Upload } from "lucide-react";
+import { AlertCircle, FileInput, Sparkles, Layers, Upload, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 import { extractTextFromFile, ACCEPTED_FILE_TYPES } from "@/lib/file-extract";
 
 interface IngestProps {
@@ -74,6 +75,7 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
   // for chunk progress. A big document no longer dies at the proxy timeout.
   const [jobId, setJobId] = useState<string | null>(null);
   const notifiedRef = useRef<string | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const startMut = trpc.ingest.start.useMutation({
     onSuccess: (r) => {
@@ -99,6 +101,12 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
       toast.success(
         `Ingested — ${job.result.added} added, ${job.result.noop} duplicate, ${job.result.contradictions} contradiction(s)`,
       );
+      // Make completion unmistakable: clear the form for the next document
+      // and bring the result card into view (it sits below a tall textarea).
+      setContent("");
+      setFileName(null);
+      setSourceUrl("");
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
     } else if (job.status === "error") {
       notifiedRef.current = jobId;
       toast.error(job.error ?? "Ingest failed");
@@ -275,9 +283,22 @@ export default function Ingest({ activeCompanyId }: IngestProps) {
 
       {/* Result */}
       {result && (
-        <Card className="card-glass">
+        <Card className="card-glass border-gold/30" ref={resultRef}>
           <CardHeader>
-            <CardTitle className="font-heading text-lg">Ingest result</CardTitle>
+            <CardTitle className="font-heading text-lg flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-gold" /> Document ingested
+            </CardTitle>
+            <p className="text-xs text-muted-foreground font-sans mt-1">
+              {result.added > 0
+                ? `${result.added} new fact(s) written to this company's memory. `
+                : result.noop > 0
+                  ? "Everything in this document was already known — no new facts. "
+                  : "No new facts were extracted. "}
+              <Link href="/memory">
+                <a className="text-gold underline">Open Memory</a>
+              </Link>
+              {" · the form is cleared for your next document."}
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
